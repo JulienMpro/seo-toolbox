@@ -14,7 +14,10 @@ def _items(results: list[dict[str, Any]]) -> list[dict[str, Any]]:
     output = []
     for result in results:
         nested = result.get("items")
-        output.extend(x for x in nested if isinstance(x, dict)) if isinstance(nested, list) else output.append(result)
+        if isinstance(nested, list):
+            output.extend(x for x in nested if isinstance(x, dict))
+        elif "items" not in result:
+            output.append(result)
     return output
 
 
@@ -30,7 +33,7 @@ def _first(item: dict[str, Any], *keys: str) -> Any:
 
 def youtube_keywords(keyword: str, limit: int = 10, client: DataForSEOClient | None = None) -> list[dict[str, Any]]:
     """List organic YouTube results for a keyword."""
-    payload = {"keyword": keyword, "location_code": 2840, "language_code": "en", "depth": limit}
+    payload = {"keyword": keyword, "location_code": 2840, "language_code": "en"}
     rows = []
     for item in _items((client or DataForSEOClient()).get_result("serp/youtube/organic/live/advanced", payload))[:limit]:
         rows.append({"rank": item.get("rank_absolute") or item.get("rank_group"), "title": item.get("title"),

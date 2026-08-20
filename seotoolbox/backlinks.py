@@ -55,12 +55,13 @@ def summary(target: str, client: DataForSEOClient | None = None) -> BacklinkSumm
         internal_links_count=item.get("internal_links_count"),
         referring_pages=item.get("referring_pages"),
         referring_links_types=item.get("referring_links_types") if isinstance(item.get("referring_links_types"), dict) else None,
+        referring_pages_nofollow=item.get("referring_pages_nofollow"),
     )
 
 
 def backlinks(target: str, limit: int = 30, client: DataForSEOClient | None = None) -> list[Backlink]:
     """List live backlinks for a target."""
-    payload = {"target": target, "limit": limit, "order_by": ["backlinks.id:desc"]}
+    payload = {"target": target, "limit": limit}
     return [Backlink(item.get("url_from"), item.get("url_to"), item.get("anchor"), item.get("domain_from"),
                      item.get("first_seen"), item.get("last_seen"), item.get("is_new"), item.get("is_lost"),
                      _first(item, "backlink_spam_score", "backlinks_spam_score", "spam_score"))
@@ -105,7 +106,7 @@ def new_lost(target: str, days: int = 30, client: DataForSEOClient | None = None
     """Return daily new and lost link totals for the requested trailing period."""
     date_to = date.today()
     payload = {"target": target, "date_from": (date_to - timedelta(days=days)).isoformat(),
-               "date_to": date_to.isoformat()}
+               "date_to": date_to.isoformat(), "group_range": "day"}
     output = []
     for item in _items((client or DataForSEOClient()).get_result(ENDPOINTS["new_lost"], payload)):
         day = item.get("date")

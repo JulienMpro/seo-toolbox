@@ -13,7 +13,7 @@ def test_summary_and_list_mapping():
     })
     assert backlinks.summary("x.test", client).backlinks == 9
     assert backlinks.backlinks("x.test", 3, client)[0].spam_score == 70
-    assert client.calls[1][1]["order_by"] == ["backlinks.id:desc"]
+    assert client.calls[1][1] == {"target": "x.test", "limit": 3}
 
 
 def test_summary_maps_real_api_keys():
@@ -30,6 +30,7 @@ def test_summary_maps_real_api_keys():
         "internal_links_count": 500,
         "referring_pages": 80,
         "referring_links_types": {"dofollow": 60, "nofollow": 40},
+        "referring_pages_nofollow": None,
     }]})
 
     result = backlinks.summary("x.test", client)
@@ -47,6 +48,7 @@ def test_summary_maps_real_api_keys():
         "internal_links_count": 500,
         "referring_pages": 80,
         "referring_links_types": {"dofollow": 60, "nofollow": 40},
+        "referring_pages_nofollow": None,
     }
 
 
@@ -63,6 +65,7 @@ def test_new_lost_uses_iso_dates():
     client = FakeClient({backlinks.ENDPOINTS["new_lost"]: [{"items": [{"date": "2026-01-01", "new_backlinks": 2}]}]})
     assert backlinks.new_lost("x.test", 30, client)[0].new_backlinks == 2
     assert len(client.calls[0][1]["date_from"]) == 10
+    assert client.calls[0][1]["group_range"] == "day"
 
 
 def test_referring_domains_and_anchors_map_documented_keys():

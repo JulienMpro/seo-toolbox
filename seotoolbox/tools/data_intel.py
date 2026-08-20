@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
 from .. import geo
@@ -15,7 +15,10 @@ def _items(results: list[dict[str, Any]]) -> list[dict[str, Any]]:
     out = []
     for result in results:
         nested = result.get("items")
-        out.extend(x for x in nested if isinstance(x, dict)) if isinstance(nested, list) else out.append(result)
+        if isinstance(nested, list):
+            out.extend(x for x in nested if isinstance(x, dict))
+        elif "items" not in result:
+            out.append(result)
     return out
 
 
@@ -44,7 +47,10 @@ def brand_mentions(keyword: str, limit: int = 10, client: DataForSEOClient | Non
 def phrase_trends(keyword: str, client: DataForSEOClient | None = None) -> list[dict[str, Any]]:
     """Return a phrase's citation trend over time."""
     rows = []
-    for item in _call("content_analysis/phrase_trends/live", {"keyword": keyword}, client):
+    today = date.today()
+    payload = {"keyword": keyword, "date_from": (today - timedelta(days=30)).isoformat(),
+               "date_to": today.isoformat()}
+    for item in _call("content_analysis/phrase_trends/live", payload, client):
         series = item.get("metrics") or item.get("trends") or item.get("history") or item.get("items")
         if isinstance(series, dict): series = [{"date": key, "value": value} for key, value in series.items()]
         for point in series if isinstance(series, list) else [item]:
@@ -74,7 +80,7 @@ def amazon_products(keyword: str, limit: int = 10, client: DataForSEOClient | No
     rows = []
     for x in _call("merchant/amazon/products/live/advanced", payload, client)[:limit]:
         rating = x.get("rating") if isinstance(x.get("rating"), dict) else {}
-        rows.append({"title": x.get("title"), "price": x.get("price_from") or x.get("price") or x.get("price_current"),
+        rows.append({"title": x.get("title"), "price": _first_present(x, "price_from", "price", "price_current"),
                      "rating": rating.get("value") if rating else x.get("rating_value"),
                      "reviews": rating.get("votes_count") if rating else x.get("reviews_count"),
                      "asin": x.get("asin") or x.get("data_asin")})
@@ -104,8 +110,11 @@ def amazon_competitors(asin: str, limit: int = 20, client: DataForSEOClient | No
 def amazon_sellers(asin: str, limit: int = 20, client: DataForSEOClient | None = None) -> list[dict[str, Any]]:
     """List Amazon sellers and current offers for an ASIN."""
     payload = {"asin": asin, "location_code": 2840, "language_code": "en_US"}
-    return [{"seller": x.get("seller_name") or x.get("seller"), "price": x.get("price") or x.get("price_current"),
-             "stock": x.get("stock") or x.get("availability")} for x in _call("merchant/amazon/sellers/live/advanced", payload, client)[:limit]]
+    rows = [{"seller": _first_present(x, "seller_name", "seller"),
+             "price": _first_present(x, "price", "price_current"),
+             "stock": _first_present(x, "stock", "availability")}
+            for x in _call("merchant/amazon/sellers/live/advanced", payload, client)[:limit]]
+    return [row for row in rows if any(value is not None for value in row.values())]
 
 
 def amazon_asin(asin: str, client: DataForSEOClient | None = None) -> list[dict[str, Any]]:
@@ -184,7 +193,9 @@ def trends_by_region(keyword: str, country: str = "FR", client: DataForSEOClient
 
 def trends_demography(keyword: str, country: str = "FR", client: DataForSEOClient | None = None) -> list[dict[str, Any]]:
     """Return DFS Trends demographic interest segments."""
-    rows = _call("keywords_data/dataforseo_trends/demography/live", {"keywords": [keyword], **_country(country)}, client)
+    market = _country(country)
+    location = {key: value for key, value in market.items() if key.startswith("location_")}
+    rows = _call("keywords_data/dataforseo_trends/demography/live", {"keywords": [keyword], **location}, client)
     output = []
     for item in rows:
         demography = item.get("demography") if isinstance(item.get("demography"), dict) else {}

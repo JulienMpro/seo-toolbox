@@ -1,5 +1,7 @@
 """Mocked, zero-network tests for remaining catalogue tools."""
 
+import httpx
+
 from seotoolbox.models import CruxMetric, KeywordIdea, SerpResult
 from seotoolbox.tools import reliquats
 
@@ -39,3 +41,21 @@ def test_lighthouse(monkeypatch):
     monkeypatch.setattr(reliquats.crux, "page_speed", lambda *args: CruxMetric("https://a", "good", {"percentile": 1000, "category": "good"}, None, None, 92))
     rows = reliquats.lighthouse_cwv("https://a")
     assert rows[0]["value"] == 92 and rows[1]["status"] == "good"
+
+
+def test_lighthouse_reports_http_failure_without_crashing(monkeypatch):
+    request = httpx.Request("GET", "https://www.googleapis.com/pagespeedonline/v5/runPagespeed")
+    response = httpx.Response(429, request=request)
+    monkeypatch.setattr(
+        reliquats.crux,
+        "page_speed",
+        lambda *args: (_ for _ in ()).throw(
+            httpx.HTTPStatusError("rate limited", request=request, response=response)
+        ),
+    )
+
+    assert reliquats.lighthouse_cwv("https://a") == [{
+        "metric": "Lighthouse performance",
+        "value": None,
+        "status": "unavailable: rate limited",
+    }]

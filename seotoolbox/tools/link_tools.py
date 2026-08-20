@@ -45,18 +45,26 @@ def anchor_distribution(domain: str, limit: int = 50) -> list[dict[str, Any]]:
 def dofollow_ratio(domain: str) -> list[dict[str, Any]]:
     """Return dofollow and nofollow counts when exposed by the summary model."""
     summary = _row(backlink_service.summary(domain))
-    types = summary.get("referring_links_types")
-    types = types if isinstance(types, dict) else {}
-    dofollow = types.get("dofollow", summary.get("dofollow"))
-    nofollow = types.get("nofollow", summary.get("nofollow"))
+    total_pages = summary.get("referring_pages")
+    nofollow = summary.get("referring_pages_nofollow")
+    dofollow = (total_pages - nofollow
+                if isinstance(total_pages, (int, float))
+                and isinstance(nofollow, (int, float)) else None)
+    if dofollow is None and nofollow is None:
+        types = summary.get("referring_links_types")
+        if isinstance(types, dict):
+            dofollow, nofollow = types.get("dofollow"), types.get("nofollow")
     total = (dofollow or 0) + (nofollow or 0)
     return [{"type": "dofollow", "count": dofollow, "percent": _percent(dofollow, total)},
             {"type": "nofollow", "count": nofollow, "percent": _percent(nofollow, total)}]
 
 
-def disavow_generator(domain: str, spam_threshold: float = 60, output: str = "") -> list[dict[str, Any]]:
+def disavow_generator(domain: str, spam_threshold: float = 60, output: str = "",
+                      limit: int = 1000) -> list[dict[str, Any]]:
     """List toxic referring domains and optionally write a disavow file."""
-    links = backlink_service.backlinks(domain, 1000)
+    if limit <= 0:
+        raise ValueError("limit must be positive")
+    links = backlink_service.backlinks(domain, limit)
     domains = sorted({_row(item).get("domain_from") for item in links
                       if _row(item).get("domain_from") and _row(item).get("spam_score") is not None
                       and _row(item)["spam_score"] >= spam_threshold})
@@ -105,7 +113,7 @@ def link_profile_evolution(domain: str, days: int = 90) -> list[dict[str, Any]]:
         raise ValueError("days must be positive")
     today = date.today()
     payload = {"target": domain, "date_from": (today - timedelta(days=days)).isoformat(),
-               "date_to": today.isoformat()}
+               "date_to": today.isoformat(), "group_range": "day"}
     # Prefer the absolute timeseries endpoint; cumulative new/lost values have no
     # trustworthy starting baseline and would manufacture totals.
     results = DataForSEOClient().get_result("backlinks/timeseries_summary/live", payload)
@@ -171,7 +179,7 @@ def A(name: str, required: bool = True, default: str | None = None) -> ArgSpec:
 
 register(ToolSpec("anchor_distribution", anchor_distribution, "Show anchor text distribution.", "links", [A("domain"), A("limit", False, "50")], "table"))
 register(ToolSpec("dofollow_ratio", dofollow_ratio, "Show dofollow and nofollow shares.", "links", [A("domain")], "table"))
-register(ToolSpec("disavow_generator", disavow_generator, "List toxic domains and optionally write a disavow file.", "links", [A("domain"), A("spam_threshold", False, "60"), A("output", False, "")], "table"))
+register(ToolSpec("disavow_generator", disavow_generator, "List toxic domains and optionally write a disavow file.", "links", [A("domain"), A("spam_threshold", False, "60"), A("output", False, ""), A("limit", False, "1000")], "table"))
 register(ToolSpec("toxic_links", toxic_links, "List backlinks above a spam threshold.", "links", [A("domain"), A("spam_threshold", False, "60"), A("limit", False, "50")], "table"))
 register(ToolSpec("link_gap", link_gap, "Find competitor referring domains missing from a target.", "links", [A("domain"), A("competitor"), A("limit", False, "50")], "table"))
 register(ToolSpec("referring_domains_analysis", referring_domains_analysis, "Analyze referring-domain quality metrics.", "links", [A("domain"), A("limit", False, "50")], "table"))

@@ -121,7 +121,8 @@ def test_dataforseo_misc_payloads_and_verified_mappings(monkeypatch):
                                            "created_datetime": "2020-01-01",
                                            "epp_status_codes": ["ok"]}]}])
     assert domain_intel.whois_lite("example.fr", whois_client)[0]["value"] == "AFNIC"
-    assert whois_client.calls == [("domain_analytics/whois/overview/live", {"domain": "example.fr"})]
+    assert whois_client.calls == [("domain_analytics/whois/overview/live", {
+        "filters": [["domain", "=", "example.fr"]], "limit": 1})]
 
     tech_client = FakeClient([{"technologies": {"cms": {"content_management": ["WordPress"]}}}])
     assert domain_intel.technology_detection("example.fr", tech_client) == [

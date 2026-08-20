@@ -176,6 +176,8 @@ def _ranked(item: dict[str, Any]) -> KeywordRanked | None:
     metrics = _metrics(item)
     ranked = item.get("ranked_serp_element") if isinstance(item.get("ranked_serp_element"), dict) else {}
     serp_item = ranked.get("serp_item") if isinstance(ranked.get("serp_item"), dict) else {}
+    if not serp_item and isinstance(item.get("first_domain_serp_element"), dict):
+        serp_item = item["first_domain_serp_element"]
     return KeywordRanked(
         keyword=keyword,
         position=serp_item.get("rank_absolute", item.get("position")),

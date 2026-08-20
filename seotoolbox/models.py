@@ -109,6 +109,7 @@ class BacklinkSummary(SerializableModel):
     internal_links_count: int | None = None
     referring_pages: int | None = None
     referring_links_types: dict[str, int] | None = None
+    referring_pages_nofollow: int | None = None
 
 
 @dataclass

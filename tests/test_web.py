@@ -138,13 +138,20 @@ def test_navigation_and_extended_audit_limits() -> None:
         assert f">{limit}</option>" in response.text
 
 
-def test_csv_export_helper_is_available_on_every_page() -> None:
+def test_table_export_helpers_are_available_on_every_page() -> None:
     response = client.get("/keywords")
     assert 'aria-label="Copy table"' in response.text
     assert 'aria-label="Download CSV"' in response.text
     assert "const BOM = '\\ufeff'" in response.text
+    assert "function tableCsv(table)" in response.text
     assert ".join(';')" in response.text
     assert ".join('\\r\\n')" in response.text
+    assert "function tableTsv(table)" in response.text
+    assert "return value.replace(/[\\t\\r\\n]+/g, ' ');" in response.text
+    assert ".join('\\t')" in response.text
+    assert ").join('\\n');" in response.text
+    assert "copyText(tableTsv(table))" in response.text
+    assert "copyText(tableCsv(table))" not in response.text
     assert "if (value === 'N/D') value = '';" in response.text
 
 

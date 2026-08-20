@@ -23,7 +23,8 @@ def _items(results: list[dict[str, Any]]) -> list[dict[str, Any]]:
 def whois_lite(domain: str, client: DataForSEOClient | None = None) -> list[dict[str, Any]]:
     """Return the principal public WHOIS fields for a domain."""
     items = _items((client or DataForSEOClient()).get_result(
-        "domain_analytics/whois/overview/live", {"domain": domain}))
+        "domain_analytics/whois/overview/live",
+        {"filters": [["domain", "=", domain]], "limit": 1}))
     item = next((value for value in items if value.get("domain") == domain), {})
     fields = (("registrar", "registrar"), ("created", "created_datetime"),
               ("expires", "expiration_datetime"), ("updated", "updated_datetime"),
@@ -72,13 +73,15 @@ def instant_audit(url: str, client: DataForSEOClient | None = None) -> list[dict
     """Inspect essential on-page metadata using the instant-pages endpoint."""
     item = next(iter(_items((client or DataForSEOClient()).get_result(
         "on_page/instant_pages", {"url": url}))), {})
-    meta = item.get("page_meta") if isinstance(item.get("page_meta"), dict) else {}
+    meta = item.get("page_meta") if isinstance(item.get("page_meta"), dict) else item.get("meta")
+    if not isinstance(meta, dict):
+        meta = {}
     values = {"title": item.get("title") or meta.get("title"),
               "description": item.get("description") or meta.get("description"),
               "canonical": item.get("canonical") or meta.get("canonical"),
               "hreflang": item.get("hreflang") or meta.get("hreflang"),
               "robots": item.get("robots") or meta.get("robots"),
-              "open_graph": item.get("og") or meta.get("og"),
+              "open_graph": item.get("og") or meta.get("og") or meta.get("social_media_tags"),
               "status_code": item.get("status_code")}
     return [{"element": key, "value": value, "status": "ok" if value not in (None, "", [], {}) else "absent"}
             for key, value in values.items()]

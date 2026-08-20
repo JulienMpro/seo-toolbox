@@ -174,7 +174,11 @@ def tfidf_analysis(keyword: str, text: str, country: str = "FR") -> list[dict[st
 
 def lighthouse_cwv(url: str, strategy: str = "mobile") -> list[dict[str, Any]]:
     """Return Lighthouse performance and available CrUX field metrics from PageSpeed Insights."""
-    metric = crux.page_speed(url, strategy)
+    try:
+        metric = crux.page_speed(url, strategy)
+    except httpx.HTTPError as exc:
+        return [{"metric": "Lighthouse performance", "value": None,
+                 "status": f"unavailable: {exc}"}]
     rows = [{"metric": "Lighthouse performance", "value": metric.performance_score, "status": metric.overall_category}]
     for name in ("lcp", "cls", "inp"):
         value = getattr(metric, name)

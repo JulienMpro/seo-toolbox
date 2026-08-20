@@ -102,7 +102,7 @@ def test_direct_backlink_payloads_and_verified_response_mapping():
     assert calls[0] == (
         "backlinks/timeseries_summary/live",
         {"target": "example.test", "date_from": (date.today() - timedelta(days=30)).isoformat(),
-         "date_to": date.today().isoformat()},
+         "date_to": date.today().isoformat(), "group_range": "day"},
     )
     assert calls[1] == (
         "backlinks/domain_pages_summary/live",

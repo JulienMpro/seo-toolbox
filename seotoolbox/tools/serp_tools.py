@@ -117,7 +117,8 @@ def serp_history(keyword: str, country: str = "FR", days: int = 30) -> list[dict
     results = DataForSEOClient().get_result("dataforseo_labs/google/historical_serps/live", payload)
     rows = []
     for result in results:
-        items = result.get("items") if isinstance(result.get("items"), list) else [result]
+        nested_items = result.get("items")
+        items = nested_items if isinstance(nested_items, list) else ([] if "items" in result else [result])
         for item in items:
             if not isinstance(item, dict):
                 continue

@@ -95,6 +95,16 @@
       return BOM + lines.join('\r\n');
     }
 
+    function tableTsv(table) {
+      return Array.from(table.querySelectorAll('tr')).map(row =>
+        Array.from(row.querySelectorAll('th, td')).map(cell => {
+          let value = cell.textContent.trim();
+          if (value === 'N/D') value = '';
+          return value.replace(/[\t\r\n]+/g, ' ');
+        }).join('\t')
+      ).join('\n');
+    }
+
     function fallbackCopy(value) {
       const textarea = document.createElement('textarea');
       textarea.value = value;
@@ -107,7 +117,7 @@
       if (!copied) throw new Error('Copy failed');
     }
 
-    async function copyCsv(value) {
+    async function copyText(value) {
       if (navigator.clipboard?.writeText) {
         try { await navigator.clipboard.writeText(value); return; } catch (_) { /* HTTP fallback */ }
       }
@@ -132,7 +142,7 @@
         const [copyButton, csvButton] = toolbar.querySelectorAll('button');
         copyButton.addEventListener('click', async () => {
           const label = copyButton.textContent;
-          try { await copyCsv(tableCsv(table)); copyButton.textContent = 'Copied'; }
+          try { await copyText(tableTsv(table)); copyButton.textContent = 'Copied'; }
           catch (_) { copyButton.textContent = 'Copy failed'; }
           window.setTimeout(() => { copyButton.textContent = label; }, 1500);
         });

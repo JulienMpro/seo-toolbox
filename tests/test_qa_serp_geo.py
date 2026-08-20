@@ -1,6 +1,7 @@
 """Regression tests for the SERP/GEO QA batch (all network calls are mocked)."""
 
 import inspect
+from datetime import date, timedelta
 
 from seotoolbox.tools import REGISTRY
 from seotoolbox.tools import data_intel as data
@@ -94,6 +95,25 @@ def test_verified_content_amazon_and_trends_mappings_preserve_zero():
     data.amazon_sellers("A", 7, sellers_client)
     assert "limit" not in sellers_client.calls[0][1]
 
+    empty_seller = FakeClient([{"items": [{"seller_name": None, "price": None, "stock": None}]}])
+    assert data.amazon_sellers("A", client=empty_seller) == []
+
+
+def test_empty_items_envelopes_do_not_become_misleading_rows():
+    envelope = [{"asin": "A", "items_count": 0, "items": None}]
+    assert data.amazon_competitors("A", client=FakeClient(envelope)) == []
+    assert data.amazon_product_keywords("A", client=FakeClient(envelope)) == []
+    assert data.amazon_sellers("A", client=FakeClient(envelope)) == []
+    assert youtube.youtube_comments("abcdefghi", client=FakeClient(envelope)) == []
+
+
+def test_phrase_trends_supplies_required_date_range():
+    client = FakeClient([])
+    data.phrase_trends("marque", client)
+    payload = client.calls[0][1]
+    assert payload == {"keyword": "marque", "date_from": (date.today() - timedelta(days=30)).isoformat(),
+                       "date_to": date.today().isoformat()}
+
 
 def test_verified_trends_nested_shapes_and_endpoints():
     region_client = FakeClient([{"items": [{"type": "google_trends_map", "data": [
@@ -115,9 +135,10 @@ def test_verified_trends_nested_shapes_and_endpoints():
         {"dimension": "gender", "segment": "female", "value": 70},
     ]
     assert demo_client.calls[0][0] == "keywords_data/dataforseo_trends/demography/live"
+    assert demo_client.calls[0][1] == {"keywords": ["seo"], "location_code": 2840}
 
 
-def test_trends_presets_and_youtube_depth_use_documented_payload_fields():
+def test_trends_presets_and_youtube_organic_omits_rejected_depth_field():
     trends_client = FakeClient([])
     data.google_trends("seo", "FR", "past_12_months", trends_client)
     assert trends_client.calls[0][1]["time_range"] == "past_12_months"
@@ -125,8 +146,16 @@ def test_trends_presets_and_youtube_depth_use_documented_payload_fields():
 
     youtube_client = FakeClient([])
     youtube.youtube_keywords("seo", 7, youtube_client)
-    assert youtube_client.calls[0][1]["depth"] == 7
+    assert "depth" not in youtube_client.calls[0][1]
     assert "limit" not in youtube_client.calls[0][1]
+
+
+def test_keyword_gap_maps_first_domain_position():
+    item = {"keyword_data": {"keyword": "seo", "keyword_info": {"search_volume": 10}},
+            "first_domain_serp_element": {"rank_absolute": 3, "url": "https://example.test"}}
+    ranked = __import__("seotoolbox.keywords", fromlist=["_ranked"])._ranked(item)
+    assert ranked.position == 3
+    assert ranked.url == "https://example.test"
 
 
 def test_brand_visibility_does_not_match_brand_as_arbitrary_substring(monkeypatch):
