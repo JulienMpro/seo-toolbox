@@ -42,10 +42,20 @@ Workflow complet illustré sur un projet fictif (zéro donnée réelle) : [`demo
 ## 🚀 Installation
 
 ```bash
+# Option 1 — depuis GitHub (recommandé)
+pip install seo-toolbox @ git+https://github.com/JulienMpro/seo-toolbox.git
+
+# Option 2 — wheel de la release
+pip install https://github.com/JulienMpro/seo-toolbox/releases/download/v0.6.0/seo_toolbox-0.6.0-py3-none-any.whl
+
+# Option 3 — développement (clone)
 git clone https://github.com/JulienMpro/seo-toolbox.git
 cd seo-toolbox
 pip install -e ".[dev]"          # + ".[web]" pour l'UI
-export DATAFORSEO_USERNAME=...   # credentials DataForSEO
+
+# UI web (option 1 ou 2) : pip install "seo-toolbox[web] @ git+https://github.com/JulienMpro/seo-toolbox.git"
+
+export DATAFORSEO_USERNAME=...   # credentials DataForSEO (optionnel : sans eux, tout affiche N/D)
 export DATAFORSEO_PASSWORD=...
 ```
 
