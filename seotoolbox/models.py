@@ -1,4 +1,4 @@
-"""Data models returned by keyword research operations."""
+"""Data models returned by SEO Toolbox operations."""
 
 from dataclasses import asdict, dataclass
 from typing import Any
@@ -173,3 +173,51 @@ class SerpResult(SerializableModel):
 class SerpFeatures(SerializableModel):
     keyword: str
     features: list[str] | None = None
+
+
+@dataclass
+class CrawlResult(SerializableModel):
+    url: str
+    status: int | None = None
+    redirect_url: str | None = None
+    title: str | None = None
+    meta_description: str | None = None
+    h1: str | None = None
+    canonical: str | None = None
+    noindex: bool = False
+    content_length: int | None = None
+    content_type: str | None = None
+
+
+@dataclass
+class Issue(SerializableModel):
+    url: str
+    type: str
+    severity: str
+    message: str
+
+
+@dataclass
+class AuditReport(SerializableModel):
+    total_urls: int
+    issues: list[Issue]
+    stats: dict[str, Any]
+
+
+@dataclass
+class CruxMetric(SerializableModel):
+    url: str
+    overall_category: str | None = None
+    lcp: dict[str, Any] | None = None
+    cls: dict[str, Any] | None = None
+    inp: dict[str, Any] | None = None
+    performance_score: int | None = None
+
+
+@dataclass
+class GscRow(SerializableModel):
+    keys: list[str]
+    clicks: float | None = None
+    impressions: float | None = None
+    ctr: float | None = None
+    position: float | None = None

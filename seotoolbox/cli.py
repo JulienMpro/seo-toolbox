@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 import typer
+import httpx
 from rich.console import Console
 from rich.table import Table
 
@@ -18,6 +19,9 @@ from . import geo as geo_service
 from . import keywords as service
 from . import ranktracker as ranks_service
 from . import serp as serp_service
+from . import audit as audit_service
+from . import crux as crux_service
+from . import gsc as gsc_service
 from .client import ApiError, DataForSEOError
 
 app = typer.Typer(help="Pay-per-request SEO research tools powered by DataForSEO.")
@@ -26,11 +30,15 @@ ranks_app = typer.Typer(help="Domain rank tracking tools.")
 geo_app = typer.Typer(help="AI and GEO visibility tools.")
 backlinks_app = typer.Typer(help="Backlink profile and gap tools.")
 serp_app = typer.Typer(help="Live SERP analysis tools.")
+audit_app = typer.Typer(help="Technical crawl and Core Web Vitals tools.")
+gsc_app = typer.Typer(help="Google Search Console analytics tools.")
 app.add_typer(keywords_app, name="keywords")
 app.add_typer(ranks_app, name="ranks")
 app.add_typer(geo_app, name="geo")
 app.add_typer(backlinks_app, name="backlinks")
 app.add_typer(serp_app, name="serp")
+app.add_typer(audit_app, name="audit")
+app.add_typer(gsc_app, name="gsc")
 console = Console()
 
 
@@ -104,7 +112,7 @@ def _emit(values: list[Any], output: str, save: Path | None = None) -> None:
 def _run(operation: Any, output: str, save: Path | None = None) -> None:
     try:
         _emit(operation(), output.lower(), save)
-    except (ApiError, DataForSEOError, ValueError) as exc:
+    except (ApiError, DataForSEOError, ValueError, httpx.HTTPError) as exc:
         console.print(f"[red]Error:[/red] {exc}", highlight=False)
         raise typer.Exit(code=1) from exc
 
@@ -261,6 +269,92 @@ def serp_live(word: str, country: str = typer.Option("US"), limit: int = typer.O
 def serp_features(word: str, country: str = typer.Option("US"), output: str = typer.Option("table"), save: Path | None = typer.Option(None)) -> None:
     """Show detected SERP features."""
     _run(lambda: [serp_service.features(word, country)], output, save)
+
+
+def _audit_report(url: str, limit: int, workers: int, issue_types: set[str] | None = None):
+    report = audit_service.analyze(audit_service.crawl_site(url, limit, workers=workers))
+    return [issue for issue in report.issues if issue_types is None or issue.type in issue_types]
+
+
+def _audit_markdown(report: Any) -> str:
+    groups = {
+        "Errors": [issue for issue in report.issues if issue.type == "error"],
+        "Redirects": [issue for issue in report.issues if issue.type == "redirect"],
+        "On-page": [issue for issue in report.issues if issue.type not in {"error", "redirect"}],
+    }
+    lines = ["# Technical audit", "", "## Summary", "", f"- URLs crawled: {report.total_urls}",
+             f"- Issues: {len(report.issues)}", ""]
+    for heading, issues in groups.items():
+        lines.extend([f"## {heading}", ""])
+        if issues:
+            lines.extend(["| URL | Type | Severity | Message |", "| --- | --- | --- | --- |"])
+            lines.extend(f"| {i.url} | {i.type} | {i.severity} | {i.message.replace('|', chr(92) + '|')} |" for i in issues)
+        else:
+            lines.append("N/D")
+        lines.append("")
+    lines.extend(["## Stats", "", f"- Status codes: {report.stats.get('status_codes') or 'N/D'}",
+                  f"- Average content length: {_display(report.stats.get('avg_content_length'))}"])
+    return "\n".join(lines)
+
+
+@audit_app.command("run")
+def audit_run(url: str = typer.Option(...), limit: int = typer.Option(200, min=1),
+              workers: int = typer.Option(10, min=1, max=10), output: str = typer.Option("table"),
+              save: Path | None = typer.Option(None)) -> None:
+    """Crawl a site and report technical SEO issues."""
+    if output.lower() == "md":
+        try:
+            report = audit_service.analyze(audit_service.crawl_site(url, limit, workers=workers))
+            text = _audit_markdown(report)
+            if save:
+                save.parent.mkdir(parents=True, exist_ok=True)
+                save.write_text(text, encoding="utf-8")
+                console.print(f"Saved audit report to {save}")
+            else:
+                typer.echo(text)
+        except (ValueError, httpx.HTTPError) as exc:
+            console.print(f"[red]Error:[/red] {exc}", highlight=False)
+            raise typer.Exit(code=1) from exc
+        return
+    _run(lambda: _audit_report(url, limit, workers), output, save)
+
+
+@audit_app.command("issues")
+def audit_issues(url: str = typer.Option(...), issue_type: str = typer.Option(..., "--type"),
+                 limit: int = typer.Option(200, min=1), workers: int = typer.Option(10, min=1, max=10),
+                 output: str = typer.Option("table"), save: Path | None = typer.Option(None)) -> None:
+    """Crawl a site and show selected comma-separated issue types."""
+    selected = {value.strip() for value in issue_type.split(",") if value.strip()}
+    _run(lambda: _audit_report(url, limit, workers, selected), output, save)
+
+
+@audit_app.command("crux")
+def audit_crux(urls: str = typer.Option(...), strategy: str = typer.Option("mobile"),
+               output: str = typer.Option("table"), save: Path | None = typer.Option(None)) -> None:
+    """Fetch PageSpeed and Chrome UX metrics for comma-separated URLs."""
+    _run(lambda: crux_service.crux_report([url.strip() for url in urls.split(",") if url.strip()], strategy), output, save)
+
+
+@gsc_app.command("properties")
+def gsc_properties(output: str = typer.Option("table"), save: Path | None = typer.Option(None)) -> None:
+    """List accessible Search Console properties."""
+    _run(lambda: [{"property": value} for value in gsc_service.list_properties(gsc_service.get_access_token())], output, save)
+
+
+@gsc_app.command("queries")
+def gsc_queries(property_name: str = typer.Option(..., "--property"), days: int = typer.Option(28, min=1),
+                limit: int = typer.Option(20, min=1), output: str = typer.Option("table"),
+                save: Path | None = typer.Option(None)) -> None:
+    """Show top Search Console queries."""
+    _run(lambda: gsc_service.top_queries(property_name, days, limit), output, save)
+
+
+@gsc_app.command("pages")
+def gsc_pages(property_name: str = typer.Option(..., "--property"), days: int = typer.Option(28, min=1),
+              limit: int = typer.Option(20, min=1), output: str = typer.Option("table"),
+              save: Path | None = typer.Option(None)) -> None:
+    """Show top Search Console pages."""
+    _run(lambda: gsc_service.top_pages(property_name, days, limit), output, save)
 
 
 if __name__ == "__main__":

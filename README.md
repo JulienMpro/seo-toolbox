@@ -12,7 +12,7 @@ Boîte à outils **open-source** pour consultants SEO : reproduit l'essentiel de
 | Rank Tracking (positions, historique, concurrents) | DataForSEO Labs | ✅ disponible |
 | Tracking IA/GEO (mentions et pages citées) | DataForSEO AI Optimization | ✅ disponible |
 | Backlinks (profil, flux, ancres, gap, disavow) | DataForSEO Backlinks | ✅ disponible |
-| Audit technique (crawl complet, CWV, GSC, CrUX) | Spider maison + API gratuites | 📋 planifié |
+| Audit technique (crawl complet, CWV, GSC, CrUX) | Spider maison + API gratuites | ✅ disponible |
 | Analyse SERP | DataForSEO SERP | ✅ disponible |
 | Logs serveur | 100 % maison | 📋 planifié |
 | Monitoring + alertes | Cron + diff | 📋 planifié |
@@ -65,7 +65,8 @@ pip install -e ".[dev]"
 |---|---|
 | `DATAFORSEO_USERNAME` | Login API DataForSEO |
 | `DATAFORSEO_PASSWORD` | Mot de passe API DataForSEO |
-| `GSC_CLIENT_ID` / `GSC_CLIENT_SECRET` | OAuth Google Search Console (module GSC) |
+| `GSC_CLIENT_ID` / `GSC_CLIENT_SECRET` / `GSC_REFRESH_TOKEN` | OAuth Google Search Console |
+| `PSI_API_KEY` | Clé PageSpeed Insights optionnelle (limites plus élevées) |
 
 ## Usage (CLI)
 
@@ -88,6 +89,12 @@ seo backlinks competitors --domain exemple.fr --limit 10
 seo backlinks disavow --domain exemple.fr --output disavow.txt --max-spam 60
 seo serp live "plombier paris" --country FR --limit 20 --device desktop
 seo serp features "plombier paris" --country FR
+seo audit run --url https://exemple.fr --limit 200 --workers 10
+seo audit issues --url https://exemple.fr --type error,redirect,missing_title
+seo audit crux --urls https://exemple.fr,https://exemple.fr/contact --strategy mobile
+seo gsc properties
+seo gsc queries --property sc-domain:exemple.fr --days 28 --limit 20
+seo gsc pages --property sc-domain:exemple.fr --days 28 --limit 20
 ```
 
 All reporting commands accept `--output table|csv|md|json`; use `--save PATH`
