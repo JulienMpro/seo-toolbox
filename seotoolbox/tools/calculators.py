@@ -20,6 +20,8 @@ def roi_seo(budget: float, basket: float, margin: float, conversion: float, mont
         raise ValueError("margin and conversion must be percentages between 0 and 100")
     if not 1 <= months <= 24:
         raise ValueError("months must be between 1 and 24")
+    if growth < -100:
+        raise ValueError("growth must be at least -100")
     rows, cumulative_profit, cumulative_cost = [], 0.0, 0.0
     for month in range(1, months + 1):
         month_traffic = traffic * (1 + growth / 100) ** (month - 1)
@@ -37,12 +39,18 @@ def traffic_projection(volume: float, ctr: float, click_rate: float = 100, growt
     _positive(volume, "volume", True)
     if not 0 <= ctr <= 100 or not 0 <= click_rate <= 100:
         raise ValueError("ctr and click_rate must be between 0 and 100")
+    if growth < -100:
+        raise ValueError("growth must be at least -100")
     base = volume * ctr / 100 * click_rate / 100
     return [{"period_months": month, "estimated_traffic": round(base * (1 + growth / 100) ** month, 2)} for month in (0, 6, 12)]
 
 
 def position_value(volume: float, cpc: float, current_ctr: float, target_ctr: float) -> str:
     """Calculate the monthly paid-search value of an organic CTR improvement."""
+    _positive(volume, "volume", True)
+    _positive(cpc, "cpc", True)
+    if not 0 <= current_ctr <= 100 or not 0 <= target_ctr <= 100:
+        raise ValueError("current_ctr and target_ctr must be between 0 and 100")
     gain = volume * (target_ctr - current_ctr) / 100
     return f"Monthly click gain: {gain:.2f}; monthly value: €{gain * cpc:.2f}"
 
@@ -65,6 +73,8 @@ def ctr_curve(position: int = 0, device: str = "both") -> list[dict]:
 
 def ads_equivalent(clicks: float, cpc: float) -> str:
     """Calculate the Ads budget equivalent for a click target."""
+    _positive(clicks, "clicks", True)
+    _positive(cpc, "cpc", True)
     return f"Equivalent monthly Ads budget: €{clicks * cpc:.2f}"
 
 
@@ -82,6 +92,7 @@ def conversion_rate(visits: int, conversions: int) -> str:
 def implicit_cpc(cost: float, clicks: float) -> str:
     """Calculate organic acquisition cost per click."""
     _positive(clicks, "clicks")
+    _positive(cost, "cost", True)
     return f"Implicit CPC: €{cost / clicks:.2f}"
 
 
@@ -89,6 +100,8 @@ def cac_ltv(cost: float, customers: int, ltv: float, months: int = 1) -> str:
     """Calculate CAC, LTV, and the LTV-to-CAC ratio over a period."""
     _positive(customers, "customers")
     _positive(months, "months")
+    _positive(cost, "cost", True)
+    _positive(ltv, "ltv", True)
     cac = cost * months / customers
     return f"CAC: €{cac:.2f}; LTV: €{ltv:.2f}; LTV/CAC ratio: {ltv / cac:.2f}" if cac else "CAC: €0.00; LTV/CAC ratio: infinite"
 
@@ -96,6 +109,7 @@ def cac_ltv(cost: float, customers: int, ltv: float, months: int = 1) -> str:
 def crawl_time(pages: int, urls_per_second: float, daily_budget_pct: float = 100) -> str:
     """Estimate crawl duration and calendar days at a daily budget percentage."""
     _positive(urls_per_second, "urls_per_second")
+    _positive(pages, "pages", True)
     if not 0 < daily_budget_pct <= 100:
         raise ValueError("daily_budget_pct must be between 0 and 100")
     seconds = pages / urls_per_second
@@ -122,6 +136,8 @@ def backlink_value(authority: float, referral_traffic: float, cpc: float) -> str
     """Estimate monthly link value: traffic value multiplied by 0.5–1.5 authority factor."""
     if not 0 <= authority <= 100:
         raise ValueError("authority must be between 0 and 100")
+    _positive(referral_traffic, "referral_traffic", True)
+    _positive(cpc, "cpc", True)
     # Authority factor ranges linearly from 0.5 at zero to 1.5 at 100.
     value = referral_traffic * cpc * (0.5 + authority / 100)
     return f"Estimated monthly backlink value: €{value:.2f}"
@@ -129,6 +145,9 @@ def backlink_value(authority: float, referral_traffic: float, cpc: float) -> str
 
 def content_cost(words: int, rate: float, articles: int = 1) -> str:
     """Calculate per-article and monthly content production costs."""
+    _positive(words, "words", True)
+    _positive(rate, "rate", True)
+    _positive(articles, "articles")
     article = words / 1000 * rate
     return f"Article cost: €{article:.2f}; monthly cost ({articles} article(s)): €{article * articles:.2f}"
 

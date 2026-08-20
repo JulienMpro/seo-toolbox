@@ -1,6 +1,7 @@
 """Tests for local technical SEO checkers."""
 
 import httpx
+from bs4 import BeautifulSoup
 
 from seotoolbox.tools import checkers
 
@@ -39,6 +40,51 @@ def test_html_checkers(monkeypatch):
     assert checkers.mixed_content("https://x.test/")[0]["resource"].startswith("http://")
     assert checkers.schema_validator("https://x.test/")[0]["valid"] is True
     assert checkers.title_meta_validator(url="https://x.test/")[-1]["message"] == "VALID"
+
+
+def test_hreflang_checker_normalizes_www_scheme_and_trailing_slash(monkeypatch):
+    pages = {
+        "http://example.test/fr/": '<link rel="alternate" hreflang="en" href="https://www.example.test/en">',
+        "https://www.example.test/en": '<link rel="alternate" hreflang="fr" href="https://example.test/fr">',
+    }
+    monkeypatch.setattr(
+        checkers,
+        "_page",
+        lambda url: (BeautifulSoup(pages[url], "html.parser"), None),
+    )
+
+    rows = checkers.hreflang_checker("http://example.test/fr/\nhttps://www.example.test/en")
+
+    assert [row["reciprocal"] for row in rows] == [True, True]
+
+
+def test_hreflang_checker_reports_unknown_and_false_reciprocity(monkeypatch):
+    pages = {
+        "https://example.test/fr": '<link rel="alternate" hreflang="en" href="https://example.test/en">',
+        "https://example.test/en": '<link rel="alternate" hreflang="de" href="https://example.test/de">',
+    }
+    monkeypatch.setattr(
+        checkers,
+        "_page",
+        lambda url: (BeautifulSoup(pages[url], "html.parser"), None),
+    )
+
+    rows = checkers.hreflang_checker("https://example.test/fr\nhttps://example.test/en")
+
+    assert rows[0]["reciprocal"] is False
+    assert rows[1]["reciprocal"] is None
+
+
+def test_hreflang_checker_preserves_page_error(monkeypatch):
+    monkeypatch.setattr(checkers, "_page", lambda url: (None, "connection failed"))
+
+    assert checkers.hreflang_checker("https://example.test/fr") == [{
+        "url": "https://example.test/fr",
+        "lang": None,
+        "target": None,
+        "reciprocal": None,
+        "error": "connection failed",
+    }]
 
 
 def test_redirect_sitemap_status_and_robots(monkeypatch):

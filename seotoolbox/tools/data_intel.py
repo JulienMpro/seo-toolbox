@@ -48,7 +48,10 @@ def phrase_trends(keyword: str, client: DataForSEOClient | None = None) -> list[
         series = item.get("metrics") or item.get("trends") or item.get("history") or item.get("items")
         if isinstance(series, dict): series = [{"date": key, "value": value} for key, value in series.items()]
         for point in series if isinstance(series, list) else [item]:
-            if isinstance(point, dict): rows.append({"date": point.get("date") or point.get("year_month"), "value": point.get("value") or point.get("count")})
+            if isinstance(point, dict):
+                rows.append({"date": point.get("date") or point.get("year_month"),
+                             "citations": _first_present(point, "total_count", "value", "count"),
+                             "rank": point.get("rank")})
     return rows
 
 
@@ -67,7 +70,7 @@ def content_summary(keyword: str, client: DataForSEOClient | None = None) -> lis
 
 def amazon_products(keyword: str, limit: int = 10, client: DataForSEOClient | None = None) -> list[dict[str, Any]]:
     """Search Amazon products by keyword."""
-    payload = {"keyword": keyword, "location_code": 2840, "language_code": "en_US", "limit": limit}
+    payload = {"keyword": keyword, "location_code": 2840, "language_code": "en_US", "depth": limit}
     rows = []
     for x in _call("merchant/amazon/products/live/advanced", payload, client)[:limit]:
         rating = x.get("rating") if isinstance(x.get("rating"), dict) else {}
@@ -93,14 +96,14 @@ def amazon_product_keywords(asin: str, limit: int = 20, client: DataForSEOClient
 
 def amazon_competitors(asin: str, limit: int = 20, client: DataForSEOClient | None = None) -> list[dict[str, Any]]:
     """Find products competing with an Amazon ASIN."""
-    return [{"asin": x.get("asin") or x.get("product_asin"), "title": x.get("title"),
-             "relevance": x.get("relevance") or x.get("avg_position")}
-            for x in _call("dataforseo_labs/amazon/product_competitors/live", {"asin": asin, "limit": limit}, client)[:limit]]
+    payload = {"asin": asin, "location_code": 2840, "language_code": "en", "limit": limit}
+    return [{"asin": x.get("asin") or x.get("product_asin"), "avg_position": x.get("avg_position")}
+            for x in _call("dataforseo_labs/amazon/product_competitors/live", payload, client)[:limit]]
 
 
 def amazon_sellers(asin: str, limit: int = 20, client: DataForSEOClient | None = None) -> list[dict[str, Any]]:
     """List Amazon sellers and current offers for an ASIN."""
-    payload = {"asin": asin, "location_code": 2840, "language_code": "en_US", "limit": limit}
+    payload = {"asin": asin, "location_code": 2840, "language_code": "en_US"}
     return [{"seller": x.get("seller_name") or x.get("seller"), "price": x.get("price") or x.get("price_current"),
              "stock": x.get("stock") or x.get("availability")} for x in _call("merchant/amazon/sellers/live/advanced", payload, client)[:limit]]
 
@@ -109,9 +112,16 @@ def amazon_asin(asin: str, client: DataForSEOClient | None = None) -> list[dict[
     """Return detailed Amazon product data for an ASIN."""
     rows = _call("merchant/amazon/asin/live/advanced", {"asin": asin, "location_code": 2840, "language_code": "en_US"}, client)
     x = rows[0] if rows else {}
-    return [{"asin": asin, "title": x.get("title"), "price": x.get("price") or x.get("price_current"),
-             "images": x.get("images"), "description": x.get("description"), "rating": x.get("rating") or x.get("rating_value"),
-             "reviews": x.get("reviews_count")}]
+    rating = x.get("rating") if isinstance(x.get("rating"), dict) else {}
+    return [{"asin": x.get("data_asin") or x.get("asin") or asin, "title": x.get("title"),
+             "price": _first_present(x, "price_from", "price", "price_current"),
+             "image": x.get("image_url"), "description": x.get("description") or x.get("details"),
+             "rating": rating.get("value") if rating else x.get("rating_value"),
+             "reviews": rating.get("votes_count") if rating else x.get("reviews_count")}]
+
+
+def _first_present(item: dict[str, Any], *keys: str) -> Any:
+    return next((item[key] for key in keys if key in item), None)
 
 
 def _trend_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -126,6 +136,8 @@ def _trend_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 if not day and isinstance(stamp, (int, float)):
                     day = datetime.fromtimestamp(stamp, UTC).date().isoformat()
                 value = point.get("value") if "value" in point else point.get("interest", point.get("values"))
+                if isinstance(value, list) and len(value) == 1:
+                    value = value[0]
                 out.append({"date": day, "interest": value})
     return out
 
@@ -133,21 +145,61 @@ def _trend_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
 def google_trends(keyword: str, country: str = "FR", time_range: str = "", client: DataForSEOClient | None = None) -> list[dict[str, Any]]:
     """Return Google Trends interest over time."""
     location = _country(country)
-    requested = (time_range or f"{date.today().year}-01-01 {date.today().isoformat()}").split()
-    payload = {"keywords": [keyword], "date_from": requested[0], "date_to": requested[-1], **location}
+    payload = {"keywords": [keyword], **location}
+    requested = time_range.split()
+    presets = {"past_hour", "past_4_hours", "past_day", "past_7_days", "past_30_days",
+               "past_90_days", "past_12_months", "past_5_years", "2004_present"}
+    if not requested:
+        payload.update({"date_from": f"{date.today().year}-01-01", "date_to": date.today().isoformat()})
+    elif len(requested) == 1 and requested[0] in presets:
+        payload["time_range"] = requested[0]
+    elif len(requested) == 2:
+        try:
+            date.fromisoformat(requested[0]); date.fromisoformat(requested[1])
+        except ValueError:
+            raise ValueError("time_range must be a supported preset or two ISO dates (YYYY-MM-DD)") from None
+        payload.update({"date_from": requested[0], "date_to": requested[1]})
+    else:
+        raise ValueError("time_range must be a supported preset or two ISO dates (YYYY-MM-DD)")
     return _trend_rows(_call("keywords_data/google_trends/explore/live", payload, client))
 
 
 def trends_by_region(keyword: str, country: str = "FR", client: DataForSEOClient | None = None) -> list[dict[str, Any]]:
     """Return keyword interest by subregion."""
-    rows = _call("keywords_data/google_trends/subregion_interests/live", {"keywords": [keyword], **_country(country)}, client)
-    return [{"region": x.get("region") or x.get("location_name"), "interest": x.get("value") or x.get("interest") or x.get("values")} for x in rows]
+    payload = {"keywords": [keyword], "item_types": ["google_trends_map"], **_country(country)}
+    rows = _call("keywords_data/google_trends/explore/live", payload, client)
+    points = []
+    for item in rows:
+        data = item.get("data") if isinstance(item.get("data"), list) else [item]
+        points.extend(point for point in data if isinstance(point, dict))
+    output = []
+    for point in points:
+        value = _first_present(point, "values", "value", "interest")
+        if isinstance(value, list) and len(value) == 1:
+            value = value[0]
+        output.append({"region": point.get("geo_name") or point.get("location_name") or point.get("region"),
+                       "interest": value})
+    return output
 
 
 def trends_demography(keyword: str, country: str = "FR", client: DataForSEOClient | None = None) -> list[dict[str, Any]]:
     """Return DFS Trends demographic interest segments."""
-    rows = _call("keywords_data/dfs_trends/demography/live", {"keywords": [keyword], **_country(country)}, client)
-    return [{"segment": x.get("segment") or x.get("age") or x.get("gender"), "value": x.get("value") or x.get("interest") or x.get("values")} for x in rows]
+    rows = _call("keywords_data/dataforseo_trends/demography/live", {"keywords": [keyword], **_country(country)}, client)
+    output = []
+    for item in rows:
+        demography = item.get("demography") if isinstance(item.get("demography"), dict) else {}
+        for dimension in ("age", "gender"):
+            groups = demography.get(dimension) if isinstance(demography.get(dimension), list) else []
+            for group in groups:
+                if not isinstance(group, dict) or group.get("keyword") not in (None, keyword):
+                    continue
+                values = group.get("values") if isinstance(group.get("values"), list) else []
+                output.extend({"dimension": dimension, "segment": value.get("type"), "value": value.get("value")}
+                              for value in values if isinstance(value, dict))
+        if not demography and (item.get("segment") or item.get("age") or item.get("gender")):
+            output.append({"dimension": None, "segment": item.get("segment") or item.get("age") or item.get("gender"),
+                           "value": _first_present(item, "value", "interest", "values")})
+    return output
 
 
 def llm_response_extract(keyword: str, engine: str = "chatgpt", client: DataForSEOClient | None = None) -> str:
@@ -190,7 +242,8 @@ def brand_visibility_ia(brand: str, keyword: str, engines: str = "chatgpt,perple
     rows = []
     for engine in [x.strip() for x in engines.split(",") if x.strip()]:
         mentions = geo.mentions(keyword, [engine], country, client)
-        matches = [x for x in mentions if x.domain and brand.casefold() in x.domain.casefold()]
+        brand_key = brand.casefold().removeprefix("www.").split(".")[0]
+        matches = [x for x in mentions if x.domain and brand_key in x.domain.casefold().removeprefix("www.").split(".")]
         best = min((x.rank for x in matches if isinstance(x.rank, int)), default=None)
         rows.append({"engine": engine, "mentioned": bool(matches), "domain": matches[0].domain if matches else None,
                      "rank": best, "visibility_score": (1 / best if best else (1 if matches else 0))})

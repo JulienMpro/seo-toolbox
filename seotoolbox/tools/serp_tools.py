@@ -65,7 +65,13 @@ def paa_extractor(keyword: str, country: str = "FR") -> list[dict[str, Any]]:
             nested = item.get("items") if isinstance(item.get("items"), list) else [item]
             for question in nested:
                 if isinstance(question, dict):
-                    rows.append({"question": question.get("title"), "snippet": question.get("text")})
+                    expanded = question.get("expanded_element")
+                    if isinstance(expanded, list):
+                        expanded = next((value for value in expanded if isinstance(value, dict)), {})
+                    if not isinstance(expanded, dict):
+                        expanded = {}
+                    rows.append({"question": question.get("title"),
+                                 "snippet": question.get("text") or expanded.get("text") or expanded.get("snippet")})
     return rows
 
 
@@ -133,19 +139,20 @@ def rank_bulk(domain: str, keywords: str, country: str = "FR") -> list[dict[str,
             if (row := _row(item))]
 
 
-def intent_analysis(keywords: str) -> list[dict[str, Any]]:
+def intent_analysis(keywords: str, country: str = "FR") -> list[dict[str, Any]]:
     """Classify the intent of several keywords."""
     rows = []
-    for item in keyword_service.intent(_values(keywords)):
+    language = {"fr": "French", "en": "English", "de": "German", "es": "Spanish", "it": "Italian"}[_market(country)[1]]
+    for item in keyword_service.intent(_values(keywords), language_name=language):
         row = _row(item)
-        rows.append({"keyword": row.get("keyword"), "intent": row.get("intent") or "N/D", "category": row.get("category") or "N/D"})
+        rows.append({"keyword": row.get("keyword"), "intent": row.get("intent") or "N/D"})
     return rows
 
 
 def keyword_gap(domain: str, competitors: str, country: str = "FR", limit: int = 50) -> list[dict[str, Any]]:
     """Find domain keywords absent from the supplied competitors."""
     return [{"keyword": row.get("keyword"), "volume": row.get("volume"),
-             "domain_position": row.get("position"), "competitor_positions": row.get("competitor_positions")}
+             "domain_position": row.get("position")}
             for item in keyword_service.gap(domain, _values(competitors), country, limit)
             if (row := _row(item))]
 
@@ -172,7 +179,10 @@ def top_searches(country: str = "FR", category: str = "", limit: int = 50) -> li
     """Return the market's top searches from DataForSEO Labs."""
     payload: dict[str, Any] = {"limit": limit, **_country(country)}
     if category:
-        payload["category"] = category
+        try:
+            payload["category_code"] = int(category)
+        except ValueError:
+            raise ValueError("category must be a numeric DataForSEO category code") from None
     results = DataForSEOClient().get_result("dataforseo_labs/google/top_searches/live", payload)
     rows = []
     for result in results:
@@ -208,7 +218,7 @@ register(ToolSpec("serp_devices", serp_devices, "Compare desktop and mobile orga
 register(ToolSpec("serp_countries", serp_countries, "Compare a keyword across several countries.", "serp", [A("keyword"), A("countries", False, "FR,GB,US")], "table"))
 register(ToolSpec("serp_history", serp_history, "Show historical organic positions.", "serp", [A("keyword"), A("country", False, "FR"), A("days", False, "30")], "table"))
 register(ToolSpec("rank_bulk", rank_bulk, "Check a domain's positions for several keywords.", "serp", [A("domain"), A("keywords"), A("country", False, "FR")], "table"))
-register(ToolSpec("intent_analysis", intent_analysis, "Classify search intent for several keywords.", "serp", [A("keywords")], "table"))
+register(ToolSpec("intent_analysis", intent_analysis, "Classify search intent for several keywords.", "serp", [A("keywords"), A("country", False, "FR")], "table"))
 register(ToolSpec("keyword_gap", keyword_gap, "Find keywords missing from competitor profiles.", "serp", [A("domain"), A("competitors"), A("country", False, "FR"), A("limit", False, "50")], "table"))
 register(ToolSpec("competitor_keywords", competitor_keywords, "List a competitor's ranking keywords.", "serp", [A("domain"), A("country", False, "FR"), A("limit", False, "50")], "table"))
 register(ToolSpec("keyword_suggestions_tool", keyword_suggestions_tool, "Merge suggested and related keywords.", "serp", [A("keyword"), A("country", False, "FR"), A("limit", False, "30")], "table"))

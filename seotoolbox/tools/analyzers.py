@@ -66,14 +66,15 @@ def co_occurrence(text: str, keyword: str, limit: int = 20) -> list[dict]:
     """Count non-stopword terms occurring in sentences or paragraphs containing a keyword."""
     if limit < 1:
         raise ValueError("limit must be positive")
-    needle = keyword.casefold().strip()
-    if not needle:
+    phrase = _words(keyword)
+    if not phrase:
         raise ValueError("keyword must not be empty")
     units = re.split(r"(?:\n\s*\n)|(?<=[.!?])\s+", text)
     counts: Counter[str] = Counter()
     keyword_words = set(_words(keyword))
     for unit in units:
-        if needle in unit.casefold():
+        unit_words = _words(unit)
+        if any(unit_words[pos:pos + len(phrase)] == phrase for pos in range(max(0, len(unit_words) - len(phrase) + 1))):
             counts.update(word for word in _words(unit) if word not in _STOPWORDS and word not in keyword_words)
     return [{"term": term, "frequency": frequency} for term, frequency in counts.most_common(limit)]
 
@@ -112,8 +113,11 @@ def readability(text: str, lang: str = "fr") -> list[dict]:
     # the standard FK coefficients as a useful comparable approximation.
     ease = (207 - 1.015 * asl - 73.6 * asw) if lang == "fr" else (206.835 - 1.015 * asl - 84.6 * asw)
     grade = 0.39 * asl + 11.8 * asw - 15.59
-    verdict = "very easy" if ease >= 80 else "easy" if ease >= 60 else "medium" if ease >= 40 else "difficult" if ease >= 20 else "very difficult"
-    return [{"metric": "Flesch Reading Ease", "score": round(ease, 2), "verdict": verdict}, {"metric": "Flesch-Kincaid Grade", "score": round(grade, 2), "verdict": verdict}]
+    labels = (("très facile", "facile", "moyen", "difficile", "très difficile") if lang == "fr"
+              else ("very easy", "easy", "medium", "difficult", "very difficult"))
+    verdict = labels[0] if ease >= 80 else labels[1] if ease >= 60 else labels[2] if ease >= 40 else labels[3] if ease >= 20 else labels[4]
+    grade_note = "niveau scolaire approximatif" if lang == "fr" else "approximate US grade level"
+    return [{"metric": "Flesch Reading Ease", "score": round(ease, 2), "verdict": verdict}, {"metric": "Flesch-Kincaid Grade", "score": round(grade, 2), "verdict": grade_note}]
 
 
 def page_similarity(urls: str) -> list[dict]:
@@ -136,7 +140,7 @@ def page_similarity(urls: str) -> list[dict]:
             continue
         dot = sum(count * b.get(word, 0) for word, count in a.items())
         denominator = math.sqrt(sum(v * v for v in a.values()) * sum(v * v for v in b.values()))
-        rows.append({"pair": f"{left} ↔ {right}", "similarity_pct": round(dot / denominator * 100, 2) if denominator else 0.0, "error": None})
+        rows.append({"pair": f"{left} ↔ {right}", "similarity_pct": round(dot / denominator * 100, 2) if denominator else None, "error": None if denominator else "no visible text"})
     return rows
 
 
@@ -176,7 +180,7 @@ def title_meta_analyzer(urls: str) -> list[dict]:
         pages.append((url, title, meta, error))
     title_counts = Counter(title.casefold() for _, title, _, _ in pages if title)
     meta_counts = Counter(meta.casefold() for _, _, meta, _ in pages if meta)
-    return [{"url": url, "title_len": len(title) if title else None, "title_ok": bool(title) and _pixel_width(title) <= 600, "meta_len": len(meta) if meta else None, "meta_ok": bool(meta) and len(meta) <= 155, "duplicate": bool(title and title_counts[title.casefold()] > 1 or meta and meta_counts[meta.casefold()] > 1), "truncated": bool(title and _pixel_width(title) > 600 or meta and len(meta) > 155), "error": error} for url, title, meta, error in pages]
+    return [{"url": url, "title_len": len(title) if title else None, "title_ok": None if error else bool(title) and _pixel_width(title) <= 600, "meta_len": len(meta) if meta else None, "meta_ok": None if error else bool(meta) and len(meta) <= 155, "duplicate": None if error else bool(title and title_counts[title.casefold()] > 1 or meta and meta_counts[meta.casefold()] > 1), "truncated": None if error else bool(title and _pixel_width(title) > 600 or meta and len(meta) > 155), "error": error} for url, title, meta, error in pages]
 
 
 def thin_content(value: str, text: bool = False) -> list[dict]:
@@ -190,8 +194,15 @@ def thin_content(value: str, text: bool = False) -> list[dict]:
         content = soup.get_text(" ", strip=True)
         paragraphs, images, links, headings = len(soup.find_all("p")), len(soup.find_all("img")), len(soup.find_all("a")), len(soup.find_all(re.compile(r"^h[1-6]$")))
     words = len(_words(content))
-    criteria = [("words", words, 50 if words < 150 else 25 if words < 300 else 0), ("paragraphs", paragraphs, 15 if paragraphs < 2 else 0), ("images", images, 10 if images == 0 else 0), ("links", links, 10 if links == 0 else 0), ("headings", headings, 15 if headings == 0 else 0)]
-    score = sum(points for _, _, points in criteria)
+    criteria = [("words", words, 50 if words < 150 else 25 if words < 300 else 0), ("paragraphs", paragraphs, 15 if paragraphs < 2 else 0)]
+    if text:
+        # Raw prose cannot establish whether the eventual page has images,
+        # links, or headings. Keep those criteria explicitly unknown.
+        score = round(sum(points for _, _, points in criteria) / 65 * 100)
+        criteria += [("images", None, None), ("links", None, None), ("headings", None, None)]
+    else:
+        criteria += [("images", images, 10 if images == 0 else 0), ("links", links, 10 if links == 0 else 0), ("headings", headings, 15 if headings == 0 else 0)]
+        score = sum(points for _, _, points in criteria)
     return [{"criterion": name, "value": amount, "points": points, "score": score} for name, amount, points in criteria]
 
 
@@ -200,13 +211,14 @@ def entity_extractor(text: str) -> list[dict]:
     found: set[tuple[str, str]] = set()
     patterns = [
         (r"\b[A-ZÀ-ÖØ-Þ][a-zà-öø-ÿ]+(?:\s+[A-ZÀ-ÖØ-Þ][a-zà-öø-ÿ]+)+\b", "Person"),
-        (r"\b(?:à|de|en)\s+([A-ZÀ-ÖØ-Þ][\wÀ-ÖØ-öø-ÿ-]+(?:\s+[A-ZÀ-ÖØ-Þ][\wÀ-ÖØ-öø-ÿ-]+)*)", "Location"),
+        (r"\b(?:à|de|en|at|from|in)\s+([A-ZÀ-ÖØ-Þ][\wÀ-ÖØ-öø-ÿ-]+(?:\s+[A-ZÀ-ÖØ-Þ][\wÀ-ÖØ-öø-ÿ-]+)*)", "Location", re.I),
         (r"\b(?:\d{1,2}[/-]\d{1,2}[/-]\d{2,4}|\d{4}-\d{2}-\d{2})\b", "Date"),
         (r"\b[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}\b", "Email"),
         (r"https?://[^\s<>\"']+", "URL"),
     ]
-    for pattern, kind in patterns:
-        for match in re.finditer(pattern, text): found.add(((match.group(1) if match.lastindex else match.group(0)).rstrip(".,)"), kind))
+    for entry in patterns:
+        pattern, kind, *flags = entry
+        for match in re.finditer(pattern, text, flags[0] if flags else 0): found.add(((match.group(1) if match.lastindex else match.group(0)).rstrip(".,)"), kind))
     capitals = Counter(re.findall(r"\b[A-Z][A-Z0-9&-]{1,}\b", text))
     found.update((word, "Brand") for word, count in capitals.items() if count > 1)
     return [{"entity": entity, "type": kind} for entity, kind in sorted(found, key=lambda item: (item[1], item[0].casefold()))]

@@ -51,6 +51,14 @@ def jsonld_localbusiness(name: str, address: str, phone: str = "", opening_hours
 
 def jsonld_product(name: str, description: str = "", sku: str = "", price: float = 0, currency: str = "EUR", availability: str = "InStock", brand: str = "", rating_value: float = 0, review_count: int = 0) -> str:
     """Generate Product JSON-LD with Offer and optional AggregateRating."""
+    if price < 0:
+        raise ValueError("price must be non-negative")
+    if bool(rating_value) != bool(review_count):
+        raise ValueError("rating_value and review_count must be provided together")
+    if rating_value and not 0 < rating_value <= 5:
+        raise ValueError("rating_value must be between 0 and 5")
+    if review_count < 0:
+        raise ValueError("review_count must be non-negative")
     offer = {"@type": "Offer", "price": price, "priceCurrency": currency, "availability": availability if availability.startswith("http") else f"https://schema.org/{availability}"}
     rating = {"@type": "AggregateRating", "ratingValue": rating_value, "reviewCount": review_count} if rating_value or review_count else None
     return _jsonld("Product", name=name, description=description, sku=sku, brand={"@type": "Brand", "name": brand} if brand else None, offers=offer, aggregateRating=rating)
@@ -63,11 +71,15 @@ def jsonld_breadcrumb(paths: str) -> str:
 
 def jsonld_review(item_reviewed: str, author: str, rating_value: float, review_body: str = "", date_published: str = "") -> str:
     """Generate Review JSON-LD."""
+    if not 1 <= rating_value <= 5:
+        raise ValueError("rating_value must be between 1 and 5")
     return _jsonld("Review", itemReviewed={"@type": "Thing", "name": item_reviewed}, author={"@type": "Person", "name": author}, reviewRating={"@type": "Rating", "ratingValue": rating_value}, reviewBody=review_body, datePublished=date_published)
 
 
 def jsonld_event(name: str, start_date: str, end_date: str = "", location_name: str = "", location_address: str = "", description: str = "", offers_price: float = 0, currency: str = "EUR") -> str:
     """Generate Event JSON-LD."""
+    if offers_price < 0:
+        raise ValueError("offers_price must be non-negative")
     location = {"@type": "Place", "name": location_name, "address": location_address} if location_name or location_address else None
     offers = {"@type": "Offer", "price": offers_price, "priceCurrency": currency} if offers_price else None
     return _jsonld("Event", name=name, startDate=start_date, endDate=end_date, location=location, description=description, offers=offers)
@@ -88,6 +100,8 @@ def jsonld_howto(name: str, steps: str, total_time: str = "", tool: str = "") ->
 
 def jsonld_jobposting(title: str, description: str, hiring_organization: str, employment_type: str = "", date_posted: str = "", valid_through: str = "", salary: float = 0, currency: str = "EUR") -> str:
     """Generate JobPosting JSON-LD."""
+    if salary < 0:
+        raise ValueError("salary must be non-negative")
     base_salary = {"@type": "MonetaryAmount", "currency": currency, "value": {"@type": "QuantitativeValue", "value": salary}} if salary else None
     return _jsonld("JobPosting", title=title, description=description, hiringOrganization={"@type": "Organization", "name": hiring_organization}, employmentType=employment_type, datePosted=date_posted, validThrough=valid_through, baseSalary=base_salary)
 
@@ -168,7 +182,7 @@ def jsonld_extract(url: str) -> list[dict]:
                 type_name = "unknown"
         except json.JSONDecodeError:
             type_name = "invalid JSON"
-        rows.append({"index": index, "type": type_name, "excerpt": block[:200]})
+        rows.append({"index": index, "type": type_name, "jsonld": block})
     return rows
 
 

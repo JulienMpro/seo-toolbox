@@ -69,8 +69,7 @@ def keyword_expansion(seed: str, country: str = "FR", limit: int = 30) -> list[d
     if limit < 1: raise ValueError("limit must be positive")
     found: dict[str, dict[str, Any]] = {}
     for source, operation in (("ideas", keywords.ideas), ("suggestions", keywords.suggestions)):
-        try: items = operation(seed, country, limit)
-        except (ApiError, DataForSEOError): items = []
+        items = operation(seed, country, limit)
         for item in items:
             row = _row(item); word = row.get("keyword")
             if word and word.casefold() not in found:
@@ -79,25 +78,20 @@ def keyword_expansion(seed: str, country: str = "FR", limit: int = 30) -> list[d
 
 
 def faq_generator(keyword: str, country: str = "FR") -> list[dict[str, Any]]:
-    """Combine live People Also Ask questions with explicit lexical variants."""
-    try: live = paa_extractor(keyword, country)
-    except (ApiError, DataForSEOError): live = []
+    """Return deduplicated live People Also Ask questions only."""
+    live = paa_extractor(keyword, country)
     rows, seen = [], set()
     for item in live:
         question = item.get("question")
         if question and question.casefold() not in seen:
             seen.add(question.casefold()); rows.append({"question": question, "source": "PAA"})
-    for prefix in ("Who", "What", "How", "Why", "How much"):
-        question = f"{prefix} {keyword}?"
-        if question.casefold() not in seen: rows.append({"question": question, "source": "variant"})
     return rows
 
 
 def content_brief(keyword: str, country: str = "FR") -> str:
     """Build a factual brief from live titles, PAA, headings, page lengths, and frequent terms."""
-    try: results = serp.live(keyword, country, 10)
-    except (ApiError, DataForSEOError): results = []
-    questions = [row["question"] for row in faq_generator(keyword, country) if row["source"] == "PAA"]
+    results = serp.live(keyword, country, 10)
+    questions = [row["question"] for row in faq_generator(keyword, country)]
     headings, terms, lengths = [], Counter(), []
     for result in results[:5]:
         item = _row(result); soup, _error = _fetch(item.get("url") or "")
@@ -108,6 +102,8 @@ def content_brief(keyword: str, country: str = "FR") -> str:
     titles = [(_row(item).get("title")) for item in results if _row(item).get("title")]
     target = round(sum(lengths) / len(lengths)) if lengths else None
     show = lambda values: "\n".join(f"- {value}" for value in values) if values else "N/D"
+    if country.upper() == "FR":
+        return f"# Brief de contenu : {keyword}\n\nTitre suggéré (modèle du premier résultat) : {titles[0] if titles else 'N/D'}\n\n## H2/H3 suggérés\n{show(headings[:12])}\n\n## Questions\n{show(questions[:10])}\n\n## Longueur cible\n{target if target is not None else 'N/D'} mots (moyenne des cinq premières pages accessibles)\n\n## Termes fréquents\n{show([word for word, _ in terms.most_common(15)])}"
     return f"# Content brief: {keyword}\n\nSuggested title (top-result pattern): {titles[0] if titles else 'N/D'}\n\n## Suggested H2/H3\n{show(headings[:12])}\n\n## Questions\n{show(questions[:10])}\n\n## Target length\n{target if target is not None else 'N/D'} words (mean of fetchable top-five pages)\n\n## Frequent terms\n{show([word for word, _ in terms.most_common(15)])}"
 
 
@@ -131,8 +127,8 @@ def content_length(urls: str) -> list[dict[str, Any]]:
     """Count visible words, paragraphs, images, and H2 headings with lightweight BeautifulSoup parsing."""
     rows = []
     for url in _lines(urls):
-        soup, _error = _fetch(url)
-        rows.append({"url": url, "words": len(_WORD.findall(_visible(soup))) if soup else None, "paragraphs": len(soup.find_all("p")) if soup else None, "images": len(soup.find_all("img")) if soup else None, "h2": len(soup.find_all("h2")) if soup else None})
+        soup, error = _fetch(url)
+        rows.append({"url": url, "words": len(_WORD.findall(_visible(soup))) if soup else None, "paragraphs": len(soup.find_all("p")) if soup else None, "images": len(soup.find_all("img")) if soup else None, "h2": len(soup.find_all("h2")) if soup else None, "error": error})
     return rows
 
 
@@ -167,7 +163,7 @@ A = lambda name, required=True, default=None: ArgSpec(name, required, default)
 register(ToolSpec("content_length_target", content_length_target, "Derive a content-length target from the live top ten.", "calculators", [A("keyword"), A("country", False, "FR")], "table"))
 register(ToolSpec("keyword_expansion", keyword_expansion, "Expand a seed with live long-tail keywords.", "generators", [A("seed"), A("country", False, "FR"), A("limit", False, "30")], "table"))
 register(ToolSpec("content_brief", content_brief, "Generate a live SERP-based content brief.", "generators", [A("keyword"), A("country", False, "FR")]))
-register(ToolSpec("faq_generator", faq_generator, "Generate FAQs from PAA and lexical variants.", "generators", [A("keyword"), A("country", False, "FR")], "table"))
+register(ToolSpec("faq_generator", faq_generator, "Return live People Also Ask questions without invented fallbacks.", "generators", [A("keyword"), A("country", False, "FR")], "table"))
 register(ToolSpec("cannibalization", cannibalization, "Detect competing ranking pages for each query.", "analyzers", [A("domain"), A("keywords"), A("country", False, "FR")], "table"))
 register(ToolSpec("content_length", content_length, "Measure structural content length for URLs.", "analyzers", [A("urls")], "table"))
 register(ToolSpec("tfidf_analysis", tfidf_analysis, "Compare simple term frequency against the live top five.", "analyzers", [A("keyword"), A("text"), A("country", False, "FR")], "table"))

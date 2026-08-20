@@ -124,16 +124,31 @@ def _hreflangs(soup: BeautifulSoup, base: str) -> dict[str, str]:
     return {str(tag.get("hreflang", "")).casefold(): urljoin(base, str(tag.get("href", ""))) for tag in soup.find_all("link", href=True) if tag.get("hreflang") and "alternate" in (tag.get("rel") or [])}
 
 
+def _normalize_url(url: str) -> str:
+    """Normalize only the URL differences ignored by hreflang reciprocity."""
+    parsed = urlparse(url)
+    hostname = (parsed.hostname or "").casefold()
+    if hostname.startswith("www."):
+        hostname = hostname[4:]
+    netloc = hostname + (f":{parsed.port}" if parsed.port else "")
+    return urlunparse(("", netloc, parsed.path.rstrip("/"), parsed.params, parsed.query, parsed.fragment))
+
+
 def hreflang_checker(urls: str) -> list[dict]:
     """List hreflang links and check reciprocal references within the batch."""
     values = _lines(urls); pages = {}
     for url in values:
         soup, error = _page(url); pages[url] = (_hreflangs(soup, url) if soup else {}, error)
+    normalized_pages = {_normalize_url(url): page for url, page in pages.items()}
     rows = []
     for url, (links, error) in pages.items():
         if not links: rows.append({"url": url, "lang": None, "target": None, "reciprocal": None, "error": error or "no hreflang"})
         for lang, target in links.items():
-            reciprocal = target in pages and url in pages[target][0].values()
+            target_page = normalized_pages.get(_normalize_url(target))
+            reciprocal = None if target_page is None or target_page[1] else any(
+                _normalize_url(return_url) == _normalize_url(url)
+                for return_url in target_page[0].values()
+            )
             rows.append({"url": url, "lang": lang, "target": target, "reciprocal": reciprocal, "error": None})
     return rows
 
@@ -158,7 +173,7 @@ def viewport_checker(urls: str) -> list[dict]:
     for url in _lines(urls):
         soup, error = _page(url); tag = soup.find("meta", attrs={"name": re.compile(r"^viewport$", re.I)}) if soup else None
         content = str(tag.get("content", "")) if tag else ""
-        rows.append({"url": url, "present": bool(tag) if soup else None, "device_width": "width=device-width" in content.casefold().replace(" ", ""), "responsive_hint": bool(tag and "width=device-width" in content.casefold().replace(" ", "")), "error": error})
+        rows.append({"url": url, "present": bool(tag) if soup else None, "device_width": "width=device-width" in content.casefold().replace(" ", "") if soup else None, "responsive_hint": bool(tag and "width=device-width" in content.casefold().replace(" ", "")) if soup else None, "error": error})
     return rows
 
 
@@ -224,7 +239,10 @@ def indexation_checker(indexed: str, urls: str) -> list[dict]:
         indexed_values = {value: "indexed" for value in _lines(indexed)}
     rows = []
     for url in _lines(urls):
+        normalized_index = {_normalized(value): status for value, status in indexed_values.items()}
         raw = indexed_values.get(url)
+        if raw is None:
+            raw = normalized_index.get(_normalized(url))
         status = "unknown" if raw is None and not indexed_values else "not indexed" if raw is None else "not indexed" if re.search(r"not|non|excluded|error", raw, re.I) else "indexed"
         rows.append({"url": url, "status": status, "source_status": raw})
     return rows
@@ -242,7 +260,11 @@ def hreflang_reciprocity(urls: str) -> list[dict]:
         soup, error = _page(url); pages[url] = (_hreflangs(soup, url) if soup else {}, error)
     rows = []
     for lang, url in entries:
-        links, error = pages[url]; missing = [other_lang for other_lang, target in entries if target != url and links.get(other_lang.casefold()) != target]
+        links, error = pages[url]; missing = [
+            other_lang for other_lang, target in entries
+            if _normalize_url(target) != _normalize_url(url)
+            and _normalize_url(links.get(other_lang.casefold(), "")) != _normalize_url(target)
+        ]
         rows.append({"url": url, "lang": lang, "missing_returns": ", ".join(missing) or None, "ok": not missing if not error else None, "error": error})
     return rows
 
@@ -277,7 +299,14 @@ register(ToolSpec("redirect_chain", redirect_chain, "Trace a redirect chain and 
 register(ToolSpec("robots_checker", robots_checker, "Check robots.txt access for a user agent.", "checkers", [A("url"), A("user_agent", False, "googlebot")], "table"))
 register(ToolSpec("sitemap_validator", sitemap_validator, "Validate sitemap XML and locations.", "checkers", [A("url")], "table"))
 register(ToolSpec("canonical_checker", canonical_checker, "Check canonical tags in bulk.", "checkers", [A("urls")], "table"))
-register(ToolSpec("hreflang_checker", hreflang_checker, "Check hreflang tags and reciprocity.", "checkers", [A("urls")], "table"))
+register(ToolSpec(
+    "hreflang_checker",
+    hreflang_checker,
+    "List hreflang links and check reciprocity between URLs in the batch. Add all language versions (one URL per line); scheme, www, and trailing-slash variants are treated as equivalent.",
+    "checkers",
+    [ArgSpec("urls", True, None, "All language-version URLs to compare, one per line; include every target whose reciprocity should be checked.")],
+    "table",
+))
 register(ToolSpec("schema_validator", schema_validator, "Validate JSON-LD blocks on a page.", "checkers", [A("url")], "table"))
 register(ToolSpec("viewport_checker", viewport_checker, "Check responsive viewport metadata.", "checkers", [A("urls")], "table"))
 register(ToolSpec("og_validator", og_validator, "Validate Open Graph and Twitter metadata.", "checkers", [A("urls")], "table"))

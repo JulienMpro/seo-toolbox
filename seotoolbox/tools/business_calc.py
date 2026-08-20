@@ -19,8 +19,8 @@ _CTR = {1: .285, 2: .157, 3: .11, 4: .08, 5: .065, 6: .05, 7: .04, 8: .032, 9: .
 
 def opportunity_cost(volume: float, cpc: float, position: int, days: int = 30) -> list[dict]:
     """Estimate missed equivalent ad value versus position one using a fixed CTR curve."""
-    if volume < 0 or cpc < 0 or position < 0 or days < 0:
-        raise ValueError("inputs must be non-negative")
+    if volume < 0 or cpc < 0 or position < 1 or days < 0:
+        raise ValueError("volume, cpc, and days must be non-negative; position must be positive")
     current_ctr = _CTR.get(position, 0.0)
     lost = max(0.0, (_CTR[1] - current_ctr) * volume * cpc * days / 30)
     return [{"metric": "position 1 CTR", "value": _CTR[1]}, {"metric": "current CTR", "value": current_ctr},
@@ -29,8 +29,8 @@ def opportunity_cost(volume: float, cpc: float, position: int, days: int = 30) -
 
 def organic_revenue(traffic: float, conversion: float, basket: float, growth: float = 0) -> list[dict]:
     """Estimate monthly, yearly, and growth-adjusted organic revenue."""
-    if min(traffic, conversion, basket) < 0 or growth < -100:
-        raise ValueError("values must be non-negative and growth at least -100")
+    if traffic < 0 or basket < 0 or not 0 <= conversion <= 100 or growth < -100:
+        raise ValueError("traffic and basket must be non-negative, conversion must be 0-100, and growth at least -100")
     monthly = traffic * conversion / 100 * basket
     return [{"metric": "monthly revenue EUR", "value": round(monthly, 2)},
             {"metric": "annual revenue EUR", "value": round(monthly * 12, 2)},

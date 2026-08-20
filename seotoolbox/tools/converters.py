@@ -29,7 +29,8 @@ def url_decode(value: str) -> str:
 
 def strip_accents(value: str) -> str:
     """Remove Unicode combining diacritics."""
-    return "".join(char for char in unicodedata.normalize("NFKD", value) if not unicodedata.combining(char))
+    ligatures = str.maketrans({"œ": "oe", "Œ": "OE", "æ": "ae", "Æ": "AE", "ø": "o", "Ø": "O", "ß": "ss", "ł": "l", "Ł": "L"})
+    return "".join(char for char in unicodedata.normalize("NFKD", value.translate(ligatures)) if not unicodedata.combining(char))
 
 
 def text_to_slug(value: str) -> str:
@@ -95,8 +96,9 @@ def csv_json(value: str, mode: str = "csv2json") -> str:
         if not isinstance(records, list) or not all(isinstance(row, dict) for row in records):
             raise ValueError("JSON input must be an object or an array of objects")
         if not records: return ""
+        fieldnames = list(dict.fromkeys(key for record in records for key in record))
         output = io.StringIO()
-        writer = csv.DictWriter(output, fieldnames=list(records[0]))
+        writer = csv.DictWriter(output, fieldnames=fieldnames)
         writer.writeheader(); writer.writerows(records)
         return output.getvalue().rstrip("\r\n")
     raise ValueError("mode must be csv2json or json2csv")

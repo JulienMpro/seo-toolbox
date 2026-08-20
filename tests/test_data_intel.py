@@ -32,7 +32,9 @@ def test_content_tools():
         "title": "A page",
     }
     assert "page_type" not in client.calls[0][1]
-    assert data.phrase_trends("brand", FakeClient([{"trends": [{"date": "2026-01", "count": 3}]}]))[0]["value"] == 3
+    assert data.phrase_trends("brand", FakeClient([{
+        "trends": [{"date": "2026-01", "total_count": 3, "rank": 7}],
+    }])) == [{"date": "2026-01", "citations": 3, "rank": 7}]
     summary_client = FakeClient([{"total_count": 4, "rank": 100, "top_domains": [{"domain": "a.test", "count": 2}]}])
     assert data.content_summary("brand", summary_client)[0] == {
         "total_count": 4,

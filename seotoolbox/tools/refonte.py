@@ -113,7 +113,8 @@ def serp_snapshot(keyword: str, country: str = "FR", output: str = "data/serp-sn
     for item in results:
         row = asdict(item) if is_dataclass(item) else item
         cards.append(f"<article><b>{html.escape(str(row.get('rank') or 'N/D'))}. {html.escape(str(row.get('title') or 'N/D'))}</b><br><a href=\"{html.escape(str(row.get('url') or ''))}\">{html.escape(str(row.get('url') or 'N/D'))}</a><p>{html.escape(str(row.get('description') or 'N/D'))}</p></article>")
-    document = f"<!doctype html><html lang='fr'><meta charset='utf-8'><title>SERP — {html.escape(keyword)}</title><body><h1>{html.escape(keyword)} ({html.escape(country)})</h1><p>{now.isoformat()}</p><p>Features: {html.escape(', '.join(features) or 'N/D')}</p>{''.join(cards) or '<p>N/D</p>'}</body></html>"
+    language = {"FR": "fr", "DE": "de", "ES": "es", "IT": "it"}.get(country.upper(), "en")
+    document = f"<!doctype html><html lang='{language}'><meta charset='utf-8'><title>SERP — {html.escape(keyword)}</title><body><h1>{html.escape(keyword)} ({html.escape(country)})</h1><p>{now.isoformat()}</p><p>Features: {html.escape(', '.join(features) or 'N/D')}</p>{''.join(cards) or '<p>N/D</p>'}</body></html>"
     target.write_text(document, encoding="utf-8")
     return str(target)
 

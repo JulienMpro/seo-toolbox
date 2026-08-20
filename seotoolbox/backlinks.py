@@ -54,6 +54,7 @@ def summary(target: str, client: DataForSEOClient | None = None) -> BacklinkSumm
         external_links_count=item.get("external_links_count"),
         internal_links_count=item.get("internal_links_count"),
         referring_pages=item.get("referring_pages"),
+        referring_links_types=item.get("referring_links_types") if isinstance(item.get("referring_links_types"), dict) else None,
     )
 
 

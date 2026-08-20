@@ -112,7 +112,11 @@ def anchor_generator(keywords: str, brand: str = "", url: str = "") -> list[dict
     rows = []
     for keyword in _items(keywords):
         partial = " ".join(keyword.split()[:-1]) or keyword
-        variants = [("exact", keyword), ("partial", f"guide {partial}"), ("brand", brand or keyword), ("naked", url or "URL cible"), ("generic", "voir plus")]
+        variants = [("exact", keyword), ("partial", f"guide {partial}"), ("generic", "voir plus")]
+        if brand:
+            variants.append(("brand", brand))
+        if url:
+            variants.append(("naked", url))
         rows += [{"keyword": keyword, "type": kind, "anchor": anchor} for kind, anchor in variants]
     return rows
 

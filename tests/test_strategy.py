@@ -18,7 +18,9 @@ def test_keyword_strategy_with_mocked_services(monkeypatch):
         KeywordOverview(word, volume=1000 - index * 100, cpc=2, difficulty=20 + index * 10)
         for index, word in enumerate(words)
     ])
-    monkeypatch.setattr(strategy.keyword_service, "intent", lambda words: [IntentInfo(word, "commercial") for word in words])
+    monkeypatch.setattr(strategy.keyword_service, "intent", lambda words, language_name="English": [
+        IntentInfo(word, "commercial") for word in words
+    ])
     rows = strategy.keyword_prioritization("alpha\nbeta", "FR")
     assert all(row["score"] is not None for row in rows)
     assert strategy.difficulty_score("alpha", "FR")[0]["level"] == "easy"
@@ -29,7 +31,7 @@ def test_keyword_prioritization_scores_metrics_without_intent(monkeypatch):
     monkeypatch.setattr(strategy.keyword_service, "overview", lambda words, country: [
         KeywordOverview(words[0], volume=500, cpc=2, difficulty=30)
     ])
-    monkeypatch.setattr(strategy.keyword_service, "intent", lambda words: [IntentInfo(words[0], None)])
+    monkeypatch.setattr(strategy.keyword_service, "intent", lambda words, language_name="English": [IntentInfo(words[0], None)])
 
     row = strategy.keyword_prioritization("alpha", "FR")[0]
 
@@ -39,7 +41,7 @@ def test_keyword_prioritization_scores_metrics_without_intent(monkeypatch):
 
 def test_keyword_prioritization_does_not_score_without_numeric_data(monkeypatch):
     monkeypatch.setattr(strategy.keyword_service, "overview", lambda words, country: [KeywordOverview(words[0])])
-    monkeypatch.setattr(strategy.keyword_service, "intent", lambda words: [IntentInfo(words[0], None)])
+    monkeypatch.setattr(strategy.keyword_service, "intent", lambda words, language_name="English": [IntentInfo(words[0], None)])
 
     row = strategy.keyword_prioritization("alpha", "FR")[0]
 

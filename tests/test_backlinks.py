@@ -29,6 +29,7 @@ def test_summary_maps_real_api_keys():
         "external_links_count": 400,
         "internal_links_count": 500,
         "referring_pages": 80,
+        "referring_links_types": {"dofollow": 60, "nofollow": 40},
     }]})
 
     result = backlinks.summary("x.test", client)
@@ -45,6 +46,7 @@ def test_summary_maps_real_api_keys():
         "external_links_count": 400,
         "internal_links_count": 500,
         "referring_pages": 80,
+        "referring_links_types": {"dofollow": 60, "nofollow": 40},
     }
 
 

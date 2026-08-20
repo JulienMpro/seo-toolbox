@@ -22,12 +22,13 @@ def check_http(url: str) -> list[dict]:
     started = time.perf_counter()
     response = httpx.get(url, timeout=15, follow_redirects=True)
     elapsed = (time.perf_counter() - started) * 1000
-    return [{"url": str(response.url), "ip": socket.gethostbyname(parsed.hostname), "status": response.status_code, "server": response.headers.get("server"), "content_type": response.headers.get("content-type"), "content_length": response.headers.get("content-length"), "cache_control": response.headers.get("cache-control"), "elapsed_ms": round(elapsed, 2)}]
+    final_hostname = urlparse(str(response.url)).hostname or parsed.hostname
+    return [{"url": str(response.url), "ip": socket.gethostbyname(final_hostname), "status": response.status_code, "server": response.headers.get("server"), "content_type": response.headers.get("content-type"), "content_length": response.headers.get("content-length"), "cache_control": response.headers.get("cache-control"), "elapsed_ms": round(elapsed, 2)}]
 
 
 def extract_emails(value: str) -> str:
     """Extract unique email addresses from text."""
-    emails = re.findall(r"(?<![\w.+-])[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}(?![\w.-])", value)
+    emails = re.findall(r"(?<![\w.+-])[\w.+-]+@(?:[\w-]+\.)+[A-Za-z]{2,}", value)
     return "\n".join(sorted(set(emails), key=str.casefold))
 
 

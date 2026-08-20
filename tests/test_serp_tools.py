@@ -48,7 +48,7 @@ def test_keyword_tools_reuse_services():
 
 def test_intent_analysis_displays_missing_values():
     with patch.object(serp_tools.keyword_service, "intent", return_value=[IntentInfo("seo", None)]):
-        assert serp_tools.intent_analysis("seo") == [{"keyword": "seo", "intent": "N/D", "category": "N/D"}]
+        assert serp_tools.intent_analysis("seo") == [{"keyword": "seo", "intent": "N/D"}]
 
 
 def test_direct_serp_endpoints_are_normalized():

@@ -39,6 +39,8 @@ def editorial_calendar(keywords: str, frequency: int = 4, start_date: str = "") 
         parsed.append((parts + ["N/D", "N/D"])[0:3])
     parsed.sort(key=lambda item: ({"P1": 1, "P2": 2, "P3": 3}.get(item[1].upper(), 9), item[0].casefold()))
     rows = [{"date": (start + timedelta(days=round(index * 30.4375 / frequency))).isoformat(), "keyword": word, "priority": priority, "type": kind} for index, (word, priority, kind) in enumerate(parsed)]
+    if not rows:
+        return "N/D"
     priorities, types = Counter(row["priority"] for row in rows), Counter(row["type"] for row in rows)
     stats = ", ".join(f"{key}: {value}" for key, value in sorted(priorities.items())) + "; " + ", ".join(f"{key}: {value}" for key, value in sorted(types.items()))
     return _md(rows) + f"\n\nDistribution — {stats or 'N/D'}"
@@ -64,11 +66,16 @@ def _safe(call, default):
         return default
 
 
+def _language_name(country: str) -> str:
+    """Return the DataForSEO language name for the countries used by these tools."""
+    return "French" if country.strip().upper() in {"FR", "FRANCE"} else "English"
+
+
 def keyword_prioritization(keywords: str, country: str = "FR") -> list[dict[str, Any]]:
     """Score keywords from available metrics, without fabricating missing data."""
     words = _lines(keywords)
     overview = _safe(lambda: keyword_service.overview(words, country), [])
-    intents = _safe(lambda: keyword_service.intent(words), [])
+    intents = _safe(lambda: keyword_service.intent(words, _language_name(country)), [])
     metrics = {item.keyword.casefold(): item for item in overview}
     intent_map = {item.keyword.casefold(): item.intent for item in intents}
     volumes = [item.volume for item in overview if item.volume is not None]
@@ -140,13 +147,15 @@ def traffic_potential(domain: str, keywords: str, country: str = "FR") -> str:
     """Estimate potential visits using a conservative 5% CTR (positions 3–10 model)."""
     words = _lines(keywords)
     found = {item.keyword.casefold(): item.volume for item in _safe(lambda: keyword_service.overview(words, country), [])}
-    rows, total = [], 0.0
+    rows, total, known = [], 0.0, 0
     for word in words:
         volume = found.get(word.casefold())
         traffic = round(volume * .05, 1) if volume is not None else None
+        known += volume is not None
         total += traffic or 0
         rows.append({"keyword": word, "volume": volume, "estimated_traffic": traffic})
-    return _md(rows) + f"\n\nTotal potential for {domain}: {round(total, 1)} visits/month (5% CTR)."
+    total_value = f"{round(total, 1)} visits/month" if known else "N/D"
+    return _md(rows) + f"\n\nTotal potential for {domain}: {total_value} (5% CTR)."
 
 
 def intent_mix(keywords: str) -> str:
@@ -176,8 +185,14 @@ def effort_impact(actions: str) -> str:
 
 def content_audit(data: str) -> list[dict[str, Any]]:
     """Audit GSC rows: keep top-10 traffic, improve impressions, merge weak pages, remove zero-demand pages."""
-    path = Path(data)
-    source = path.read_text(encoding="utf-8-sig") if "\n" not in data and path.is_file() else data
+    source = data
+    if "\n" not in data and len(data) < 4096:
+        try:
+            path = Path(data)
+            if path.is_file():
+                source = path.read_text(encoding="utf-8-sig")
+        except OSError:
+            pass
     if "|" in source and "," not in source.splitlines()[0]:
         parsed = [dict(zip(("url", "clicks", "impressions", "position"), line.split("|"))) for line in _lines(source)]
     else:
@@ -200,10 +215,14 @@ def competitor_benchmark(domains: str, country: str = "FR") -> list[dict[str, An
     """Compare ranked-keyword and backlink KPIs, returning N/D fields on provider failure."""
     rows = []
     for domain in _lines(domains):
-        ranked = _safe(lambda domain=domain: keyword_service.keywords_for_site(domain, country, 1000), [])
+        ranked_available = True
+        try:
+            ranked = keyword_service.keywords_for_site(domain, country, 1000)
+        except (ApiError, DataForSEOError, OSError):
+            ranked, ranked_available = [], False
         summary = _safe(lambda domain=domain: backlinks.summary(domain), None)
         positions = [item.position for item in ranked if item.position is not None]
-        rows.append({"domain": domain, "ranked_keywords": len(ranked) if ranked else None, "average_position": round(sum(positions) / len(positions), 1) if positions else None, "backlinks": summary.backlinks if summary else None, "referring_domains": summary.referring_domains if summary else None, "rank": summary.rank if summary else None})
+        rows.append({"domain": domain, "ranked_keywords": len(ranked) if ranked_available else None, "average_position": round(sum(positions) / len(positions), 1) if positions else None, "backlinks": summary.backlinks if summary else None, "referring_domains": summary.referring_domains if summary else None, "rank": summary.rank if summary else None})
     return rows
 
 

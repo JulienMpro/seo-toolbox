@@ -93,7 +93,7 @@ def link_gap(domain: str, competitor: str, limit: int = 50) -> list[dict[str, An
 def referring_domains_analysis(domain: str, limit: int = 50) -> list[dict[str, Any]]:
     """Return referring-domain link, date, rank, and spam metrics."""
     return [{"domain": row.get("domain"), "links": row.get("referring_links"),
-             "first_seen": row.get("first_seen"), "last_seen": row.get("last_seen"),
+             "first_seen": row.get("first_seen"), "lost_date": row.get("last_seen"),
              "rank": row.get("rank"), "spam": row.get("spam_score")}
             for item in backlink_service.referring_domains(domain, limit) if (row := _row(item))]
 

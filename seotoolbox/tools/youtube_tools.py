@@ -30,7 +30,7 @@ def _first(item: dict[str, Any], *keys: str) -> Any:
 
 def youtube_keywords(keyword: str, limit: int = 10, client: DataForSEOClient | None = None) -> list[dict[str, Any]]:
     """List organic YouTube results for a keyword."""
-    payload = {"keyword": keyword, "location_code": 2840, "language_code": "en", "limit": limit}
+    payload = {"keyword": keyword, "location_code": 2840, "language_code": "en", "depth": limit}
     rows = []
     for item in _items((client or DataForSEOClient()).get_result("serp/youtube/organic/live/advanced", payload))[:limit]:
         rows.append({"rank": item.get("rank_absolute") or item.get("rank_group"), "title": item.get("title"),
@@ -42,7 +42,8 @@ def youtube_keywords(keyword: str, limit: int = 10, client: DataForSEOClient | N
 def youtube_video_info(video: str, client: DataForSEOClient | None = None) -> list[dict[str, Any]]:
     """Return metadata and engagement for one YouTube video."""
     item = next(iter(_items((client or DataForSEOClient()).get_result(
-        "serp/youtube/video/info/live/advanced", {"video_id": _video_id(video)}))), {})
+        "serp/youtube/video_info/live/advanced",
+        {"video_id": _video_id(video), "location_code": 2840, "language_code": "en"}))), {})
     return [{"title": item.get("title"), "channel": _first(item, "channel_name", "channel"),
              "views": _first(item, "views_count", "views"), "likes": _first(item, "likes_count", "likes"),
              "comments": _first(item, "comments_count", "comments"), "duration": item.get("duration"),
@@ -53,7 +54,8 @@ def youtube_comments(video: str, limit: int = 20, client: DataForSEOClient | Non
     """Return viewer comments for a YouTube video."""
     rows = []
     for item in _items((client or DataForSEOClient()).get_result(
-            "serp/youtube/video/comments/live/advanced", {"video_id": _video_id(video), "limit": limit}))[:limit]:
+            "serp/youtube/video_comments/live/advanced",
+            {"video_id": _video_id(video), "location_code": 2840, "language_code": "en"}))[:limit]:
         rows.append({"author": item.get("author_name") or item.get("author"), "text": item.get("text"),
                      "likes": _first(item, "likes_count", "likes"), "date": item.get("publication_date") or item.get("date")})
     return rows
@@ -63,7 +65,8 @@ def youtube_transcript(video: str, n: int = 2, limit: int = 10, client: DataForS
     """Return a transcript followed by its most frequent word n-grams."""
     parts = []
     for item in _items((client or DataForSEOClient()).get_result(
-            "serp/youtube/video/subtitles/live/advanced", {"video_id": _video_id(video)})):
+            "serp/youtube/video_subtitles/live/advanced",
+            {"video_id": _video_id(video), "location_code": 2840, "language_code": "en"})):
         value = item.get("text") or item.get("transcript") or item.get("subtitle")
         if isinstance(value, str): parts.append(value)
         elif isinstance(value, list): parts.extend(str(x.get("text")) for x in value if isinstance(x, dict) and x.get("text"))

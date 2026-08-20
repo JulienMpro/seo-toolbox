@@ -48,8 +48,9 @@ def broken_link_building(domain: str, keyword: str = "") -> list[dict]:
     for url in urls[:100]:
         try:
             status = httpx.get(url, timeout=15, follow_redirects=False, headers=HEADERS).status_code
-        except httpx.HTTPError:
+        except httpx.HTTPError as exc:
             status = None
+            rows.append({"url_404": url, "status": None, "similar_page": f"check failed: {exc}"})
         if status == 404:
             rows.append({"url_404": url, "status": 404, "similar_page": suggestions[0] if suggestions else "N/D"})
     return rows
@@ -66,13 +67,14 @@ def prospect_emails(urls: str) -> list[dict]:
             response = httpx.get(url, timeout=15, follow_redirects=True, headers=HEADERS)
             response.raise_for_status()
             emails = _urls(extract_emails(response.text))
-        except httpx.HTTPError:
-            emails = []
+        except httpx.HTTPError as exc:
+            rows.append({"url": url, "email": None, "email_domain": None, "error": str(exc)})
+            continue
         for email in emails:
             domain = email.rsplit("@", 1)[-1].casefold()
             if domain not in domains:
                 domains.add(domain)
-                rows.append({"url": url, "email": email, "email_domain": domain})
+                rows.append({"url": url, "email": email, "email_domain": domain, "error": None})
     return rows
 
 
