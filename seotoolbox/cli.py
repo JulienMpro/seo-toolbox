@@ -8,7 +8,7 @@ import io
 import json
 from dataclasses import asdict, is_dataclass
 from pathlib import Path
-from typing import Any, get_type_hints
+from typing import Any
 
 import typer
 import httpx
@@ -30,7 +30,7 @@ from . import monitor as monitor_service
 from . import report as report_service
 from . import content as content_service
 from .client import ApiError, DataForSEOError
-from .tools import REGISTRY, list_tools
+from .tools import REGISTRY, coerce_tool_args, list_tools
 
 app = typer.Typer(help="Pay-per-request SEO research tools powered by DataForSEO.")
 keywords_app = typer.Typer(help="Keyword research, intent, gap, and clustering tools.")
@@ -100,26 +100,7 @@ def _parse_tool_args(name: str, tokens: list[str]) -> dict[str, Any]:
                 raise ValueError(f"option --{token[2:]} requires a value")
             raw[key] = tokens[index + 1]
             index += 2
-    for arg in spec.args:
-        if arg.name not in raw:
-            if arg.required:
-                raise ValueError(f"missing required option --{arg.name.replace('_', '-')}")
-            if arg.is_flag:
-                raw[arg.name] = False
-            elif arg.default is not None:
-                raw[arg.name] = arg.default
-    hints = get_type_hints(spec.fn)
-    for key, value in list(raw.items()):
-        target = hints.get(key, str)
-        if target is bool:
-            if isinstance(value, bool): continue
-            normalized = value.lower()
-            if normalized not in {"true", "false", "1", "0", "yes", "no"}: raise ValueError(f"--{key} must be a boolean")
-            raw[key] = normalized in {"true", "1", "yes"}
-        elif target in {int, float, str}:
-            try: raw[key] = target(value)
-            except ValueError as exc: raise ValueError(f"--{key.replace('_', '-')} must be a {target.__name__}") from exc
-    return raw
+    return coerce_tool_args(spec, raw)
 
 
 @tools_app.command("list")

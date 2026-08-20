@@ -7,7 +7,7 @@ import httpx
 from fastapi.testclient import TestClient
 
 from api.main import app
-from seotoolbox.tools import list_tools
+from seotoolbox.tools import ArgSpec, REGISTRY, ToolSpec, list_tools
 from seotoolbox.models import (
     AiMention, AuditReport, BacklinkSummary, CrawlResult, Issue, KeywordIdea,
     ReferringDomain, SerpResult,
@@ -66,7 +66,68 @@ def test_tools_api_exposes_all_registry_metadata() -> None:
     assert len(payload) == 165
     assert [item["name"] for item in payload] == [tool.name for tool in list_tools()]
     assert set(payload[0]) == {"name", "category", "description", "returns", "args"}
+    assert all(arg["type"] in {"str", "int", "float", "bool"} for item in payload for arg in item["args"])
     assert "fn" not in payload[0]
+
+
+def test_run_text_tool() -> None:
+    response = client.post("/api/tools/strip_accents/run", json={"value": "héllo"})
+    assert response.status_code == 200
+    assert response.json() == {"returns": "str", "output": "hello"}
+
+
+def test_run_table_tool_returns_dict_rows() -> None:
+    response = client.post(
+        "/api/tools/sitemap_diff/run",
+        json={"before": "https://example.com/a", "after": "https://example.com/b"},
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["returns"] == "table"
+    assert payload["output"][0] == {"status": "new", "url": "https://example.com/b"}
+
+
+def test_run_tool_rejects_missing_and_unknown_arguments() -> None:
+    missing = client.post("/api/tools/strip_accents/run", json={})
+    assert missing.status_code == 400
+    assert "missing required" in missing.json()["error"]
+    unknown = client.post("/api/tools/strip_accents/run", json={"value": "ok", "fn": "bad"})
+    assert unknown.status_code == 400
+    assert unknown.json() == {"error": "unknown argument: fn"}
+
+
+def test_run_unknown_tool() -> None:
+    response = client.post("/api/tools/not_a_tool/run", json={})
+    assert response.status_code == 404
+    assert response.json() == {"error": "unknown tool"}
+
+
+def test_run_tool_coerces_integer_and_boolean(monkeypatch) -> None:
+    def typed(count: int, enabled: bool = False) -> str:
+        return f"{count}:{enabled}"
+
+    spec = ToolSpec(
+        "typed_test", typed, "Test typed arguments.", "misc",
+        [ArgSpec("count", True), ArgSpec("enabled", False, is_flag=True)],
+    )
+    monkeypatch.setitem(REGISTRY, spec.name, spec)
+    response = client.post(
+        "/api/tools/typed_test/run", json={"count": "10", "enabled": "yes"}
+    )
+    assert response.status_code == 200
+    assert response.json() == {"returns": "str", "output": "10:True"}
+
+
+def test_run_tool_runtime_error_is_json(monkeypatch) -> None:
+    spec = REGISTRY["strip_accents"]
+
+    def fail(value: str) -> str:
+        raise OSError("runtime unavailable")
+
+    monkeypatch.setattr(spec, "fn", fail)
+    response = client.post("/api/tools/strip_accents/run", json={"value": "hello"})
+    assert response.status_code == 500
+    assert response.json() == {"error": "runtime unavailable"}
 
 
 def test_navigation_and_extended_audit_limits() -> None:

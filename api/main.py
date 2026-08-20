@@ -3,15 +3,18 @@
 from __future__ import annotations
 
 import os
+from dataclasses import asdict, is_dataclass
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, get_type_hints
 
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+import httpx
+from fastapi import Body, FastAPI, Request
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 
 from seotoolbox import audit, backlinks, geo, keywords, serp
-from seotoolbox.tools import ToolSpec, list_tools
+from seotoolbox.client import ApiError, DataForSEOError
+from seotoolbox.tools import REGISTRY, ToolSpec, coerce_tool_args, list_tools
 
 VERSION = "0.5.0"
 COUNTRIES = ("FR", "GB", "US", "DE", "ES", "IT", "BE", "CH", "CA")
@@ -31,6 +34,7 @@ templates.env.filters["nd"] = _nd
 
 def _serialize_tool(tool: ToolSpec) -> dict[str, Any]:
     """Return the public, JSON-safe registry metadata used by the tools UI."""
+    hints = get_type_hints(tool.fn)
     return {
         "name": tool.name,
         "category": tool.category,
@@ -43,6 +47,9 @@ def _serialize_tool(tool: ToolSpec) -> dict[str, Any]:
                 "default": arg.default,
                 "help": arg.help,
                 "is_flag": arg.is_flag,
+                "type": getattr(hints.get(arg.name, str), "__name__", "str")
+                if hints.get(arg.name, str) in {str, int, float, bool}
+                else "str",
             }
             for arg in tool.args
         ],
@@ -90,6 +97,38 @@ async def health() -> dict[str, str]:
 async def tools_api() -> list[dict[str, Any]]:
     tools, _ = _tool_catalog()
     return tools
+
+
+@app.post("/api/tools/{name}/run")
+async def run_tool_api(name: str, raw: dict[str, Any] = Body(...)) -> JSONResponse:
+    """Run one registry tool with validated, typed JSON arguments."""
+    spec = REGISTRY.get(name)
+    if spec is None:
+        return JSONResponse({"error": "unknown tool"}, status_code=404)
+    try:
+        kwargs = coerce_tool_args(spec, raw)
+    except (ValueError, TypeError) as exc:
+        return JSONResponse({"error": str(exc)}, status_code=400)
+
+    try:
+        result = spec.fn(**kwargs)
+        if spec.returns == "table":
+            if not isinstance(result, list):
+                raise ValueError("table tools must return a list of rows")
+            output = []
+            for row in result:
+                if is_dataclass(row):
+                    output.append(asdict(row))
+                elif isinstance(row, dict):
+                    output.append(row)
+                else:
+                    output.append({"keyword": str(row)})
+            return JSONResponse({"returns": "table", "output": output})
+        return JSONResponse({"returns": "str", "output": str(result)})
+    except (ApiError, DataForSEOError, ValueError, TypeError, httpx.HTTPError, OSError) as exc:
+        return JSONResponse(
+            {"error": str(exc) or exc.__class__.__name__}, status_code=500
+        )
 
 
 @app.get("/tools", response_class=HTMLResponse)
