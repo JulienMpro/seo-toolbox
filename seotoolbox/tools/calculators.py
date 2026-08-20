@@ -126,10 +126,12 @@ def sitemap_split(urls: int) -> str:
 
 
 def eeat_score(author: bool = False, bio: bool = False, sources: bool = False, mentions: bool = False, evidence: bool = False, dates: bool = False, faq: bool = False, reviews: bool = False, about: bool = False, contact: bool = False) -> str:
-    """Score ten transparent E-E-A-T checklist signals equally."""
-    score = sum((author, bio, sources, mentions, evidence, dates, faq, reviews, about, contact)) * 10
-    verdict = "strong" if score >= 80 else "moderate" if score >= 50 else "weak"
-    return f"E-E-A-T score: {score}/100; verdict: {verdict}"
+    """Report ten equally weighted heuristic E-E-A-T checklist signals."""
+    signals = dict(author=author, bio=bio, sources=sources, mentions=mentions, evidence=evidence,
+                   dates=dates, faq=faq, reviews=reviews, about=about, contact=contact)
+    score = sum(signals.values()) * 10
+    checklist = "; ".join(f"{name}: {'yes' if present else 'no'}" for name, present in signals.items())
+    return f"Checklist score: {score}/100 (heuristic, not a Google score); {checklist}"
 
 
 def backlink_value(authority: float, referral_traffic: float, cpc: float) -> str:
@@ -140,7 +142,7 @@ def backlink_value(authority: float, referral_traffic: float, cpc: float) -> str
     _positive(cpc, "cpc", True)
     # Authority factor ranges linearly from 0.5 at zero to 1.5 at 100.
     value = referral_traffic * cpc * (0.5 + authority / 100)
-    return f"Estimated monthly backlink value: €{value:.2f}"
+    return f"Estimated monthly backlink value: €{value:.2f}; note: heuristic estimate"
 
 
 def content_cost(words: int, rate: float, articles: int = 1) -> str:
@@ -166,6 +168,6 @@ register(ToolSpec("implicit_cpc", implicit_cpc, "Calculate the implicit cost of 
 register(ToolSpec("cac_ltv", cac_ltv, "Calculate customer acquisition cost and LTV ratio.", "calculators", [A("cost"), A("customers"), A("ltv"), A("months", False, "1")]))
 register(ToolSpec("crawl_time", crawl_time, "Estimate crawl duration and calendar time.", "calculators", [A("pages"), A("urls_per_second"), A("daily_budget_pct", False, "100")]))
 register(ToolSpec("sitemap_split", sitemap_split, "Calculate sitemap splitting requirements.", "calculators", [A("urls")]))
-register(ToolSpec("eeat_score", eeat_score, "Score ten E-E-A-T checklist signals.", "calculators", [A(n, False, None, f"Set the {n} signal.", True) for n in ("author", "bio", "sources", "mentions", "evidence", "dates", "faq", "reviews", "about", "contact")]))
-register(ToolSpec("backlink_value", backlink_value, "Estimate a backlink's monthly market value.", "calculators", [A("authority"), A("referral_traffic"), A("cpc")]))
+register(ToolSpec("eeat_score", eeat_score, "Checklist of 10 E-E-A-T signals (heuristic) — not a Google score.", "calculators", [A(n, False, None, f"Set the {n} signal.", True) for n in ("author", "bio", "sources", "mentions", "evidence", "dates", "faq", "reviews", "about", "contact")]))
+register(ToolSpec("backlink_value", backlink_value, "Heuristic estimate of a backlink's monthly market value — not an official metric.", "calculators", [A("authority"), A("referral_traffic"), A("cpc")]))
 register(ToolSpec("content_cost", content_cost, "Calculate article and monthly content costs.", "calculators", [A("words"), A("rate"), A("articles", False, "1")]))

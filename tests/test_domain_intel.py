@@ -11,10 +11,10 @@ class FakeClient:
 
 
 def test_whois_and_technology_and_audit():
-    whois = domain_intel.whois_lite("example.com", FakeClient([{"registrar": "Registrar", "name_servers": ["ns1"]}]))
-    assert whois[0]["value"] == "Registrar" and whois[-1]["value"] == ["ns1"]
-    tech = domain_intel.technology_detection("example.com", FakeClient([{"technologies": [{"name": "CMS", "categories": ["WordPress"]}]}]))
-    assert tech == [{"group": "CMS", "technologies": ["WordPress"]}]
+    whois = domain_intel.whois_lite("example.com", FakeClient([{"domain": "example.com", "registrar": "Registrar", "epp_status_codes": ["ok"]}]))
+    assert whois[0]["value"] == "Registrar" and whois[-1]["value"] == ["ok"]
+    tech = domain_intel.technology_detection("example.com", FakeClient([{"technologies": {"cms": {"content_management": ["WordPress"]}}}]))
+    assert tech == [{"group": "cms", "category": "content_management", "technology": "WordPress"}]
     audit = domain_intel.instant_audit("https://example.com", FakeClient([{"page_meta": {"title": "Page"}, "status_code": 200}]))
     assert audit[0]["status"] == "ok" and audit[1]["status"] == "absent"
 

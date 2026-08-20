@@ -53,6 +53,9 @@
     .metric span { display:block; color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
     .metric strong { display:block; margin-top:3px; font-size:22px; }
     .table-wrap { overflow-x:auto; border:1px solid var(--line); border-radius:10px; background:#fff; }
+    .table-export { display:flex; justify-content:flex-end; gap:7px; margin:0 0 8px; }
+    .table-export-button { height:32px; padding:0 11px; border:1px solid var(--line); background:#fff; color:var(--brand-dark); font-size:13px; font-weight:650; }
+    .table-export-button:hover { border-color:var(--brand); background:#e7f5f3; }
     table { width:100%; border-collapse:collapse; }
     th, td { padding:11px 13px; border-bottom:1px solid #e8edf2; text-align:left; vertical-align:top; }
     th { color:#475467; background:#f8fafc; font-size:12px; text-transform:uppercase; letter-spacing:.035em; }
@@ -77,5 +80,76 @@
     {% block content %}{% endblock %}
   </main>
   <footer>SEO Toolbox local demonstration UI · Do not expose publicly without authentication.</footer>
+  <script>
+  (() => {
+    const BOM = '\ufeff';
+
+    function tableCsv(table) {
+      const lines = Array.from(table.querySelectorAll('tr')).map(row =>
+        Array.from(row.querySelectorAll('th, td')).map(cell => {
+          let value = cell.textContent.trim();
+          if (value === 'N/D') value = '';
+          return /[;"\r\n]/.test(value) ? `"${value.replaceAll('"', '""')}"` : value;
+        }).join(';')
+      );
+      return BOM + lines.join('\r\n');
+    }
+
+    function fallbackCopy(value) {
+      const textarea = document.createElement('textarea');
+      textarea.value = value;
+      textarea.setAttribute('readonly', '');
+      textarea.style.cssText = 'position:fixed;left:-9999px;top:0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      const copied = document.execCommand('copy');
+      textarea.remove();
+      if (!copied) throw new Error('Copy failed');
+    }
+
+    async function copyCsv(value) {
+      if (navigator.clipboard?.writeText) {
+        try { await navigator.clipboard.writeText(value); return; } catch (_) { /* HTTP fallback */ }
+      }
+      fallbackCopy(value);
+    }
+
+    function fileName(table) {
+      const name = table.dataset.exportName || document.querySelector('h1')?.textContent || 'table';
+      const slug = name.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      return `${slug || 'table'}.csv`;
+    }
+
+    function initExportableTables(root = document) {
+      root.querySelectorAll('table.exportable').forEach(table => {
+        if (table.dataset.exportReady === 'true') return;
+        table.dataset.exportReady = 'true';
+        const toolbar = document.createElement('div');
+        toolbar.className = 'table-export';
+        toolbar.setAttribute('role', 'group');
+        toolbar.setAttribute('aria-label', 'Table export options');
+        toolbar.innerHTML = '<button class="table-export-button" type="button" aria-label="Copy table">Copy</button><button class="table-export-button" type="button" aria-label="Download CSV">CSV</button>';
+        const [copyButton, csvButton] = toolbar.querySelectorAll('button');
+        copyButton.addEventListener('click', async () => {
+          const label = copyButton.textContent;
+          try { await copyCsv(tableCsv(table)); copyButton.textContent = 'Copied'; }
+          catch (_) { copyButton.textContent = 'Copy failed'; }
+          window.setTimeout(() => { copyButton.textContent = label; }, 1500);
+        });
+        csvButton.addEventListener('click', () => {
+          const url = URL.createObjectURL(new Blob([tableCsv(table)], {type:'text/csv;charset=utf-8'}));
+          const link = document.createElement('a');
+          link.href = url; link.download = fileName(table); document.body.appendChild(link); link.click(); link.remove();
+          URL.revokeObjectURL(url);
+        });
+        (table.closest('.table-wrap') || table).before(toolbar);
+      });
+    }
+
+    window.initExportableTables = initExportableTables;
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => initExportableTables());
+    else initExportableTables();
+  })();
+  </script>
 </body>
 </html>

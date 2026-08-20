@@ -29,7 +29,7 @@ def test_distribution_quality_and_comparison_tools(tmp_path):
 
 
 def test_wrapped_backlink_operations():
-    with patch.object(link_tools.backlink_service, "gap", return_value=[{"domain": "ref.test", "backlinks_to_target2": 2}]), \
+    with patch.object(link_tools.backlink_service, "gap", return_value=[{"domain": "ref.test", "links_to_competitor": 2, "rank": 10}]), \
          patch.object(link_tools.backlink_service, "referring_domains", return_value=[ReferringDomain("ref.test", 4, rank=20)]), \
          patch.object(link_tools.backlink_service, "new_lost", return_value=[NewLost("2026-01-01", 2, 1, 1, 0)]), \
          patch.object(link_tools.backlink_service, "networks", return_value=[{"ip": "192.0.2.1", "referring_domains": 3, "backlinks": 8}]), \
@@ -37,7 +37,7 @@ def test_wrapped_backlink_operations():
         assert link_tools.link_gap("a.test", "b.test")[0]["domain"] == "ref.test"
         assert link_tools.referring_domains_analysis("a.test")[0]["rank"] == 20
         assert link_tools.new_lost_links("a.test")[0]["new_rd"] == 1
-        assert link_tools.pbn_detection("a.test")[0]["network_or_ip"] == "192.0.2.1"
+        assert link_tools.pbn_detection("a.test")[0]["network_address"] == "192.0.2.1"
         assert link_tools.authority_score("a.test\nmissing.test")[1]["rank"] is None
 
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import re
 from collections import Counter
 from dataclasses import asdict, is_dataclass
@@ -11,7 +12,7 @@ from urllib.parse import urlparse
 import httpx
 from bs4 import BeautifulSoup
 
-from .. import crux, keywords, ranktracker, serp
+from .. import crux, keywords, serp
 from ..client import ApiError, DataForSEOError
 from . import ArgSpec, ToolSpec, register
 from .serp_tools import paa_extractor
@@ -108,18 +109,32 @@ def content_brief(keyword: str, country: str = "FR") -> str:
 
 
 def cannibalization(domain: str, keywords: str, country: str = "FR") -> list[dict[str, Any]]:
-    """Flag multiple ranking URLs returned for a domain and keyword; absent rankings are N/D."""
+    """Return every target-domain URL when at least two rank in the same live SERP."""
+    target = domain.strip().casefold().rstrip(".")
+    if "://" in target:
+        target = (urlparse(target).hostname or "").casefold().rstrip(".")
+    if target.startswith("www."):
+        target = target[4:]
+    if not target:
+        raise ValueError("domain must not be empty")
     rows = []
     for word in _lines(keywords):
-        try: matches = ranktracker.domain_rank([word], domain, country, 100)
-        except (ApiError, DataForSEOError): matches = []
-        unique = []
-        for item in matches:
-            if item.url and all(prior.url != item.url for prior in unique): unique.append(item)
-        if len(unique) < 2:
-            rows.append({"keyword": word, "url1": unique[0].url if unique else None, "position1": unique[0].position if unique else None, "url2": None, "position2": None, "risk": None})
-        else:
-            rows.append({"keyword": word, "url1": unique[0].url, "position1": unique[0].position, "url2": unique[1].url, "position2": unique[1].position, "risk": "high" if all(item.position and item.position <= 20 for item in unique[:2]) else "medium"})
+        try: results = serp.live(word, country, 100)
+        except (ApiError, DataForSEOError): results = []
+        matches: dict[str, int | None] = {}
+        for result in results:
+            item = _row(result)
+            url = item.get("url")
+            hostname = str(item.get("domain") or (urlparse(url).hostname if url else "")).casefold().rstrip(".")
+            if hostname.startswith("www."):
+                hostname = hostname[4:]
+            if url and hostname == target:
+                rank = item.get("rank_absolute", item.get("rank"))
+                if url not in matches or (rank is not None and (matches[url] is None or rank < matches[url])):
+                    matches[url] = rank
+        if len(matches) >= 2:
+            ordered = sorted(matches.items(), key=lambda pair: (pair[1] is None, pair[1] or 0, pair[0]))
+            rows.extend({"keyword": word, "url": url, "rank": rank} for url, rank in ordered)
     return rows
 
 
@@ -133,20 +148,28 @@ def content_length(urls: str) -> list[dict[str, Any]]:
 
 
 def tfidf_analysis(keyword: str, text: str, country: str = "FR") -> list[dict[str, Any]]:
-    """Compare simple top-five term frequency (not true IDF) with supplied text or URL content."""
+    """Calculate normalized TF-IDF across the supplied text and fetchable live top-five pages."""
     own = text
     if text.startswith(("http://", "https://")):
         soup, _error = _fetch(text); own = _visible(soup) if soup else ""
-    own_terms = {word.casefold() for word in _WORD.findall(own)}
-    counts, documents = Counter(), Counter()
+    documents: list[tuple[str, list[str]]] = [("input", [word.casefold() for word in _WORD.findall(own)])]
     try: results = serp.live(keyword, country, 5)
     except (ApiError, DataForSEOError): results = []
-    for result in results:
-        soup, _error = _fetch(_row(result).get("url") or "")
+    for index, result in enumerate(results, 1):
+        item = _row(result)
+        soup, _error = _fetch(item.get("url") or "")
         if not soup: continue
-        tokens = [word.casefold() for word in _WORD.findall(_visible(soup)) if len(word) > 3 and word.casefold() not in _STOP]
-        counts.update(tokens); documents.update(set(tokens))
-    return [{"term": term, "present_in_top": documents[term], "present_in_my_text": "yes" if term in own_terms else "no", "missing": "no" if term in own_terms else "yes"} for term, _ in counts.most_common(25)]
+        documents.append((item.get("url") or f"serp_{index}", [word.casefold() for word in _WORD.findall(_visible(soup))]))
+    document_frequency = Counter(term for _, tokens in documents for term in set(tokens))
+    document_count = len(documents)
+    rows = []
+    for document, tokens in documents:
+        counts = Counter(tokens)
+        for term, frequency in counts.items():
+            tf = frequency / len(tokens)
+            idf = math.log(1 + document_count / document_frequency[term])
+            rows.append({"term": term, "document": document, "tf": round(tf, 6), "idf": round(idf, 6), "tfidf": round(tf * idf, 6)})
+    return sorted(rows, key=lambda row: (-row["tfidf"], row["term"], row["document"]))
 
 
 def lighthouse_cwv(url: str, strategy: str = "mobile") -> list[dict[str, Any]]:
@@ -166,5 +189,5 @@ register(ToolSpec("content_brief", content_brief, "Generate a live SERP-based co
 register(ToolSpec("faq_generator", faq_generator, "Return live People Also Ask questions without invented fallbacks.", "generators", [A("keyword"), A("country", False, "FR")], "table"))
 register(ToolSpec("cannibalization", cannibalization, "Detect competing ranking pages for each query.", "analyzers", [A("domain"), A("keywords"), A("country", False, "FR")], "table"))
 register(ToolSpec("content_length", content_length, "Measure structural content length for URLs.", "analyzers", [A("urls")], "table"))
-register(ToolSpec("tfidf_analysis", tfidf_analysis, "Compare simple term frequency against the live top five.", "analyzers", [A("keyword"), A("text"), A("country", False, "FR")], "table"))
+register(ToolSpec("tfidf_analysis", tfidf_analysis, "Calculate normalized TF-IDF across the input and live top-five pages.", "analyzers", [A("keyword"), A("text"), A("country", False, "FR")], "table"))
 register(ToolSpec("lighthouse_cwv", lighthouse_cwv, "Report Lighthouse and Core Web Vitals metrics.", "checkers", [A("url"), A("strategy", False, "mobile")], "table"))

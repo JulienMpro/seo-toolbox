@@ -158,10 +158,10 @@ def traffic_potential(domain: str, keywords: str, country: str = "FR") -> str:
     return _md(rows) + f"\n\nTotal potential for {domain}: {total_value} (5% CTR)."
 
 
-def intent_mix(keywords: str) -> str:
+def intent_mix(keywords: str, country: str = "FR") -> str:
     """Summarize provider search-intent classifications."""
     words = _lines(keywords)
-    values = _safe(lambda: keyword_service.intent(words), [])
+    values = _safe(lambda: keyword_service.intent(words, _language_name(country)), [])
     counts = Counter(item.intent or "N/D" for item in values)
     if len(values) < len(words): counts["N/D"] += len(words) - len(values)
     rows = [{"intent": key, "count": count, "percent": round(count / len(words) * 100, 1) if words else 0} for key, count in sorted(counts.items())]
@@ -234,7 +234,7 @@ register(ToolSpec("difficulty_score", difficulty_score, "Retrieve keyword diffic
 register(ToolSpec("topic_clusters", topic_clusters, "Build enriched thematic keyword clusters.", "strategy", [A("keywords"), A("country", False, "FR")], "table"))
 register(ToolSpec("semantic_silo", semantic_silo, "Build a pillar and subpage semantic silo.", "strategy", [A("keywords"), A("country", False, "FR")]))
 register(ToolSpec("traffic_potential", traffic_potential, "Estimate keyword traffic potential at a documented CTR.", "strategy", [A("domain"), A("keywords"), A("country", False, "FR")]))
-register(ToolSpec("intent_mix", intent_mix, "Summarize the search-intent mix.", "strategy", [A("keywords")]))
+register(ToolSpec("intent_mix", intent_mix, "Summarize the localized search-intent mix.", "strategy", [A("keywords"), A("country", False, "FR", "Country code; FR/France uses French, other values use English.")]))
 register(ToolSpec("effort_impact", effort_impact, "Classify actions in an effort-impact matrix.", "strategy", [A("actions")]))
 register(ToolSpec("content_audit", content_audit, "Classify GSC pages for content action.", "strategy", [A("data")], "table"))
 register(ToolSpec("competitor_benchmark", competitor_benchmark, "Benchmark domain SEO and backlink KPIs.", "strategy", [A("domains"), A("country", False, "FR")], "table"))

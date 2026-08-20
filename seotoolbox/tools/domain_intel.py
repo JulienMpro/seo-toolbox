@@ -22,11 +22,12 @@ def _items(results: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 def whois_lite(domain: str, client: DataForSEOClient | None = None) -> list[dict[str, Any]]:
     """Return the principal public WHOIS fields for a domain."""
-    item = next(iter(_items((client or DataForSEOClient()).get_result(
-        "domain_analytics/whois/overview/live", {"domain": domain}))), {})
+    items = _items((client or DataForSEOClient()).get_result(
+        "domain_analytics/whois/overview/live", {"domain": domain}))
+    item = next((value for value in items if value.get("domain") == domain), {})
     fields = (("registrar", "registrar"), ("created", "created_datetime"),
               ("expires", "expiration_datetime"), ("updated", "updated_datetime"),
-              ("status", "status"), ("nameservers", "name_servers"))
+              ("status", "epp_status_codes"))
     return [{"field": label, "value": item.get(key)} for label, key in fields]
 
 
@@ -36,13 +37,16 @@ def technology_detection(domain: str, client: DataForSEOClient | None = None) ->
     for item in _items((client or DataForSEOClient()).get_result(
             "domain_analytics/technologies/domain_technologies/live", {"target": domain})):
         technologies = item.get("technologies")
-        if isinstance(technologies, dict):
-            technologies = [{"name": key, "technologies": value} for key, value in technologies.items()]
-        for group in technologies if isinstance(technologies, list) else []:
-            if not isinstance(group, dict):
+        if not isinstance(technologies, dict):
+            continue
+        for group, categories in technologies.items():
+            if not isinstance(categories, dict):
                 continue
-            values = group.get("technologies") or group.get("items") or group.get("categories")
-            rows.append({"group": group.get("name") or group.get("category"), "technologies": values})
+            for category, names in categories.items():
+                if not isinstance(names, list):
+                    continue
+                rows.extend({"group": group, "category": category, "technology": name}
+                            for name in names if isinstance(name, str))
     return rows
 
 

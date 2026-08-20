@@ -117,12 +117,15 @@ def test_http_misc_tools_are_fully_mocked(monkeypatch):
 
 
 def test_dataforseo_misc_payloads_and_verified_mappings(monkeypatch):
-    whois_client = FakeClient([{"registrar": "AFNIC", "created_datetime": "2020-01-01", "name_servers": ["ns1"]}])
+    whois_client = FakeClient([{"items": [{"domain": "example.fr", "registrar": "AFNIC",
+                                           "created_datetime": "2020-01-01",
+                                           "epp_status_codes": ["ok"]}]}])
     assert domain_intel.whois_lite("example.fr", whois_client)[0]["value"] == "AFNIC"
     assert whois_client.calls == [("domain_analytics/whois/overview/live", {"domain": "example.fr"})]
 
-    tech_client = FakeClient([{"technologies": [{"name": "CMS", "categories": ["WordPress"]}]}])
-    assert domain_intel.technology_detection("example.fr", tech_client) == [{"group": "CMS", "technologies": ["WordPress"]}]
+    tech_client = FakeClient([{"technologies": {"cms": {"content_management": ["WordPress"]}}}])
+    assert domain_intel.technology_detection("example.fr", tech_client) == [
+        {"group": "cms", "category": "content_management", "technology": "WordPress"}]
     assert tech_client.calls[0] == ("domain_analytics/technologies/domain_technologies/live", {"target": "example.fr"})
 
     audit_client = FakeClient([{"page_meta": {"title": "Accueil", "description": "Bonjour"}, "status_code": 200}])

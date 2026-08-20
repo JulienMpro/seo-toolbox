@@ -107,12 +107,19 @@ def hreflang_generator(urls: str, x_default: str = "") -> str:
     return "\n".join(lines)
 
 
-def anchor_generator(keywords: str, brand: str = "", url: str = "") -> list[dict]:
+def _validate_language(language: str) -> None:
+    if language not in {"fr", "en"}:
+        raise ValueError("language must be fr or en")
+
+
+def anchor_generator(keywords: str, brand: str = "", url: str = "", language: str = "fr") -> list[dict]:
     """Create deterministic natural anchor variants for target keywords."""
+    _validate_language(language)
     rows = []
     for keyword in _items(keywords):
         partial = " ".join(keyword.split()[:-1]) or keyword
-        variants = [("exact", keyword), ("partial", f"guide {partial}"), ("generic", "voir plus")]
+        variants = [("exact", keyword), ("partial", f"{'guide' if language == 'fr' else 'guide to'} {partial}"),
+                    ("generic", "voir plus" if language == "fr" else "learn more")]
         if brand:
             variants.append(("brand", brand))
         if url:
@@ -121,19 +128,23 @@ def anchor_generator(keywords: str, brand: str = "", url: str = "") -> list[dict
     return rows
 
 
-def title_variants(title: str, count: int = 8) -> list[dict]:
+def title_variants(title: str, count: int = 8, language: str = "fr") -> list[dict]:
     """Generate up to eight structurally distinct title variants."""
+    _validate_language(language)
     if count <= 0:
         raise ValueError("count must be positive")
-    candidates = [f"Pourquoi choisir {title} ?", f"7 conseils : {title}", f"{title} (Guide complet)", f"Guide : {title}", f"{title} — Mode d'emploi", f"Les 10 clés de {title}", f"{title} : agissez maintenant", f"{title} à [Ville]"]
+    candidates = ([f"Pourquoi choisir {title} ?", f"7 conseils : {title}", f"{title} (Guide complet)", f"Guide : {title}", f"{title} — Mode d'emploi", f"Les 10 clés de {title}", f"{title} : agissez maintenant", f"{title} à [Ville]"] if language == "fr" else
+                  [f"Why choose {title}?", f"7 tips: {title}", f"{title} (Complete Guide)", f"Guide to {title}", f"{title} — How It Works", f"10 keys to {title}", f"{title}: Get Started Today", f"{title} in [City]"])
     return [{"n": i, "title": value, "length_px": _pixel_width(value)} for i, value in enumerate((candidates * ((count + 7) // 8))[:count], 1)]
 
 
-def meta_variants(description: str, count: int = 5) -> list[dict]:
+def meta_variants(description: str, count: int = 5, language: str = "fr") -> list[dict]:
     """Generate deterministic meta-description variants."""
+    _validate_language(language)
     if count <= 0:
         raise ValueError("count must be positive")
-    candidates = [f"Découvrez {description}", f"{description} En savoir plus.", f"Vous cherchez une solution ? {description}", f"{description} Contactez-nous dès aujourd'hui.", f"5 raisons de choisir notre solution : {description}"]
+    candidates = ([f"Découvrez {description}", f"{description} En savoir plus.", f"Vous cherchez une solution ? {description}", f"{description} Contactez-nous dès aujourd'hui.", f"5 raisons de choisir notre solution : {description}"] if language == "fr" else
+                  [f"Discover {description}", f"{description} Learn more.", f"Looking for a solution? {description}", f"{description} Contact us today.", f"5 reasons to choose our solution: {description}"])
     values = (candidates * ((count + 4) // 5))[:count]
     return [{"n": i, "description": value, "length": len(value)} for i, value in enumerate(values, 1)]
 
@@ -225,9 +236,10 @@ register(ToolSpec("robots_generator", robots_generator, "Generate a robots.txt f
 register(ToolSpec("sitemap_generator", sitemap_generator, "Generate an XML sitemap.", "generators", [A("urls"), A("lastmod", False, ""), A("priority", False, "0.5")]))
 register(ToolSpec("meta_generator", meta_generator, "Generate title and meta-description content.", "generators", [A("keyword"), A("template"), A("description", False, "{kw}"), A("brand", False, "")], "table"))
 register(ToolSpec("hreflang_generator", hreflang_generator, "Generate hreflang and x-default links.", "generators", [A("urls"), A("x_default", False, "")]))
-register(ToolSpec("anchor_generator", anchor_generator, "Generate anchor-text variants.", "generators", [A("keywords"), A("brand", False, ""), A("url", False, "")], "table"))
-register(ToolSpec("title_variants", title_variants, "Generate title variants for testing.", "generators", [A("title"), A("count", False, "8")], "table"))
-register(ToolSpec("meta_variants", meta_variants, "Generate meta-description variants.", "generators", [A("description"), A("count", False, "5")], "table"))
+_LANGUAGE_ARG = ArgSpec("language", False, "fr", "Template language: fr or en.")
+register(ToolSpec("anchor_generator", anchor_generator, "Generate anchor-text variants.", "generators", [A("keywords"), A("brand", False, ""), A("url", False, ""), _LANGUAGE_ARG], "table"))
+register(ToolSpec("title_variants", title_variants, "Generate title variants for testing.", "generators", [A("title"), A("count", False, "8"), _LANGUAGE_ARG], "table"))
+register(ToolSpec("meta_variants", meta_variants, "Generate meta-description variants.", "generators", [A("description"), A("count", False, "5"), _LANGUAGE_ARG], "table"))
 register(ToolSpec("internal_link_generator", internal_link_generator, "Suggest internal links from a page set.", "generators", [A("pages"), A("keywords")], "table"))
 register(ToolSpec("breadcrumb_generator", breadcrumb_generator, "Generate JSON-LD and HTML breadcrumbs.", "generators", [A("paths")]))
 register(ToolSpec("snippet_generator", snippet_generator, "Format content for a featured snippet.", "generators", [A("content"), A("type", False, "paragraph")]))

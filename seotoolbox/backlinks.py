@@ -14,7 +14,7 @@ ENDPOINTS = {
     "referring_domains": "backlinks/referring_domains/live", "anchors": "backlinks/anchors/live",
     "networks": "backlinks/referring_networks/live",
     "new_lost": "backlinks/timeseries_new_lost_summary/live",
-    "gap": "backlinks/domain_intersection/live", "competitors": "backlinks/competitors/live",
+    "competitors": "backlinks/competitors/live",
     "bulk_ranks": "backlinks/bulk_ranks/live",
 }
 
@@ -115,10 +115,31 @@ def new_lost(target: str, days: int = 30, client: DataForSEOClient | None = None
     return output
 
 
-def gap(targets: list[str], limit: int = 20, client: DataForSEOClient | None = None) -> list[dict[str, Any]]:
-    """Return backlink domains intersecting the supplied targets."""
-    return _items((client or DataForSEOClient()).get_result(
-        ENDPOINTS["gap"], {"targets": targets, "limit": limit}))[:limit]
+def gap(target: str, competitor: str, limit: int = 20,
+        client: DataForSEOClient | None = None) -> list[dict[str, Any]]:
+    """Return competitor referring domains which do not link to the target."""
+    api = client or DataForSEOClient()
+    target_items = _items(api.get_result(
+        ENDPOINTS["referring_domains"], {"target": target, "limit": limit}))
+    competitor_items = _items(api.get_result(
+        ENDPOINTS["referring_domains"], {"target": competitor, "limit": limit}))
+    target_domains = {
+        str(item["domain_from"]).casefold()
+        for item in target_items if isinstance(item.get("domain_from"), str)
+    }
+    rows = [
+        {"domain": item["domain_from"],
+         "links_to_competitor": item.get("referring_links"),
+         "rank": item.get("rank")}
+        for item in competitor_items
+        if isinstance(item.get("domain_from"), str)
+        and item["domain_from"].casefold() not in target_domains
+    ]
+    rows.sort(key=lambda row: (
+        row["links_to_competitor"] if isinstance(row["links_to_competitor"], (int, float)) else -1,
+        row["rank"] if isinstance(row["rank"], (int, float)) else -1,
+    ), reverse=True)
+    return rows[:limit]
 
 
 def competitors(target: str, limit: int = 10, client: DataForSEOClient | None = None) -> list[BacklinkCompetitor]:

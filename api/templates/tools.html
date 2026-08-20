@@ -97,7 +97,8 @@
     if (payload.returns === 'table') {
       if (!payload.output.length) { result.innerHTML = '<div class="empty">No results.</div>'; return; }
       const headers = Object.keys(payload.output[0]);
-      result.innerHTML = `<div class="table-wrap"><table><thead><tr>${headers.map(key => `<th>${escapeHtml(key)}</th>`).join('')}</tr></thead><tbody>${payload.output.map(row => `<tr>${headers.map(key => { const value = row[key]; return `<td>${escapeHtml(value === null || value === '' ? 'N/D' : Array.isArray(value) ? value.join(', ') : typeof value === 'object' ? JSON.stringify(value) : value)}</td>`; }).join('')}</tr>`).join('')}</tbody></table></div>`;
+      result.innerHTML = `<div class="table-wrap exportable"><table class="exportable" data-export-name="${escapeHtml(activeTool.name)}"><thead><tr>${headers.map(key => `<th>${escapeHtml(key)}</th>`).join('')}</tr></thead><tbody>${payload.output.map(row => `<tr>${headers.map(key => { const value = row[key]; return `<td>${escapeHtml(value === null || value === '' ? 'N/D' : Array.isArray(value) ? value.join(', ') : typeof value === 'object' ? JSON.stringify(value) : value)}</td>`; }).join('')}</tr>`).join('')}</tbody></table></div>`;
+      window.initExportableTables(result);
     } else {
       const pre = document.createElement('pre'); pre.textContent = payload.output ?? ''; result.replaceChildren(pre);
     }

@@ -1,6 +1,5 @@
 """QA coverage for every analyzer and calculator in the assigned batch."""
 
-from dataclasses import dataclass
 import inspect
 
 from bs4 import BeautifulSoup
@@ -88,21 +87,17 @@ def test_rank_change_fr_en_and_empty():
     assert r.keyword_rank_change("keyword,position\n", "keyword,position\n")[-1]["keyword"] == "TOTAL"
 
 
-@dataclass
-class Rank:
-    url: str
-    position: int
-
-
 def test_reliquat_analyzers_and_target_are_fully_mocked(monkeypatch):
     html = "<html><p>Café durable et local.</p><h2>Guide</h2><img src='x'></html>"
     monkeypatch.setattr(q, "_fetch", lambda url: (soup(html), None) if url.startswith("http") else (None, "invalid URL"))
-    monkeypatch.setattr(q.serp, "live", lambda keyword, country, limit: [{"rank": 1, "url": "https://ex.test/"}])
-    monkeypatch.setattr(q.ranktracker, "domain_rank", lambda *args: [Rank("https://ex.test/a", 4), Rank("https://ex.test/b", 9)])
+    monkeypatch.setattr(q.serp, "live", lambda keyword, country, limit: [
+        {"rank": 1, "url": "https://ex.test/", "domain": "ex.test"},
+        {"rank": 9, "url": "https://ex.test/b", "domain": "ex.test"},
+    ])
     assert q.content_length("https://ex.test/")[0] == {"url": "https://ex.test/", "words": 5, "paragraphs": 1, "images": 1, "h2": 1, "error": None}
     assert q.content_length_target("café", "FR")[-1]["words"] == 5
     assert q.tfidf_analysis("café", "Le café est local", "FR")[0]["term"]
-    assert q.cannibalization("ex.test", "café\ncoffee", "FR")[0]["risk"] == "high"
+    assert q.cannibalization("ex.test", "café\ncoffee", "FR")[0]["rank"] == 1
 
 
 def test_fetch_failure_is_honest(monkeypatch):

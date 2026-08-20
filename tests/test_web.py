@@ -138,11 +138,22 @@ def test_navigation_and_extended_audit_limits() -> None:
         assert f">{limit}</option>" in response.text
 
 
+def test_csv_export_helper_is_available_on_every_page() -> None:
+    response = client.get("/keywords")
+    assert 'aria-label="Copy table"' in response.text
+    assert 'aria-label="Download CSV"' in response.text
+    assert "const BOM = '\\ufeff'" in response.text
+    assert ".join(';')" in response.text
+    assert ".join('\\r\\n')" in response.text
+    assert "if (value === 'N/D') value = '';" in response.text
+
+
 @patch("api.main.keywords.ideas", return_value=[KeywordIdea("seo tools", 100, 22, 1.5, search_intent="commercial")])
 def test_keywords_results(mock_ideas) -> None:
     response = client.get("/keywords", params={"seed": "seo", "country": "FR", "limit": 5})
     assert response.status_code == 200
     assert "seo tools" in response.text
+    assert 'class="exportable" data-export-name="keyword-results"' in response.text
     mock_ideas.assert_called_once_with("seo", "FR", 5)
 
 
@@ -151,6 +162,7 @@ def test_serp_results(mock_live) -> None:
     response = client.get("/serp", params={"keyword": "seo", "country": "US", "limit": 10})
     assert response.status_code == 200
     assert "Example" in response.text
+    assert 'class="exportable" data-export-name="serp-results"' in response.text
     mock_live.assert_called_once_with("seo", "US", 10)
 
 
@@ -159,6 +171,7 @@ def test_geo_results(mock_mentions) -> None:
     response = client.get("/geo", params={"keyword": "seo", "engine": "chatgpt"})
     assert response.status_code == 200
     assert "example.com" in response.text
+    assert 'class="exportable" data-export-name="ai-mentions"' in response.text
     mock_mentions.assert_called_once_with("seo", ["chatgpt"], limit=50)
 
 
@@ -168,6 +181,7 @@ def test_backlink_results(mock_summary, mock_referring) -> None:
     response = client.get("/backlinks", params={"domain": "example.com"})
     assert response.status_code == 200
     assert "referrer.com" in response.text
+    assert 'class="exportable" data-export-name="referring-domains"' in response.text
     mock_summary.assert_called_once_with("example.com")
     mock_referring.assert_called_once_with("example.com", limit=10)
 
@@ -178,6 +192,7 @@ def test_audit_results(mock_analyze, mock_crawl) -> None:
     response = client.get("/audit", params={"url": "https://example.com", "limit": 5})
     assert response.status_code == 200
     assert "Missing title" in response.text
+    assert 'class="exportable" data-export-name="audit-issues"' in response.text
     mock_crawl.assert_called_once_with("https://example.com", max_pages=5)
 
 

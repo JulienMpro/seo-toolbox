@@ -1,6 +1,6 @@
 """Mocked, zero-network tests for remaining catalogue tools."""
 
-from seotoolbox.models import CruxMetric, KeywordIdea, RankPosition, SerpResult
+from seotoolbox.models import CruxMetric, KeywordIdea, SerpResult
 from seotoolbox.tools import reliquats
 
 
@@ -28,8 +28,11 @@ def test_keyword_and_rank_tools(monkeypatch):
     assert len(reliquats.keyword_expansion("seed")) == 2
     monkeypatch.setattr(reliquats, "paa_extractor", lambda *args: [{"question": "How?", "snippet": None}])
     assert reliquats.faq_generator("plumbing")[0]["source"] == "PAA"
-    monkeypatch.setattr(reliquats.ranktracker, "domain_rank", lambda *args: [RankPosition("x", 3, "https://a"), RankPosition("x", 5, "https://b")])
-    assert reliquats.cannibalization("example.com", "x")[0]["risk"] == "high"
+    monkeypatch.setattr(reliquats.serp, "live", lambda *args: [
+        {"url": "https://example.com/a", "domain": "example.com", "rank_absolute": 3},
+        {"url": "https://example.com/b", "domain": "example.com", "rank_absolute": 5},
+    ])
+    assert reliquats.cannibalization("example.com", "x")[0]["rank"] == 3
 
 
 def test_lighthouse(monkeypatch):

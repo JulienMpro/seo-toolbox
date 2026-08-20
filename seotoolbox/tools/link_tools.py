@@ -80,14 +80,7 @@ def toxic_links(domain: str, spam_threshold: float = 60, limit: int = 50) -> lis
 
 def link_gap(domain: str, competitor: str, limit: int = 50) -> list[dict[str, Any]]:
     """Return referring domains available to a competitor but not the target."""
-    rows = []
-    for item in backlink_service.gap([domain, competitor], limit):
-        row = _row(item)
-        name = row.get("domain") or row.get("referring_domain") or row.get("domain_from")
-        links = row.get("backlinks") or row.get("links") or row.get("backlinks_to_target2")
-        if name:
-            rows.append({"domain": name, "links_to_competitor": links})
-    return rows
+    return backlink_service.gap(domain, competitor, limit)
 
 
 def referring_domains_analysis(domain: str, limit: int = 50) -> list[dict[str, Any]]:
@@ -154,8 +147,8 @@ def pbn_detection(domain: str, limit: int = 50) -> list[dict[str, Any]]:
     rows = []
     for item in backlink_service.networks(domain, limit):
         row = _row(item)
-        network = row.get("network") or row.get("ip") or row.get("subnet")
-        rows.append({"network_or_ip": network, "referring_domains": row.get("referring_domains"),
+        network = row.get("network_address") or row.get("network") or row.get("ip") or row.get("subnet")
+        rows.append({"network_address": network, "referring_domains": row.get("referring_domains"),
                      "backlinks": row.get("backlinks")})
     return rows
 

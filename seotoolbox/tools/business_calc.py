@@ -10,8 +10,9 @@ def time_to_rank(kd: float, authority: float, age: float) -> list[dict]:
     if not 0 <= kd <= 100 or not 0 <= authority <= 100 or age < 0:
         raise ValueError("kd and authority must be 0-100; age must be non-negative")
     months = max(1.0, min(24.0, 3 + kd / 8 - authority / 12 - min(age, 120) / 30))
-    return [{"factor": "KD", "value": kd}, {"factor": "domain authority", "value": authority},
-            {"factor": "domain age (months)", "value": age}, {"factor": "estimated months", "value": round(months, 1)}]
+    note = "heuristic, non-predictive estimate; not calibrated data"
+    return [{"factor": "KD", "value": kd, "note": note}, {"factor": "domain authority", "value": authority, "note": note},
+            {"factor": "domain age (months)", "value": age, "note": note}, {"factor": "estimated months", "value": round(months, 1), "note": note}]
 
 
 _CTR = {1: .285, 2: .157, 3: .11, 4: .08, 5: .065, 6: .05, 7: .04, 8: .032, 9: .027, 10: .024}
@@ -41,6 +42,6 @@ def A(name: str, required: bool = True, default: str | None = None) -> ArgSpec:
     return ArgSpec(name, required, default, name.replace("_", " ").capitalize() + ".")
 
 
-register(ToolSpec("time_to_rank", time_to_rank, "Estimate a heuristic time to rank.", "calculators", [A("kd"), A("authority"), A("age")], "table"))
+register(ToolSpec("time_to_rank", time_to_rank, "Heuristic, non-predictive estimate of time to rank — not calibrated data.", "calculators", [A("kd"), A("authority"), A("age")], "table"))
 register(ToolSpec("opportunity_cost", opportunity_cost, "Estimate missed organic equivalent ad value.", "calculators", [A("volume"), A("cpc"), A("position"), A("days", False, "30")], "table"))
 register(ToolSpec("organic_revenue", organic_revenue, "Estimate organic monthly and annual revenue.", "calculators", [A("traffic"), A("conversion"), A("basket"), A("growth", False, "0")], "table"))
