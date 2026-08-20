@@ -1,144 +1,123 @@
 # SEO Toolbox
 
-Boîte à outils **open-source** pour consultants SEO : reproduit l'essentiel des fonctionnalités des suites payantes (Ahrefs, Semrush, Moz, Screaming Frog…) à partir de l'**API DataForSEO** (pay-per-request) + de modules maison sans API (Python).
+Boîte à outils **open-source** pour consultants SEO : **165 mini-outils** pour couvrir tous les usages du métier — recherche de mots-clés, tracking de positions, backlinks, audits techniques, SERP, données structurées, calculs business, tracking IA/GEO — propulsée par l'**API DataForSEO** (+ modules maison sans API).
 
-> **Pourquoi** : les suites SEO coûtent 130 $+/mois pour quelques fonctionnalités utilisées. DataForSEO facture à la requête : un consultant qui lance quelques audits par mois paie une fraction du prix — et récupère en bonus le tracking de visibilité IA/GEO (ChatGPT, Perplexity, AI Overviews).
+> 🧰 L'outil pour **tous** les usages : un mini-outil = **un but précis**. Catalogue complet : `seo tools list`.
 
-## Modules couverts (benchmark août 2026)
+## ✨ Fonctionnalités
 
-| Module | Source de données | Statut |
+### 165 mini-outils en 11 catégories
+
+| Catégorie | Nb | Exemples |
 |---|---|---|
-| Keyword Research (volumes, KD, intent, clustering, gap) | DataForSEO Labs | ✅ disponible |
-| Rank Tracking (positions, historique, concurrents) | DataForSEO Labs | ✅ disponible |
-| Tracking IA/GEO (mentions et pages citées) | DataForSEO AI Optimization | ✅ disponible |
-| Backlinks (profil, flux, ancres, gap, disavow) | DataForSEO Backlinks | ✅ disponible |
-| Audit technique (crawl complet, CWV, GSC, CrUX) | Spider maison + API gratuites | ✅ disponible |
-| Analyse SERP | DataForSEO SERP | ✅ disponible |
-| SEO local (listings, local pack) | DataForSEO Business Data + SERP | ✅ disponible |
-| Logs serveur | 100 % maison | ✅ disponible |
-| Monitoring + alertes webhook | Spider maison + SQLite | ✅ disponible |
-| Reporting white-label (markdown → HTML/PDF optionnel) | 100 % maison | ✅ disponible |
-| Analyse et optimisation de contenu | DataForSEO SERP + NLP maison | ✅ disponible |
+| **SERP** | 29 | comparateur de SERP, PAA, features, devices, pays, historique, YouTube, Amazon, Trends, top searches, gap… |
+| **Générateurs** | 18 | redirections 301, robots.txt, sitemap.xml, hreflang, ancres, briefs de contenu, questions FAQ, prompts IA… |
+| **Analyseurs** | 17 | cannibalisation, densité, n-grams, lisibilité, similarité, TF-IDF, entités, maillage interne… |
+| **Calculatrices** | 17 | ROI SEO, projection, valeur d'une position, CTR, CAC/LTV, time-to-rank, coût d'opportunité… |
+| **Vérificateurs** | 17 | status HTTP en masse, chaînes de redirection, robots, sitemap, canonicals, hreflang, mixed content… |
+| **Convertisseurs** | 15 | URL encode/decode, texte→slug, liste→URLs, CSV↔JSON, casse, accents, dates, tokeniseur… |
+| **Liens** | 14 | répartition d'ancres, dofollow, toxiques, désaveu, gap, PBN, prospection emails, broken link building… |
+| **Schema JSON-LD** | 12 | 10 générateurs (Article, FAQ, LocalBusiness, Product, Breadcrumb, Review, Event, Organization, HowTo, JobPosting) + validateur + extracteur |
+| **Divers** | 12 | check HTTP, WHOIS lite, détection de technologies, extraction emails/URLs, diff, lorem… |
+| **Stratégie** | 11 | calendrier éditorial, priorisation de KW, clusters, cocon sémantique, benchmark concurrentiel… |
+| **GEO / IA** | 3 | visibilité de marque dans les réponses IA, mentions LLM (chatgpt/perplexity/claude/gemini)… |
 
-Le benchmark complet (matrice ~80 features payantes → reproduction) est dans [`TOOLBOX-CONSULTANT-SEO.md`](TOOLBOX-CONSULTANT-SEO.md).
+### 12 commandes de modules (au-delà des mini-outils)
 
-## Architecture
+`seo keywords` · `seo ranks` · `seo geo` · `seo backlinks` · `seo serp` · `seo audit` · `seo gsc` · `seo ga4` · `seo local` · `seo logs` · `seo monitor` · `seo report` · `seo content`
 
-```
-seo-toolbox/
-├── seotoolbox/        # package cœur
-│   ├── client.py      # wrapper DataForSEO (auth, retry, quotas, cache SQLite)
-│   ├── keywords.py    # KW research + clustering + intent
-│   ├── ranktracker.py # positions, historique, SERP features, GEO mentions
-│   ├── backlinks.py   # profil, flux, ancres, gap, disavow export
-│   ├── audit.py       # spider maison (sitemap → crawl → rapports)
-│   ├── crux.py        # CWV field (API CrUX/PageSpeed)
-│   ├── gsc.py         # API Google Search Console (OAuth)
-│   ├── ga4.py         # API Google Analytics 4 Data (OAuth)
-│   ├── serp.py        # SERP live + features + historique
-│   ├── geo.py         # AI Optimization API (llm_mentions, chatgpt)
-│   ├── local.py       # business listings + rank local
-│   ├── logs.py        # analyse logs serveur
-│   ├── monitor.py     # diff + alertes
-│   ├── report.py      # markdown → HTML/PDF white-label
-│   └── content.py     # termes SERP + score de contenu réel
-├── api/               # FastAPI (REST + MCP server) — phase 2
-├── web/               # UI web — phase 2
-├── cli.py             # interface CLI (Typer)
-└── data/              # SQLite (cache, projets, historique)
-```
+### Connecteurs documentés
 
-## Stack
+- **Google Search Console** et **Google Analytics 4** : guide complet dans [`docs/connecteurs.md`](docs/connecteurs.md) — via **Google Cloud Console** (OAuth) ou **MCP** (pour les agents IA). Rien n'est connecté par défaut : les credentials se configurent en variables d'environnement.
+- **DataForSEO** : `DATAFORSEO_USERNAME` / `DATAFORSEO_PASSWORD` (env).
 
-- Python 3.11+, [httpx](https://www.python-httpx.org/), [Typer](https://typer.tiangolo.com/) (CLI), [Rich](https://rich.readthedocs.io/) (sortie console)
-- SQLite (stdlib) pour le cache et l'historique
-- Zéro dépendance payante, zéro service tiers imposé
+### UI web de démonstration
 
-## Installation
+Dashboard FastAPI + Jinja2 (keyword research, SERP, AI mentions, backlinks, audit) — voir [`api/`](api/).
+
+### Démo
+
+Workflow complet illustré sur un projet fictif (zéro donnée réelle) : [`demo/README.md`](demo/README.md).
+
+## 🚀 Installation
 
 ```bash
-git clone git@github.com:JulienMpro/seo-toolbox.git
+git clone https://github.com/JulienMpro/seo-toolbox.git
 cd seo-toolbox
-python -m venv .venv && source .venv/bin/activate
-pip install -e ".[dev]"
+pip install -e ".[dev]"          # + ".[web]" pour l'UI
+export DATAFORSEO_USERNAME=...   # credentials DataForSEO
+export DATAFORSEO_PASSWORD=...
 ```
 
-For the optional local web demonstration, install the web extra instead:
+## 🧰 Utilisation
 
 ```bash
-pip install -e ".[dev,web]"
-uvicorn api.main:app --port 8010
-```
+# Lister les 165 outils
+seo tools list
+seo tools list --category serp
 
-Then open `http://127.0.0.1:8010`. The UI calls the same cached DataForSEO
-modules as the CLI and reads the same environment variables. It is intended for
-local use or deployment behind authentication; do not expose it publicly without
-adding authentication and appropriate production hardening.
+# Utiliser un outil (aide : seo tool <nom> --help)
+seo tool serp_compare --keywords "plombier paris\nplombier lyon" --country FR
+seo tool roi_seo --budget 2000 --basket 300 --margin 40 --conversion 2 --months 12
+seo tool jsonld_faq --qa "Quel prix ?|50 euros"
+seo tool redirect_generator --old "https://x.fr/old" --new "https://x.fr/new"
+seo tool cannibalization --domain mon-site.fr --keywords "plombier paris" --country FR
 
-## Configuration
-
-| Variable | Rôle |
-|---|---|
-| `DATAFORSEO_USERNAME` | Login API DataForSEO |
-| `DATAFORSEO_PASSWORD` | Mot de passe API DataForSEO |
-| `GSC_CLIENT_ID` / `GSC_CLIENT_SECRET` / `GSC_REFRESH_TOKEN` | OAuth Google Search Console |
-| `GA4_PROPERTY_ID` | Numeric Google Analytics 4 property ID |
-| `PSI_API_KEY` | Clé PageSpeed Insights optionnelle (limites plus élevées) |
-
-## Usage (CLI)
-
-```bash
+# Modules métier
 seo keywords research "plombier paris" --country FR --limit 50
-seo keywords gap --domain exemple.fr --competitors conc1.fr,conc2.fr
-seo ranks domain "plombier paris" --domain exemple.fr --country FR --limit 20
-seo ranks history "plombier paris" --domain exemple.fr --country FR --days 90
-seo ranks competitors --domain exemple.fr --country FR --limit 20
-seo geo mentions "geo seo" --engine chatgpt --limit 20
-seo geo aggregated "geo seo,optimisation ia" --engines chatgpt,perplexity
-seo geo top-pages "geo seo,optimisation ia" --limit 20
-seo backlinks summary --domain exemple.fr
-seo backlinks list --domain exemple.fr --limit 30
-seo backlinks referring-domains --domain exemple.fr --limit 20
-seo backlinks anchors --domain exemple.fr --limit 20
-seo backlinks new-lost --domain exemple.fr --days 30
-seo backlinks gap --domain exemple.fr --competitors conc1.fr,conc2.fr --limit 20
-seo backlinks competitors --domain exemple.fr --limit 10
-seo backlinks disavow --domain exemple.fr --output disavow.txt --max-spam 60
-seo serp live "plombier paris" --country FR --limit 20 --device desktop
-seo serp features "plombier paris" --country FR
-seo audit run --url https://exemple.fr --limit 200 --workers 10
-seo audit issues --url https://exemple.fr --type error,redirect,missing_title
-seo audit crux --urls https://exemple.fr,https://exemple.fr/contact --strategy mobile
-seo gsc properties
-seo gsc queries --property sc-domain:exemple.fr --days 28 --limit 20
-seo gsc pages --property sc-domain:exemple.fr --days 28 --limit 20
-seo ga4 daily --days 28
-seo ga4 sources --days 28 --limit 10
-seo ga4 pages --days 28 --limit 10
-seo local listings --query "plombier" --city paris --country FR --limit 20
-seo local rank --keyword "plombier" --city paris --country FR --limit 10
-seo logs analyze --file access.log --output md
-seo logs robots --file access.log
-seo monitor init --url https://exemple.fr --limit 100
-seo monitor check --url https://exemple.fr --limit 100 --alert-url https://webhook.example/seo
-seo report build --input rapport.md --title "Audit SEO — exemple.fr" --output rapport.html --brand-color "#0ea5e9"
-seo content terms --keyword "plombier paris" --country FR --limit 10
-seo content score --url https://exemple.fr/page --keyword "plombier paris" --country FR
+seo backlinks summary --domain mon-site.fr
+seo geo mentions --keyword "geo seo" --engine chatgpt
+seo audit run --url https://mon-site.fr --limit 500
+
+# UI web
+uvicorn api.main:app
 ```
 
-All reporting commands accept `--output table|csv|md|json`; use `--save PATH`
-with CSV, Markdown, or JSON output. Missing API values are displayed as `N/D`.
-The monitoring alert URL receives a generic `{"text": "..."}` JSON payload; use a
-Slack/Telegram-compatible incoming webhook or an adapter. Alert failures never block
-the baseline update. PDF export is available from Python when WeasyPrint is installed
-separately (`pip install weasyprint`).
+## 🗂️ Structure
 
-## Connectors
+```
+seotoolbox/               # Package Python
+├── client.py             # Client DataForSEO (auth, retry, cache SQLite)
+├── keywords.py           # Module keyword research
+├── ranktracker.py        # Module positions + historique
+├── geo.py                # Module mentions IA (GEO)
+├── backlinks.py          # Module backlinks
+├── serp.py               # Module SERP
+├── audit.py              # Spider + audit technique maison
+├── crux.py               # Core Web Vitals (PageSpeed API)
+├── gsc.py / ga4.py       # Connecteurs Google (OAuth)
+├── local.py / logs.py / monitor.py / report.py / content.py
+├── cli.py                # CLI Typer (`seo`)
+└── tools/                # ⭐ Les 165 mini-outils (registre)
+    ├── __init__.py       # REGISTRY + dispatcher
+    ├── calculators.py, converters.py, generators.py, schema.py,
+    ├── analyzers.py, checkers.py, serp_tools.py, link_tools.py,
+    ├── strategy.py, misc.py, domain_intel.py, youtube_tools.py,
+    ├── data_intel.py, refonte.py, netlinking_extra.py,
+    ├── business_calc.py, onpage_extra.py, ia_tools.py
+api/                      # UI web FastAPI + templates Jinja2
+demo/                     # Démo projet fictif + captures
+docs/connecteurs.md       # Guide GSC/GA4 (API & MCP)
+TOOLS-ROADMAP.md          # Catalogue des 165 outils
+```
 
-Google Search Console and Google Analytics 4 can be connected through their direct
-OAuth APIs or exposed to AI agents through MCP. See the complete setup and verification
-guide in [Connector setup](docs/connecteurs.md).
+## 🧪 Tests
 
-## Licence
+```bash
+python -m pytest        # 140 tests (unitaires, mockés — zéro réseau)
+```
 
-MIT — libre d'utilisation, de modification et de redistribution. Les données DataForSEO restent soumises aux conditions de DataForSEO ; aucune donnée propriétaire n'est embarquée dans ce repo.
+## 🔒 Sécurité & conventions
+
+- **Zéro donnée inventée** : API HS / champ absent → `N/D`, jamais de fallback fictif.
+- **Zéro secret en dur** : credentials uniquement en variables d'environnement ; `data/`, `*.db`, `.env` sont gitignorés.
+- **Cache SQLite** sur tous les appels DataForSEO (coût ÷ par exécutions répétées).
+- Un mini-outil = un but précis ; chaque outil a une description et des tests.
+
+## 🤝 Contribuer
+
+Nouvel outil ? Ajoute une fonction dans le module de sa catégorie + `register(ToolSpec(...))` + un test — le CLI et l'aide sont automatiques. Voir [`CLAUDE.md`](CLAUDE.md).
+
+## 📄 Licence
+
+MIT
