@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import csv
+import difflib
 import io
 import json
 from dataclasses import asdict, is_dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, get_type_hints
 
 import typer
 import httpx
@@ -29,6 +30,7 @@ from . import monitor as monitor_service
 from . import report as report_service
 from . import content as content_service
 from .client import ApiError, DataForSEOError
+from .tools import REGISTRY, list_tools
 
 app = typer.Typer(help="Pay-per-request SEO research tools powered by DataForSEO.")
 keywords_app = typer.Typer(help="Keyword research, intent, gap, and clustering tools.")
@@ -44,6 +46,7 @@ logs_app = typer.Typer(help="Local web server log analysis.")
 monitor_app = typer.Typer(help="Crawl baseline and change monitoring.")
 report_app = typer.Typer(help="White-label Markdown reporting.")
 content_app = typer.Typer(help="Content terms and on-page scoring.")
+tools_app = typer.Typer(help="Browse the local mini-tool catalogue.")
 app.add_typer(keywords_app, name="keywords")
 app.add_typer(ranks_app, name="ranks")
 app.add_typer(geo_app, name="geo")
@@ -57,7 +60,104 @@ app.add_typer(logs_app, name="logs")
 app.add_typer(monitor_app, name="monitor")
 app.add_typer(report_app, name="report")
 app.add_typer(content_app, name="content")
+app.add_typer(tools_app, name="tools")
 console = Console()
+
+
+def _tool_help(name: str) -> None:
+    """Render detailed help for a registered mini-tool."""
+    spec = REGISTRY[name]
+    console.print(f"[bold]{spec.name}[/bold] — {spec.description}")
+    table = Table(show_header=True, header_style="bold cyan")
+    table.add_column("Argument")
+    table.add_column("Required")
+    table.add_column("Default")
+    table.add_column("Description")
+    for arg in spec.args:
+        table.add_row(f"--{arg.name.replace('_', '-')}", "yes" if arg.required else "no", arg.default if arg.default is not None else "N/D", arg.help or "N/D")
+    console.print(table)
+
+
+def _parse_tool_args(name: str, tokens: list[str]) -> dict[str, Any]:
+    """Parse dynamic options according to a registered ToolSpec."""
+    spec = REGISTRY[name]
+    args = {arg.name: arg for arg in spec.args}
+    raw: dict[str, Any] = {}
+    index = 0
+    while index < len(tokens):
+        token = tokens[index]
+        if not token.startswith("--"):
+            raise ValueError(f"unexpected argument: {token}")
+        key = token[2:].replace("-", "_")
+        if key not in args:
+            raise ValueError(f"unknown option --{token[2:]} for {name}")
+        arg = args[key]
+        if arg.is_flag:
+            raw[key] = True
+            index += 1
+        else:
+            if index + 1 >= len(tokens) or tokens[index + 1].startswith("--"):
+                raise ValueError(f"option --{token[2:]} requires a value")
+            raw[key] = tokens[index + 1]
+            index += 2
+    for arg in spec.args:
+        if arg.name not in raw:
+            if arg.required:
+                raise ValueError(f"missing required option --{arg.name.replace('_', '-')}")
+            if arg.is_flag:
+                raw[arg.name] = False
+            elif arg.default is not None:
+                raw[arg.name] = arg.default
+    hints = get_type_hints(spec.fn)
+    for key, value in list(raw.items()):
+        target = hints.get(key, str)
+        if target is bool:
+            if isinstance(value, bool): continue
+            normalized = value.lower()
+            if normalized not in {"true", "false", "1", "0", "yes", "no"}: raise ValueError(f"--{key} must be a boolean")
+            raw[key] = normalized in {"true", "1", "yes"}
+        elif target in {int, float, str}:
+            try: raw[key] = target(value)
+            except ValueError as exc: raise ValueError(f"--{key.replace('_', '-')} must be a {target.__name__}") from exc
+    return raw
+
+
+@tools_app.command("list")
+def tools_list(category: str | None = typer.Option(None, help="Filter by category.")) -> None:
+    """List available local mini-tools."""
+    rows = list_tools(category)
+    if category and not rows:
+        console.print(f"[red]Error:[/red] unknown or empty category: {category}")
+        raise typer.Exit(code=1)
+    table = Table(show_header=True, header_style="bold cyan")
+    for column in ("NAME", "CATEGORY", "DESCRIPTION"): table.add_column(column)
+    for spec in rows: table.add_row(spec.name, spec.category, spec.description)
+    console.print(table)
+
+
+@app.command("tool", context_settings={"allow_extra_args": True, "ignore_unknown_options": True, "help_option_names": []})
+def run_tool(ctx: typer.Context, name: str) -> None:
+    """Run a local mini-tool by name; append --help for its arguments."""
+    if name not in REGISTRY:
+        matches = difflib.get_close_matches(name, REGISTRY, n=3)
+        suggestion = f" Did you mean: {', '.join(matches)}?" if matches else " Run 'seo tools list' to browse categories."
+        console.print(f"[red]Error:[/red] unknown tool '{name}'.{suggestion}")
+        raise typer.Exit(code=1)
+    if "--help" in ctx.args or "-h" in ctx.args:
+        _tool_help(name)
+        return
+    try:
+        kwargs = _parse_tool_args(name, list(ctx.args))
+        spec = REGISTRY[name]
+        result = spec.fn(**kwargs)
+        if spec.returns == "table":
+            if not isinstance(result, list): raise ValueError("table tools must return a list of rows")
+            _emit(result, "table")
+        else:
+            console.print(str(result), highlight=False, markup=False)
+    except (ValueError, TypeError, httpx.HTTPError, OSError) as exc:
+        console.print(f"[red]Error:[/red] {exc}", highlight=False)
+        raise typer.Exit(code=1) from exc
 
 
 def _rows(values: list[Any]) -> list[dict[str, Any]]:
