@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "seo-toolbox"
 version = "0.6.0"
-description = "165 mini-outils SEO pour consultants : keyword research, rank tracking, backlinks, SERP, audit technique, GEO/IA — propulsé par DataForSEO (CLI Typer + API FastAPI)"
+description = "165 SEO mini-tools for consultants: keyword research, rank tracking, backlinks, SERP, technical audit, GEO/AI — powered by DataForSEO (Typer CLI + FastAPI web UI)"
 readme = "README.md"
 requires-python = ">=3.11"
 authors = [

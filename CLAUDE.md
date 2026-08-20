@@ -1,50 +1,50 @@
 # SEO Toolbox
 
-Ce fichier guide les agents IA (Claude Code, Codex, Cursor, etc.) qui travaillent sur ce repo. Lis-le en entier avant de modifier quoi que ce soit.
+This file guides AI agents (Claude Code, Codex, Cursor, etc.) working on this repo. Read it in full before modifying anything.
 
-## Vue d'ensemble
+## Overview
 
-- Quoi : boîte à outils open-source pour consultants SEO — **165 mini-outils** + 13 modules métier, propulsée par l'API DataForSEO + modules maison.
-- Stack : Python 3.11+, CLI Typer (`seo`), httpx, Rich ; UI web optionnelle FastAPI + Jinja2 (`api/`). Tests pytest.
-- Repo public : `JulienMpro/seo-toolbox`. Les credentials ne sont JAMAIS dans le repo (env vars uniquement).
+- What: open-source toolbox for SEO consultants — **165 mini-tools** + 13 business modules, powered by the DataForSEO API + in-house modules.
+- Stack: Python 3.11+, Typer CLI (`seo`), httpx, Rich; optional FastAPI + Jinja2 web UI (`api/`). pytest tests.
+- Public repo: `JulienMpro/seo-toolbox`. Credentials are NEVER stored in the repo (env vars only).
 
-## Règles d'or (non négociables)
+## Golden rules (non-negotiable)
 
-1. **Zéro donnée inventée** : API HS / champ absent → `N/D` dans les sorties. Jamais de fallback fictif, jamais de données fabriquées.
-2. **Zéro secret en dur** : credentials via variables d'environnement (`DATAFORSEO_USERNAME`, `DATAFORSEO_PASSWORD`, `GSC_CLIENT_ID`, `GSC_CLIENT_SECRET`, `GSC_REFRESH_TOKEN`, `GA4_PROPERTY_ID`, `PSI_API_KEY`). Ne jamais logger ni committer de secret. `data/`, `*.db`, `.env` sont gitignorés.
-3. **Ne committe jamais toi-même** : laisse l'orchestrateur valider (tests + review) et committer.
-4. **Tests obligatoires** pour tout nouveau code (pytest, mockés — zéro appel réseau dans les tests).
-5. **Cache SQLite** obligatoire pour les appels DataForSEO (le client le gère — ne pas contourner).
+1. **Zero fabricated data**: API unavailable / missing field → `N/D` in outputs. Never use a fictional fallback or fabricated data.
+2. **Zero hard-coded secrets**: credentials through environment variables (`DATAFORSEO_USERNAME`, `DATAFORSEO_PASSWORD`, `GSC_CLIENT_ID`, `GSC_CLIENT_SECRET`, `GSC_REFRESH_TOKEN`, `GA4_PROPERTY_ID`, `PSI_API_KEY`). Never log or commit secrets. `data/`, `*.db`, `.env` are gitignored.
+3. **Never commit changes yourself**: let the orchestrator validate (tests + review) and commit.
+4. **Tests are mandatory** for all new code (pytest, mocked — zero network calls in tests).
+5. **SQLite caching** is mandatory for DataForSEO calls (the client handles it — do not bypass it).
 
 ## Architecture
 
-### Modules métier (`seotoolbox/*.py`)
-- `client.py` — `DataForSEOClient` : auth Basic, retry, timeout, **cache SQLite** (`data/cache.db`). `get_result(path, payload)` valide `status_code == 20000` et aplatit `tasks[].result[]`. Erreurs : `ApiError` (réseau), `DataForSEOError` (métier).
-- `keywords.py` (research/overview/difficulty/suggestions/related/intent/gap/keywords_for_site/cluster) · `ranktracker.py` · `geo.py` (mentions IA) · `backlinks.py` · `serp.py` · `audit.py` (spider maison) · `crux.py` (PSI/CWV) · `gsc.py` + `ga4.py` (OAuth Google) · `local.py` · `logs.py` · `monitor.py` (baseline + diff) · `report.py` (markdown→HTML) · `content.py` · `google_auth.py` (helper OAuth partagé).
-- `cli.py` — l'app Typer : groupes `keywords/ranks/geo/backlinks/serp/audit/gsc/ga4/local/logs/monitor/report/content` + commandes `tool` et `tools`.
+### Business modules (`seotoolbox/*.py`)
+- `client.py` — `DataForSEOClient`: Basic auth, retry, timeout, **SQLite cache** (`data/cache.db`). `get_result(path, payload)` validates `status_code == 20000` and flattens `tasks[].result[]`. Errors: `ApiError` (network), `DataForSEOError` (business logic).
+- `keywords.py` (research/overview/difficulty/suggestions/related/intent/gap/keywords_for_site/cluster) · `ranktracker.py` · `geo.py` (AI mentions) · `backlinks.py` · `serp.py` · `audit.py` (in-house spider) · `crux.py` (PSI/CWV) · `gsc.py` + `ga4.py` (Google OAuth) · `local.py` · `logs.py` · `monitor.py` (baseline + diff) · `report.py` (markdown→HTML) · `content.py` · `google_auth.py` (shared OAuth helper).
+- `cli.py` — the Typer app: groups `keywords/ranks/geo/backlinks/serp/audit/gsc/ga4/local/logs/monitor/report/content` + `tool` and `tools` commands.
 
-### Mini-outils (`seotoolbox/tools/`) — LE registre
-- `__init__.py` : `REGISTRY` (dict name → `ToolSpec`), `register()`, `list_tools()`. Les modules de catégorie s'importent en bas de `__init__.py` (déclenche l'enregistrement).
-- `ToolSpec(name, fn, description, category, args: list[ArgSpec], returns="str"|"table")` ; `ArgSpec(name, required, default, help, is_flag)`.
-- Modules : `calculators.py`, `converters.py`, `generators.py`, `schema.py`, `analyzers.py`, `checkers.py`, `serp_tools.py`, `link_tools.py`, `strategy.py`, `misc.py`, `domain_intel.py`, `youtube_tools.py`, `data_intel.py`, `refonte.py`, `netlinking_extra.py`, `business_calc.py`, `onpage_extra.py`, `ia_tools.py`.
-- **Ajouter un outil** = 1 fonction + 1 `register(ToolSpec(...))` + 1 test. Le CLI (`seo tool <nom>`), l'aide et `seo tools list` sont automatiques. `returns="table"` → liste de dicts (les valeurs `None` s'affichent `N/D`).
-- Nom de fonction = snake_case du nom d'outil. Catégories existantes : calculators, converters, generators, analyzers, checkers, serp, links, schema, strategy, misc, geo.
+### Mini-tools (`seotoolbox/tools/`) — THE registry
+- `__init__.py`: `REGISTRY` (dict name → `ToolSpec`), `register()`, `list_tools()`. Category modules are imported at the bottom of `__init__.py` (triggering registration).
+- `ToolSpec(name, fn, description, category, args: list[ArgSpec], returns="str"|"table")`; `ArgSpec(name, required, default, help, is_flag)`.
+- Modules: `calculators.py`, `converters.py`, `generators.py`, `schema.py`, `analyzers.py`, `checkers.py`, `serp_tools.py`, `link_tools.py`, `strategy.py`, `misc.py`, `domain_intel.py`, `youtube_tools.py`, `data_intel.py`, `refonte.py`, `netlinking_extra.py`, `business_calc.py`, `onpage_extra.py`, `ia_tools.py`.
+- **Add a tool** = 1 function + 1 `register(ToolSpec(...))` + 1 test. The CLI (`seo tool <nom>`), help, and `seo tools list` are generated automatically. `returns="table"` → list of dicts (`None` values are displayed as `N/D`).
+- Function name = snake_case tool name. Existing categories: calculators, converters, generators, analyzers, checkers, serp, links, schema, strategy, misc, geo.
 
-## Pièges connus (vérifiés en live — ne pas répéter)
+## Known pitfalls (verified live — do not repeat)
 
-1. **`search_intent` exige une localisation** : payload `{"keywords": [...], "language_name": "English"}` — `language_code` seul → `Invalid Field: 'language_name'`. La fonction `keywords.intent()` gère déjà ça (paramètre `language_name`, défaut English).
-2. **`backlinks/summary`** : les clés réelles sont `backlinks`, `referring_domains`, `backlinks_spam_score` (PAS `live_backlinks`/`live_referring_domains`/`spam_score`).
-3. **Endpoints MCP-only (404 en REST direct)** : `ai_optimization/llm_response/live`, `ai_optimization/chatgpt/scraper/live`, `ai_optimization/llm_models`, `ai_optimization/keyword_data/search_volume/live` → 404 en REST même avec creds valides. Capacités disponibles via le serveur MCP DataForSEO uniquement. Les outils concernés (`llm_response_extract`, `llm_volume`) affichent une erreur explicative propre.
-4. **`content_analysis/search`** : la réponse est `{"items": [...]}` ; items avec `url`, `domain`, `url_rank`, `domain_rank`, `score`, `spam_score`, `content_info` (title dedans). Pas de champ `title` au niveau item.
-5. **Le client met en cache 24h** : après un changement de payload/path, purger `data/cache.db` pour les tests réels.
+1. **`search_intent` requires a location**: payload `{"keywords": [...], "language_name": "English"}` — `language_code` alone → `Invalid Field: 'language_name'`. The `keywords.intent()` function already handles this (`language_name` parameter, defaults to English).
+2. **`backlinks/summary`**: the actual keys are `backlinks`, `referring_domains`, `backlinks_spam_score` (NOT `live_backlinks`/`live_referring_domains`/`spam_score`).
+3. **MCP-only endpoints (404 through direct REST)**: `ai_optimization/llm_response/live`, `ai_optimization/chatgpt/scraper/live`, `ai_optimization/llm_models`, `ai_optimization/keyword_data/search_volume/live` → 404 through REST even with valid credentials. Capabilities are available only through the DataForSEO MCP server. The affected tools (`llm_response_extract`, `llm_volume`) display a clear explanatory error.
+4. **`content_analysis/search`**: the response is `{"items": [...]}`; items contain `url`, `domain`, `url_rank`, `domain_rank`, `score`, `spam_score`, `content_info` (title is inside it). There is no `title` field at the item level.
+5. **The client caches for 24h**: after changing a payload/path, clear `data/cache.db` for real-world tests.
 
-## Convention de sortie
-- `returns="str"` → texte brut (blocs, XML, JSON beautifié).
-- `returns="table"` → liste de dicts ; en-têtes = clés du premier dict (ordre stable) ; `None` → `N/D`.
-- Messages d'erreur : `Error: <message>` + exit code 1 (jamais de traceback dans le CLI).
+## Output conventions
+- `returns="str"` → raw text (blocks, XML, formatted JSON).
+- `returns="table"` → list of dicts; headers = keys of the first dict (stable order); `None` → `N/D`.
+- Error messages: `Error: <message>` + exit code 1 (never show a traceback in the CLI).
 
-## Validation avant livraison
-1. `python -m pytest -q` → vert (les tests mockés ne doivent pas toucher le réseau).
-2. `seo tools list` → nouveau outil présent.
-3. Smoke test réel (si DataForSEO nécessaire) avec les creds de l'env — vérifier les sorties, les N/D honnêtes.
-4. Scan : aucun secret/chemin perso (`git grep -E "/root/|julienmouttet"` doit être vide), `data/` non tracké.
+## Validation before delivery
+1. `python -m pytest -q` → green (mocked tests must not access the network).
+2. `seo tools list` → new tool is present.
+3. Real-world smoke test (if DataForSEO is required) with credentials from the env — verify outputs and honest N/D values.
+4. Scan: no secret/personal path (`git grep -E "/root/|julienmouttet"` must return nothing), `data/` is untracked.
