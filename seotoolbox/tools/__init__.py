@@ -47,4 +47,8 @@ def list_tools(category: str | None = None) -> list[ToolSpec]:
     return sorted(tools, key=lambda tool: (tool.category, tool.name))
 
 
-from . import analyzers, calculators, checkers, converters, data_intel, domain_intel, generators, link_tools, misc, reliquats, schema, serp_tools, strategy, youtube_tools  # noqa: E402,F401
+from . import (  # noqa: E402,F401
+    analyzers, business_calc, calculators, checkers, converters, data_intel,
+    domain_intel, generators, ia_tools, link_tools, misc, netlinking_extra,
+    onpage_extra, refonte, reliquats, schema, serp_tools, strategy, youtube_tools,
+)

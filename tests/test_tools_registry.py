@@ -12,20 +12,20 @@ runner = CliRunner()
 def test_registry_contract():
     # The roadmap has 13 calculators, 15 converter command names (encode and
     # decode are separate), and 7 miscellaneous tools.
-    assert len(REGISTRY) == 151
+    assert len(REGISTRY) == 165
     assert len(REGISTRY) == len(set(REGISTRY))
     assert all(tool.description and tool.args for tool in REGISTRY.values())
-    assert len(list_tools("calculators")) == 14
-    assert len(list_tools("generators")) == 16
+    assert len(list_tools("calculators")) == 17
+    assert len(list_tools("generators")) == 18
     assert len(list_tools("schema")) == 12
-    assert len(list_tools("analyzers")) == 14
-    assert len(list_tools("checkers")) == 15
-    assert len(list_tools("serp")) == 28
-    assert len(list_tools("links")) == 12
+    assert len(list_tools("analyzers")) == 17
+    assert len(list_tools("checkers")) == 17
+    assert len(list_tools("serp")) == 29
+    assert len(list_tools("links")) == 14
     assert len(list_tools("strategy")) == 11
     assert {"content_length_target", "keyword_expansion", "content_brief", "faq_generator",
             "cannibalization", "content_length", "tfidf_analysis", "lighthouse_cwv"} <= set(REGISTRY)
-    assert len(list_tools("misc")) == 11
+    assert len(list_tools("misc")) == 12
     assert len(list_tools("geo")) == 3
 
 
