@@ -1,0 +1,4063 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>165 mini-outils SEO — SEO Toolbox</title>
+  <style>
+    :root{--bg:#0a0e1a;--card:#111827;--border:#1f2937;--violet:#8b5cf6;--cyan:#22d3ee;--text:#e5e7eb;--muted:#9ca3af}
+    *{box-sizing:border-box}html{color-scheme:dark;scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.5}button,input{font:inherit}.shell{width:min(1440px,calc(100% - 32px));margin:auto;padding:54px 0 64px}.hero{text-align:center;margin-bottom:34px}.brand{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border:1px solid #312e81;border-radius:999px;background:#17152e;color:#c4b5fd;font-size:.78rem;font-weight:800;letter-spacing:.12em}.hero h1{margin:16px 0 8px;font-size:clamp(2.1rem,5vw,4rem);line-height:1.05;letter-spacing:-.045em}.gradient{background:linear-gradient(100deg,var(--violet),var(--cyan));background-clip:text;-webkit-background-clip:text;color:transparent}.hero p{max-width:790px;margin:auto;color:var(--muted);font-size:1.03rem}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:30px 0}.stat{padding:20px;border:1px solid var(--border);border-radius:14px;background:var(--card);text-align:center}.stat strong{display:block;font-size:1.8rem;line-height:1.15}.stat span{color:var(--muted);font-size:.84rem}.controls{position:sticky;top:0;z-index:10;margin-bottom:24px;padding:16px;border:1px solid var(--border);border-radius:16px;background:rgba(10,14,26,.94);box-shadow:0 12px 30px rgba(0,0,0,.25);backdrop-filter:blur(12px)}.search-row{display:flex;align-items:center;gap:14px}.search{position:relative;flex:1}.search::before{content:"⌕";position:absolute;left:15px;top:50%;transform:translateY(-52%);color:#a78bfa;font-size:1.45rem}.search input{width:100%;padding:13px 16px 13px 44px;border:1px solid #374151;border-radius:11px;outline:0;background:#0d1322;color:var(--text);transition:.2s}.search input:focus{border-color:var(--violet);box-shadow:0 0 0 3px rgba(139,92,246,.16)}.results{min-width:140px;color:var(--muted);font-size:.88rem;text-align:right}.chips{display:flex;gap:8px;margin-top:13px;padding-bottom:1px;overflow-x:auto;scrollbar-width:thin}.chip{flex:none;padding:7px 11px;border:1px solid #374151;border-radius:999px;background:#111827;color:#cbd5e1;cursor:pointer;font-size:.8rem;transition:.18s}.chip:hover{border-color:#6d5bd0}.chip.active{border-color:var(--violet);background:var(--violet);color:white}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}.card{display:flex;min-height:188px;padding:19px;border:1px solid var(--border);border-radius:14px;background:var(--card);cursor:pointer;transition:transform .2s,border-color .2s,box-shadow .2s}.card:hover,.card:focus-visible{transform:translateY(-2px);border-color:var(--violet);box-shadow:0 14px 32px rgba(76,29,149,.22)}.card:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}.card-inner{display:flex;flex:1;min-width:0;flex-direction:column}.category{display:inline-flex;align-self:flex-start;padding:4px 9px;border:1px solid color-mix(in srgb,var(--cat) 52%,transparent);border-radius:999px;background:color-mix(in srgb,var(--cat) 13%,transparent);color:var(--cat);font-size:.68rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase}.card h2{margin:13px 0 6px;font-size:1.08rem;overflow-wrap:anywhere}.description{display:-webkit-box;margin:0;color:var(--muted);font-size:.88rem;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:2}.meta{display:flex;gap:8px;margin-top:auto;padding-top:15px}.pill{padding:4px 8px;border:1px solid #283548;border-radius:7px;background:#0d1422;color:#b7c0cc;font-size:.72rem}.empty{grid-column:1/-1;padding:60px 20px;border:1px dashed #374151;border-radius:14px;color:var(--muted);text-align:center}.modal{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(2,6,23,.78);backdrop-filter:blur(5px)}.modal.open{display:flex}.dialog{width:min(900px,100%);max-height:min(88vh,850px);overflow:auto;border:1px solid #334155;border-radius:18px;background:#111827;box-shadow:0 28px 80px rgba(0,0,0,.6)}.dialog-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:24px 26px 12px}.dialog-head h2{margin:10px 0 0;font-size:1.65rem;overflow-wrap:anywhere}.close{display:grid;flex:none;width:38px;height:38px;border:1px solid #374151;border-radius:9px;background:#182131;color:#cbd5e1;cursor:pointer;place-items:center;font-size:1.25rem}.close:hover{border-color:var(--violet);color:white}.dialog-body{padding:0 26px 26px}.full-description{margin:5px 0 25px;color:#c7ced8}.dialog h3{margin:22px 0 10px;font-size:.9rem;letter-spacing:.04em;text-transform:uppercase;color:#c4b5fd}.table-wrap{overflow-x:auto;border:1px solid #263244;border-radius:10px}table{width:100%;border-collapse:collapse;font-size:.82rem}th,td{padding:10px 12px;border-bottom:1px solid #263244;text-align:left;vertical-align:top}tr:last-child td{border-bottom:0}th{background:#0e1624;color:#9ca3af;font-size:.72rem;text-transform:uppercase}td{overflow-wrap:anywhere}.required{display:inline-block;padding:2px 7px;border-radius:999px;font-size:.68rem;font-weight:700}.yes{background:rgba(239,68,68,.15);color:#fca5a5}.no{background:rgba(34,197,94,.13);color:#86efac}.no-args{padding:18px;border:1px dashed #374151;border-radius:10px;color:var(--muted);text-align:center}pre{margin:0;padding:16px;border:1px solid #30363d;border-radius:10px;background:#0d1117;color:#a5f3fc;white-space:pre-wrap;overflow-wrap:anywhere;font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}@media(max-width:800px){.stats{grid-template-columns:repeat(2,1fr)}.search-row{align-items:stretch;flex-direction:column}.results{text-align:left}.controls{position:static}.shell{padding-top:32px}}@media(max-width:430px){.shell{width:min(100% - 20px,1440px)}.grid{grid-template-columns:1fr}.stats{gap:9px}.stat{padding:15px 8px}.dialog-head,.dialog-body{padding-left:18px;padding-right:18px}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="hero"><div class="brand">🛠️ SEO TOOLBOX</div><h1 class="gradient">165 mini-outils SEO</h1><p>Boîte à outils open-source pour consultants — API DataForSEO + modules maison.</p></header>
+    <section class="stats" aria-label="Statistiques"><div class="stat"><strong class="gradient" id="stat-total">—</strong><span>outils</span></div><div class="stat"><strong class="gradient" id="stat-categories">—</strong><span>catégories</span></div><div class="stat"><strong class="gradient" id="stat-with-args">—</strong><span>outils avec arguments</span></div><div class="stat"><strong class="gradient" id="stat-without-args">—</strong><span>outils sans argument</span></div></section>
+    <section class="controls" aria-label="Filtres"><div class="search-row"><label class="search"><span hidden>Rechercher</span><input id="search" type="search" placeholder="Rechercher un outil (nom, description, argument)…" autocomplete="off"></label><div class="results" id="results" aria-live="polite"></div></div><div class="chips" id="chips" aria-label="Catégories"></div></section>
+    <section class="grid" id="grid" aria-live="polite"></section>
+  </main>
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><article class="dialog"><header class="dialog-head"><div><span class="category" id="modal-category"></span><h2 id="modal-title"></h2></div><button class="close" id="close-modal" type="button" aria-label="Fermer">✕</button></header><div class="dialog-body"><p class="full-description" id="modal-description"></p><h3>Arguments</h3><div id="arguments"></div><h3>Commande d’exemple</h3><pre><code id="example"></code></pre></div></article></div>
+  <script id="tools-data" type="application/json">
+[
+ {
+  "name": "cannibalization",
+  "category": "analyzers",
+  "description": "Detect competing ranking pages for each query.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "domain",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "keywords",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "country",
+    "required": false,
+    "default": "FR",
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "co_occurrence",
+  "category": "analyzers",
+  "description": "Find terms co-occurring with a keyword.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "text",
+    "required": true,
+    "default": null,
+    "help": "Text.",
+    "is_flag": false
+   },
+   {
+    "name": "keyword",
+    "required": true,
+    "default": null,
+    "help": "Keyword.",
+    "is_flag": false
+   },
+   {
+    "name": "limit",
+    "required": false,
+    "default": "20",
+    "help": "Limit.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "content_length",
+  "category": "analyzers",
+  "description": "Measure structural content length for URLs.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "urls",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "entity_extractor",
+  "category": "analyzers",
+  "description": "Extract named entities with local patterns.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "text",
+    "required": true,
+    "default": null,
+    "help": "Text.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "heading_checker",
+  "category": "analyzers",
+  "description": "Check page heading structure.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "urls",
+    "required": true,
+    "default": null,
+    "help": "Urls.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "internal_anchors",
+  "category": "analyzers",
+  "description": "Aggregate internal anchor text and targets.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "urls",
+    "required": true,
+    "default": null,
+    "help": "Urls.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "internal_link_score",
+  "category": "analyzers",
+  "description": "Score internal links and crawl depth.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "urls",
+    "required": true,
+    "default": null,
+    "help": "Urls.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "keyword_density",
+  "category": "analyzers",
+  "description": "Measure keyword density by paragraph.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "text",
+    "required": true,
+    "default": null,
+    "help": "Text.",
+    "is_flag": false
+   },
+   {
+    "name": "keyword",
+    "required": true,
+    "default": null,
+    "help": "Keyword.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "keyword_extractor",
+  "category": "analyzers",
+  "description": "Extract frequent keyword candidates and bigrams.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "text",
+    "required": true,
+    "default": null,
+    "help": "Text.",
+    "is_flag": false
+   },
+   {
+    "name": "limit",
+    "required": false,
+    "default": "20",
+    "help": "Limit.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "keyword_rank_change",
+  "category": "analyzers",
+  "description": "Compare two keyword ranking CSV snapshots.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "before",
+    "required": true,
+    "default": null,
+    "help": "Before.",
+    "is_flag": false
+   },
+   {
+    "name": "after",
+    "required": true,
+    "default": null,
+    "help": "After.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "merge_candidates",
+  "category": "analyzers",
+  "description": "Find near-duplicate merge candidates (maximum 10 URLs).",
+  "returns": "table",
+  "args": [
+   {
+    "name": "urls",
+    "required": true,
+    "default": null,
+    "help": "Urls.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "ngrams",
+  "category": "analyzers",
+  "description": "Count frequent word n-grams.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "text",
+    "required": true,
+    "default": null,
+    "help": "Text.",
+    "is_flag": false
+   },
+   {
+    "name": "n",
+    "required": false,
+    "default": "2",
+    "help": "N.",
+    "is_flag": false
+   },
+   {
+    "name": "limit",
+    "required": false,
+    "default": "20",
+    "help": "Limit.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "page_similarity",
+  "category": "analyzers",
+  "description": "Compare visible text across URLs.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "urls",
+    "required": true,
+    "default": null,
+    "help": "Urls.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "readability",
+  "category": "analyzers",
+  "description": "Estimate French or English text readability.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "text",
+    "required": true,
+    "default": null,
+    "help": "Text.",
+    "is_flag": false
+   },
+   {
+    "name": "lang",
+    "required": false,
+    "default": "fr",
+    "help": "Lang.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "tfidf_analysis",
+  "category": "analyzers",
+  "description": "Compare simple term frequency against the live top five.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "keyword",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "text",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "country",
+    "required": false,
+    "default": "FR",
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "thin_content",
+  "category": "analyzers",
+  "description": "Score thin-content risk for text or a URL.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "value",
+    "required": true,
+    "default": null,
+    "help": "Value.",
+    "is_flag": false
+   },
+   {
+    "name": "text",
+    "required": false,
+    "default": null,
+    "help": "Text.",
+    "is_flag": true
+   }
+  ]
+ },
+ {
+  "name": "title_meta_analyzer",
+  "category": "analyzers",
+  "description": "Analyze page titles and descriptions in bulk.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "urls",
+    "required": true,
+    "default": null,
+    "help": "Urls.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "ads_equivalent",
+  "category": "calculators",
+  "description": "Calculate the Ads budget equivalent of organic clicks.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "clicks",
+    "required": true,
+    "default": null,
+    "help": "Clicks.",
+    "is_flag": false
+   },
+   {
+    "name": "cpc",
+    "required": true,
+    "default": null,
+    "help": "Cpc.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "backlink_value",
+  "category": "calculators",
+  "description": "Estimate a backlink's monthly market value.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "authority",
+    "required": true,
+    "default": null,
+    "help": "Authority.",
+    "is_flag": false
+   },
+   {
+    "name": "referral_traffic",
+    "required": true,
+    "default": null,
+    "help": "Referral traffic.",
+    "is_flag": false
+   },
+   {
+    "name": "cpc",
+    "required": true,
+    "default": null,
+    "help": "Cpc.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "cac_ltv",
+  "category": "calculators",
+  "description": "Calculate customer acquisition cost and LTV ratio.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "cost",
+    "required": true,
+    "default": null,
+    "help": "Cost.",
+    "is_flag": false
+   },
+   {
+    "name": "customers",
+    "required": true,
+    "default": null,
+    "help": "Customers.",
+    "is_flag": false
+   },
+   {
+    "name": "ltv",
+    "required": true,
+    "default": null,
+    "help": "Ltv.",
+    "is_flag": false
+   },
+   {
+    "name": "months",
+    "required": false,
+    "default": "1",
+    "help": "Months.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "content_cost",
+  "category": "calculators",
+  "description": "Calculate article and monthly content costs.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "words",
+    "required": true,
+    "default": null,
+    "help": "Words.",
+    "is_flag": false
+   },
+   {
+    "name": "rate",
+    "required": true,
+    "default": null,
+    "help": "Rate.",
+    "is_flag": false
+   },
+   {
+    "name": "articles",
+    "required": false,
+    "default": "1",
+    "help": "Articles.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "content_length_target",
+  "category": "calculators",
+  "description": "Derive a content-length target from the live top ten.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "keyword",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "country",
+    "required": false,
+    "default": "FR",
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "conversion_rate",
+  "category": "calculators",
+  "description": "Calculate conversion rate and a Wilson 95% interval.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "visits",
+    "required": true,
+    "default": null,
+    "help": "Visits.",
+    "is_flag": false
+   },
+   {
+    "name": "conversions",
+    "required": true,
+    "default": null,
+    "help": "Conversions.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "crawl_time",
+  "category": "calculators",
+  "description": "Estimate crawl duration and calendar time.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "pages",
+    "required": true,
+    "default": null,
+    "help": "Pages.",
+    "is_flag": false
+   },
+   {
+    "name": "urls_per_second",
+    "required": true,
+    "default": null,
+    "help": "Urls per second.",
+    "is_flag": false
+   },
+   {
+    "name": "daily_budget_pct",
+    "required": false,
+    "default": "100",
+    "help": "Daily budget pct.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "ctr_curve",
+  "category": "calculators",
+  "description": "Show desktop and mobile CTR reference curves.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "position",
+    "required": false,
+    "default": "0",
+    "help": "Position.",
+    "is_flag": false
+   },
+   {
+    "name": "device",
+    "required": false,
+    "default": "both",
+    "help": "Device.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "eeat_score",
+  "category": "calculators",
+  "description": "Score ten E-E-A-T checklist signals.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "author",
+    "required": false,
+    "default": null,
+    "help": "Set the author signal.",
+    "is_flag": true
+   },
+   {
+    "name": "bio",
+    "required": false,
+    "default": null,
+    "help": "Set the bio signal.",
+    "is_flag": true
+   },
+   {
+    "name": "sources",
+    "required": false,
+    "default": null,
+    "help": "Set the sources signal.",
+    "is_flag": true
+   },
+   {
+    "name": "mentions",
+    "required": false,
+    "default": null,
+    "help": "Set the mentions signal.",
+    "is_flag": true
+   },
+   {
+    "name": "evidence",
+    "required": false,
+    "default": null,
+    "help": "Set the evidence signal.",
+    "is_flag": true
+   },
+   {
+    "name": "dates",
+    "required": false,
+    "default": null,
+    "help": "Set the dates signal.",
+    "is_flag": true
+   },
+   {
+    "name": "faq",
+    "required": false,
+    "default": null,
+    "help": "Set the faq signal.",
+    "is_flag": true
+   },
+   {
+    "name": "reviews",
+    "required": false,
+    "default": null,
+    "help": "Set the reviews signal.",
+    "is_flag": true
+   },
+   {
+    "name": "about",
+    "required": false,
+    "default": null,
+    "help": "Set the about signal.",
+    "is_flag": true
+   },
+   {
+    "name": "contact",
+    "required": false,
+    "default": null,
+    "help": "Set the contact signal.",
+    "is_flag": true
+   }
+  ]
+ },
+ {
+  "name": "implicit_cpc",
+  "category": "calculators",
+  "description": "Calculate the implicit cost of an organic click.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "cost",
+    "required": true,
+    "default": null,
+    "help": "Cost.",
+    "is_flag": false
+   },
+   {
+    "name": "clicks",
+    "required": true,
+    "default": null,
+    "help": "Clicks.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "opportunity_cost",
+  "category": "calculators",
+  "description": "Estimate missed organic equivalent ad value.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "volume",
+    "required": true,
+    "default": null,
+    "help": "Volume.",
+    "is_flag": false
+   },
+   {
+    "name": "cpc",
+    "required": true,
+    "default": null,
+    "help": "Cpc.",
+    "is_flag": false
+   },
+   {
+    "name": "position",
+    "required": true,
+    "default": null,
+    "help": "Position.",
+    "is_flag": false
+   },
+   {
+    "name": "days",
+    "required": false,
+    "default": "30",
+    "help": "Days.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "organic_revenue",
+  "category": "calculators",
+  "description": "Estimate organic monthly and annual revenue.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "traffic",
+    "required": true,
+    "default": null,
+    "help": "Traffic.",
+    "is_flag": false
+   },
+   {
+    "name": "conversion",
+    "required": true,
+    "default": null,
+    "help": "Conversion.",
+    "is_flag": false
+   },
+   {
+    "name": "basket",
+    "required": true,
+    "default": null,
+    "help": "Basket.",
+    "is_flag": false
+   },
+   {
+    "name": "growth",
+    "required": false,
+    "default": "0",
+    "help": "Growth.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "position_value",
+  "category": "calculators",
+  "description": "Estimate the monetary gain from a better CTR position.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "volume",
+    "required": true,
+    "default": null,
+    "help": "Volume.",
+    "is_flag": false
+   },
+   {
+    "name": "cpc",
+    "required": true,
+    "default": null,
+    "help": "Cpc.",
+    "is_flag": false
+   },
+   {
+    "name": "current_ctr",
+    "required": true,
+    "default": null,
+    "help": "Current ctr.",
+    "is_flag": false
+   },
+   {
+    "name": "target_ctr",
+    "required": true,
+    "default": null,
+    "help": "Target ctr.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "roi_seo",
+  "category": "calculators",
+  "description": "Project cumulative SEO ROI by month.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "budget",
+    "required": true,
+    "default": null,
+    "help": "Budget.",
+    "is_flag": false
+   },
+   {
+    "name": "basket",
+    "required": true,
+    "default": null,
+    "help": "Basket.",
+    "is_flag": false
+   },
+   {
+    "name": "margin",
+    "required": true,
+    "default": null,
+    "help": "Margin.",
+    "is_flag": false
+   },
+   {
+    "name": "conversion",
+    "required": true,
+    "default": null,
+    "help": "Conversion.",
+    "is_flag": false
+   },
+   {
+    "name": "months",
+    "required": false,
+    "default": "12",
+    "help": "Months.",
+    "is_flag": false
+   },
+   {
+    "name": "traffic",
+    "required": false,
+    "default": "1000",
+    "help": "Traffic.",
+    "is_flag": false
+   },
+   {
+    "name": "growth",
+    "required": false,
+    "default": "5",
+    "help": "Growth.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "sitemap_split",
+  "category": "calculators",
+  "description": "Calculate sitemap splitting requirements.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "urls",
+    "required": true,
+    "default": null,
+    "help": "Urls.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "time_to_rank",
+  "category": "calculators",
+  "description": "Estimate a heuristic time to rank.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "kd",
+    "required": true,
+    "default": null,
+    "help": "Kd.",
+    "is_flag": false
+   },
+   {
+    "name": "authority",
+    "required": true,
+    "default": null,
+    "help": "Authority.",
+    "is_flag": false
+   },
+   {
+    "name": "age",
+    "required": true,
+    "default": null,
+    "help": "Age.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "traffic_projection",
+  "category": "calculators",
+  "description": "Project estimated organic traffic over 6 and 12 months.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "volume",
+    "required": true,
+    "default": null,
+    "help": "Volume.",
+    "is_flag": false
+   },
+   {
+    "name": "ctr",
+    "required": true,
+    "default": null,
+    "help": "Ctr.",
+    "is_flag": false
+   },
+   {
+    "name": "click_rate",
+    "required": false,
+    "default": "100",
+    "help": "Click rate.",
+    "is_flag": false
+   },
+   {
+    "name": "growth",
+    "required": false,
+    "default": "0",
+    "help": "Growth.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "canonical_checker",
+  "category": "checkers",
+  "description": "Check canonical tags in bulk.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "urls",
+    "required": true,
+    "default": null,
+    "help": "Urls.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "canonical_hreflang_check",
+  "category": "checkers",
+  "description": "Check canonical and hreflang coherence.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "url",
+    "required": true,
+    "default": null,
+    "help": "Url.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "hreflang_checker",
+  "category": "checkers",
+  "description": "Check hreflang tags and reciprocity.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "urls",
+    "required": true,
+    "default": null,
+    "help": "Urls.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "hreflang_reciprocity",
+  "category": "checkers",
+  "description": "Check multilingual hreflang return links.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "urls",
+    "required": true,
+    "default": null,
+    "help": "Urls.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "http_status_bulk",
+  "category": "checkers",
+  "description": "Check HTTP status and latency in bulk.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "urls",
+    "required": true,
+    "default": null,
+    "help": "Urls.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "indexation_checker",
+  "category": "checkers",
+  "description": "Compare URLs with an indexation export.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "indexed",
+    "required": true,
+    "default": null,
+    "help": "Indexed.",
+    "is_flag": false
+   },
+   {
+    "name": "urls",
+    "required": true,
+    "default": null,
+    "help": "Urls.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "lighthouse_cwv",
+  "category": "checkers",
+  "description": "Report Lighthouse and Core Web Vitals metrics.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "url",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "strategy",
+    "required": false,
+    "default": "mobile",
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "mixed_content",
+  "category": "checkers",
+  "description": "Find insecure resources on an HTTPS page.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "url",
+    "required": true,
+    "default": null,
+    "help": "Url.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "og_validator",
+  "category": "checkers",
+  "description": "Validate Open Graph and Twitter metadata.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "urls",
+    "required": true,
+    "default": null,
+    "help": "Urls.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "redirect_chain",
+  "category": "checkers",
+  "description": "Trace a redirect chain and detect loops.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "url",
+    "required": true,
+    "default": null,
+    "help": "Url.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "robots_checker",
+  "category": "checkers",
+  "description": "Check robots.txt access for a user agent.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "url",
+    "required": true,
+    "default": null,
+    "help": "Url.",
+    "is_flag": false
+   },
+   {
+    "name": "user_agent",
+    "required": false,
+    "default": "googlebot",
+    "help": "User agent.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "schema_validator",
+  "category": "checkers",
+  "description": "Validate JSON-LD blocks on a page.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "url",
+    "required": true,
+    "default": null,
+    "help": "Url.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "sitemap_diff",
+  "category": "checkers",
+  "description": "Compare two sitemap URL lists.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "before",
+    "required": true,
+    "default": null,
+    "help": "Before.",
+    "is_flag": false
+   },
+   {
+    "name": "after",
+    "required": true,
+    "default": null,
+    "help": "After.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "sitemap_validator",
+  "category": "checkers",
+  "description": "Validate sitemap XML and locations.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "url",
+    "required": true,
+    "default": null,
+    "help": "Url.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "title_meta_validator",
+  "category": "checkers",
+  "description": "Validate one title and meta description.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "url",
+    "required": false,
+    "default": "",
+    "help": "Url.",
+    "is_flag": false
+   },
+   {
+    "name": "title",
+    "required": false,
+    "default": "",
+    "help": "Title.",
+    "is_flag": false
+   },
+   {
+    "name": "meta",
+    "required": false,
+    "default": "",
+    "help": "Meta.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "url_syntax",
+  "category": "checkers",
+  "description": "Validate and normalize URL syntax.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "urls",
+    "required": true,
+    "default": null,
+    "help": "Urls.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "viewport_checker",
+  "category": "checkers",
+  "description": "Check responsive viewport metadata.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "urls",
+    "required": true,
+    "default": null,
+    "help": "Urls.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "bytes_human",
+  "category": "converters",
+  "description": "Convert byte sizes to readable units.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "value",
+    "required": true,
+    "default": null,
+    "help": "Value.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "case_convert",
+  "category": "converters",
+  "description": "Convert text casing.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "value",
+    "required": true,
+    "default": null,
+    "help": "Value.",
+    "is_flag": false
+   },
+   {
+    "name": "mode",
+    "required": true,
+    "default": null,
+    "help": "Mode.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "csv_json",
+  "category": "converters",
+  "description": "Convert CSV and JSON bidirectionally.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "value",
+    "required": true,
+    "default": null,
+    "help": "Value.",
+    "is_flag": false
+   },
+   {
+    "name": "mode",
+    "required": false,
+    "default": "csv2json",
+    "help": "Mode.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "date_convert",
+  "category": "converters",
+  "description": "Convert ISO, French, epoch, and sitemap dates.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "value",
+    "required": true,
+    "default": null,
+    "help": "Value.",
+    "is_flag": false
+   },
+   {
+    "name": "input_format",
+    "required": true,
+    "default": null,
+    "help": "Input format.",
+    "is_flag": false
+   },
+   {
+    "name": "output_format",
+    "required": true,
+    "default": null,
+    "help": "Output format.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "dedupe_list",
+  "category": "converters",
+  "description": "Clean, sort, and deduplicate lines.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "value",
+    "required": true,
+    "default": null,
+    "help": "Value.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "html_entities",
+  "category": "converters",
+  "description": "Encode or decode HTML entities.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "value",
+    "required": true,
+    "default": null,
+    "help": "Value.",
+    "is_flag": false
+   },
+   {
+    "name": "mode",
+    "required": false,
+    "default": "encode",
+    "help": "Mode.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "html_to_md",
+  "category": "converters",
+  "description": "Convert common HTML to Markdown.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "value",
+    "required": true,
+    "default": null,
+    "help": "Value.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "jsonld_minify",
+  "category": "converters",
+  "description": "Minify or beautify JSON-LD.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "value",
+    "required": true,
+    "default": null,
+    "help": "Value.",
+    "is_flag": false
+   },
+   {
+    "name": "mode",
+    "required": false,
+    "default": "minify",
+    "help": "Mode.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "list_to_urls",
+  "category": "converters",
+  "description": "Convert a keyword list to URLs.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "value",
+    "required": true,
+    "default": null,
+    "help": "Value.",
+    "is_flag": false
+   },
+   {
+    "name": "prefix",
+    "required": false,
+    "default": "",
+    "help": "Prefix.",
+    "is_flag": false
+   },
+   {
+    "name": "suffix",
+    "required": false,
+    "default": "",
+    "help": "Suffix.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "md_to_html",
+  "category": "converters",
+  "description": "Convert Markdown to HTML.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "value",
+    "required": true,
+    "default": null,
+    "help": "Value.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "strip_accents",
+  "category": "converters",
+  "description": "Remove text diacritics.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "value",
+    "required": true,
+    "default": null,
+    "help": "Value.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "text_to_slug",
+  "category": "converters",
+  "description": "Convert text to a clean URL slug.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "value",
+    "required": true,
+    "default": null,
+    "help": "Value.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "tokenize",
+  "category": "converters",
+  "description": "Extract unique terms without common stopwords.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "value",
+    "required": true,
+    "default": null,
+    "help": "Value.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "url_decode",
+  "category": "converters",
+  "description": "Decode percent escapes in a URL.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "value",
+    "required": true,
+    "default": null,
+    "help": "Value.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "url_encode",
+  "category": "converters",
+  "description": "Percent-encode a URL.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "value",
+    "required": true,
+    "default": null,
+    "help": "Value.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "anchor_generator",
+  "category": "generators",
+  "description": "Generate anchor-text variants.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "keywords",
+    "required": true,
+    "default": null,
+    "help": "Keywords.",
+    "is_flag": false
+   },
+   {
+    "name": "brand",
+    "required": false,
+    "default": "",
+    "help": "Brand.",
+    "is_flag": false
+   },
+   {
+    "name": "url",
+    "required": false,
+    "default": "",
+    "help": "Url.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "breadcrumb_generator",
+  "category": "generators",
+  "description": "Generate JSON-LD and HTML breadcrumbs.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "paths",
+    "required": true,
+    "default": null,
+    "help": "Paths.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "canonical_generator",
+  "category": "generators",
+  "description": "Normalize and identify a canonical URL.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "url",
+    "required": true,
+    "default": null,
+    "help": "Url.",
+    "is_flag": false
+   },
+   {
+    "name": "force_https",
+    "required": false,
+    "default": null,
+    "help": "Force https.",
+    "is_flag": true
+   },
+   {
+    "name": "remove_www",
+    "required": false,
+    "default": null,
+    "help": "Remove www.",
+    "is_flag": true
+   },
+   {
+    "name": "remove_trailing_slash",
+    "required": false,
+    "default": null,
+    "help": "Remove trailing slash.",
+    "is_flag": true
+   },
+   {
+    "name": "remove_params",
+    "required": false,
+    "default": "",
+    "help": "Remove params.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "content_brief",
+  "category": "generators",
+  "description": "Generate a live SERP-based content brief.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "keyword",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "country",
+    "required": false,
+    "default": "FR",
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "faq_generator",
+  "category": "generators",
+  "description": "Generate FAQs from PAA and lexical variants.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "keyword",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "country",
+    "required": false,
+    "default": "FR",
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "hreflang_generator",
+  "category": "generators",
+  "description": "Generate hreflang and x-default links.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "urls",
+    "required": true,
+    "default": null,
+    "help": "Urls.",
+    "is_flag": false
+   },
+   {
+    "name": "x_default",
+    "required": false,
+    "default": "",
+    "help": "X default.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "internal_link_generator",
+  "category": "generators",
+  "description": "Suggest internal links from a page set.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "pages",
+    "required": true,
+    "default": null,
+    "help": "Pages.",
+    "is_flag": false
+   },
+   {
+    "name": "keywords",
+    "required": true,
+    "default": null,
+    "help": "Keywords.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "keyword_expansion",
+  "category": "generators",
+  "description": "Expand a seed with live long-tail keywords.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "seed",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "country",
+    "required": false,
+    "default": "FR",
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "limit",
+    "required": false,
+    "default": "30",
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "meta_generator",
+  "category": "generators",
+  "description": "Generate title and meta-description content.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "keyword",
+    "required": true,
+    "default": null,
+    "help": "Keyword.",
+    "is_flag": false
+   },
+   {
+    "name": "template",
+    "required": true,
+    "default": null,
+    "help": "Template.",
+    "is_flag": false
+   },
+   {
+    "name": "description",
+    "required": false,
+    "default": "{kw}",
+    "help": "Description.",
+    "is_flag": false
+   },
+   {
+    "name": "brand",
+    "required": false,
+    "default": "",
+    "help": "Brand.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "meta_variants",
+  "category": "generators",
+  "description": "Generate meta-description variants.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "description",
+    "required": true,
+    "default": null,
+    "help": "Description.",
+    "is_flag": false
+   },
+   {
+    "name": "count",
+    "required": false,
+    "default": "5",
+    "help": "Count.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "og_generator",
+  "category": "generators",
+  "description": "Generate Open Graph and Twitter Card markup.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "title",
+    "required": true,
+    "default": null,
+    "help": "Title.",
+    "is_flag": false
+   },
+   {
+    "name": "description",
+    "required": true,
+    "default": null,
+    "help": "Description.",
+    "is_flag": false
+   },
+   {
+    "name": "image",
+    "required": true,
+    "default": null,
+    "help": "Image.",
+    "is_flag": false
+   },
+   {
+    "name": "type",
+    "required": false,
+    "default": "website",
+    "help": "Type.",
+    "is_flag": false
+   },
+   {
+    "name": "url",
+    "required": false,
+    "default": "",
+    "help": "Url.",
+    "is_flag": false
+   },
+   {
+    "name": "site_name",
+    "required": false,
+    "default": "",
+    "help": "Site name.",
+    "is_flag": false
+   },
+   {
+    "name": "twitter",
+    "required": false,
+    "default": "",
+    "help": "Twitter.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "prompt_generator",
+  "category": "generators",
+  "description": "Generate reusable French SEO prompts.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "type",
+    "required": true,
+    "default": null,
+    "help": "audit, brief, geo, meta, strategy, or email.",
+    "is_flag": false
+   },
+   {
+    "name": "subject",
+    "required": true,
+    "default": null,
+    "help": "Prompt subject.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "redirect_generator",
+  "category": "generators",
+  "description": "Generate Apache, nginx, and CSV redirects.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "old",
+    "required": true,
+    "default": null,
+    "help": "Old.",
+    "is_flag": false
+   },
+   {
+    "name": "new",
+    "required": true,
+    "default": null,
+    "help": "New.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "redirect_map_generator",
+  "category": "generators",
+  "description": "Build a migration redirect map and htaccess rules.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "old",
+    "required": true,
+    "default": null,
+    "help": "Old.",
+    "is_flag": false
+   },
+   {
+    "name": "new",
+    "required": false,
+    "default": "",
+    "help": "New.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "robots_generator",
+  "category": "generators",
+  "description": "Generate a robots.txt file.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "user_agent",
+    "required": false,
+    "default": "*",
+    "help": "User agent.",
+    "is_flag": false
+   },
+   {
+    "name": "disallow",
+    "required": false,
+    "default": "",
+    "help": "Disallow.",
+    "is_flag": false
+   },
+   {
+    "name": "allow",
+    "required": false,
+    "default": "",
+    "help": "Allow.",
+    "is_flag": false
+   },
+   {
+    "name": "sitemap",
+    "required": false,
+    "default": "",
+    "help": "Sitemap.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "sitemap_generator",
+  "category": "generators",
+  "description": "Generate an XML sitemap.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "urls",
+    "required": true,
+    "default": null,
+    "help": "Urls.",
+    "is_flag": false
+   },
+   {
+    "name": "lastmod",
+    "required": false,
+    "default": "",
+    "help": "Lastmod.",
+    "is_flag": false
+   },
+   {
+    "name": "priority",
+    "required": false,
+    "default": "0.5",
+    "help": "Priority.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "snippet_generator",
+  "category": "generators",
+  "description": "Format content for a featured snippet.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "content",
+    "required": true,
+    "default": null,
+    "help": "Content.",
+    "is_flag": false
+   },
+   {
+    "name": "type",
+    "required": false,
+    "default": "paragraph",
+    "help": "Type.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "title_variants",
+  "category": "generators",
+  "description": "Generate title variants for testing.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "title",
+    "required": true,
+    "default": null,
+    "help": "Title.",
+    "is_flag": false
+   },
+   {
+    "name": "count",
+    "required": false,
+    "default": "8",
+    "help": "Count.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "brand_visibility_ia",
+  "category": "geo",
+  "description": "Measure brand visibility in AI citations.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "brand",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "keyword",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "engines",
+    "required": false,
+    "default": "chatgpt,perplexity,gemini",
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "country",
+    "required": false,
+    "default": "US",
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "llm_response_extract",
+  "category": "geo",
+  "description": "Extract a live structured LLM response.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "keyword",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "engine",
+    "required": false,
+    "default": "chatgpt",
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "llm_volume",
+  "category": "geo",
+  "description": "Show LLM search volumes for keywords.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "keywords",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "anchor_distribution",
+  "category": "links",
+  "description": "Show anchor text distribution.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "domain",
+    "required": true,
+    "default": null,
+    "help": "Domain.",
+    "is_flag": false
+   },
+   {
+    "name": "limit",
+    "required": false,
+    "default": "50",
+    "help": "Limit.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "authority_score",
+  "category": "links",
+  "description": "Return authority rank scores for domains.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "domains",
+    "required": true,
+    "default": null,
+    "help": "Domains.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "broken_link_building",
+  "category": "links",
+  "description": "Find 404s in a competitor sitemap (maximum 100 URLs).",
+  "returns": "table",
+  "args": [
+   {
+    "name": "domain",
+    "required": true,
+    "default": null,
+    "help": "Domain.",
+    "is_flag": false
+   },
+   {
+    "name": "keyword",
+    "required": false,
+    "default": "",
+    "help": "Keyword.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "disavow_generator",
+  "category": "links",
+  "description": "List toxic domains and optionally write a disavow file.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "domain",
+    "required": true,
+    "default": null,
+    "help": "Domain.",
+    "is_flag": false
+   },
+   {
+    "name": "spam_threshold",
+    "required": false,
+    "default": "60",
+    "help": "Spam threshold.",
+    "is_flag": false
+   },
+   {
+    "name": "output",
+    "required": false,
+    "default": "",
+    "help": "Output.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "dofollow_ratio",
+  "category": "links",
+  "description": "Show dofollow and nofollow shares.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "domain",
+    "required": true,
+    "default": null,
+    "help": "Domain.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "link_gap",
+  "category": "links",
+  "description": "Find competitor referring domains missing from a target.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "domain",
+    "required": true,
+    "default": null,
+    "help": "Domain.",
+    "is_flag": false
+   },
+   {
+    "name": "competitor",
+    "required": true,
+    "default": null,
+    "help": "Competitor.",
+    "is_flag": false
+   },
+   {
+    "name": "limit",
+    "required": false,
+    "default": "50",
+    "help": "Limit.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "link_profile_compare",
+  "category": "links",
+  "description": "Compare backlink profiles across domains.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "domains",
+    "required": true,
+    "default": null,
+    "help": "Domains.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "link_profile_evolution",
+  "category": "links",
+  "description": "Show backlink profile totals over time.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "domain",
+    "required": true,
+    "default": null,
+    "help": "Domain.",
+    "is_flag": false
+   },
+   {
+    "name": "days",
+    "required": false,
+    "default": "90",
+    "help": "Days.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "most_linked_pages",
+  "category": "links",
+  "description": "List a domain's most-linked pages.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "domain",
+    "required": true,
+    "default": null,
+    "help": "Domain.",
+    "is_flag": false
+   },
+   {
+    "name": "limit",
+    "required": false,
+    "default": "50",
+    "help": "Limit.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "new_lost_links",
+  "category": "links",
+  "description": "Show daily gained and lost links.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "domain",
+    "required": true,
+    "default": null,
+    "help": "Domain.",
+    "is_flag": false
+   },
+   {
+    "name": "days",
+    "required": false,
+    "default": "30",
+    "help": "Days.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "pbn_detection",
+  "category": "links",
+  "description": "Find shared referring networks and IPs.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "domain",
+    "required": true,
+    "default": null,
+    "help": "Domain.",
+    "is_flag": false
+   },
+   {
+    "name": "limit",
+    "required": false,
+    "default": "50",
+    "help": "Limit.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "prospect_emails",
+  "category": "links",
+  "description": "Extract public emails from prospect pages (maximum 10 URLs).",
+  "returns": "table",
+  "args": [
+   {
+    "name": "urls",
+    "required": true,
+    "default": null,
+    "help": "Urls.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "referring_domains_analysis",
+  "category": "links",
+  "description": "Analyze referring-domain quality metrics.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "domain",
+    "required": true,
+    "default": null,
+    "help": "Domain.",
+    "is_flag": false
+   },
+   {
+    "name": "limit",
+    "required": false,
+    "default": "50",
+    "help": "Limit.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "toxic_links",
+  "category": "links",
+  "description": "List backlinks above a spam threshold.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "domain",
+    "required": true,
+    "default": null,
+    "help": "Domain.",
+    "is_flag": false
+   },
+   {
+    "name": "spam_threshold",
+    "required": false,
+    "default": "60",
+    "help": "Spam threshold.",
+    "is_flag": false
+   },
+   {
+    "name": "limit",
+    "required": false,
+    "default": "50",
+    "help": "Limit.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "check_http",
+  "category": "misc",
+  "description": "Check a URL's IP, headers, status, and latency.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "url",
+    "required": true,
+    "default": null,
+    "help": "Url.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "count_text",
+  "category": "misc",
+  "description": "Count text characters, words, and lines.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "value",
+    "required": true,
+    "default": null,
+    "help": "Value.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "domain_compare",
+  "category": "misc",
+  "description": "Compare domain authority and search KPIs.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "domains",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "country",
+    "required": false,
+    "default": "US",
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "extract_emails",
+  "category": "misc",
+  "description": "Extract unique email addresses from text.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "value",
+    "required": true,
+    "default": null,
+    "help": "Value.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "extract_urls",
+  "category": "misc",
+  "description": "Extract unique URLs from text or HTML.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "value",
+    "required": true,
+    "default": null,
+    "help": "Value.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "instant_audit",
+  "category": "misc",
+  "description": "Audit essential metadata for one URL instantly.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "url",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "lorem_seo",
+  "category": "misc",
+  "description": "Generate parameterized SEO placeholder text.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "paragraphs",
+    "required": false,
+    "default": "1",
+    "help": "Paragraphs.",
+    "is_flag": false
+   },
+   {
+    "name": "words",
+    "required": false,
+    "default": "50",
+    "help": "Words.",
+    "is_flag": false
+   },
+   {
+    "name": "keywords",
+    "required": false,
+    "default": "",
+    "help": "Keywords.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "meta_raw_extractor",
+  "category": "misc",
+  "description": "Extract raw on-page metadata.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "url",
+    "required": true,
+    "default": null,
+    "help": "Url.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "technology_detection",
+  "category": "misc",
+  "description": "Detect a site's technology stack.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "domain",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "text_diff",
+  "category": "misc",
+  "description": "Compare two texts with a readable diff.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "text1",
+    "required": true,
+    "default": null,
+    "help": "Text1.",
+    "is_flag": false
+   },
+   {
+    "name": "text2",
+    "required": true,
+    "default": null,
+    "help": "Text2.",
+    "is_flag": false
+   },
+   {
+    "name": "mode",
+    "required": false,
+    "default": "unified",
+    "help": "Mode.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "tz_convert",
+  "category": "misc",
+  "description": "Convert local time between IANA time zones.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "value",
+    "required": true,
+    "default": null,
+    "help": "Value.",
+    "is_flag": false
+   },
+   {
+    "name": "source",
+    "required": true,
+    "default": null,
+    "help": "Source.",
+    "is_flag": false
+   },
+   {
+    "name": "target",
+    "required": true,
+    "default": null,
+    "help": "Target.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "whois_lite",
+  "category": "misc",
+  "description": "Show essential WHOIS data for a domain.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "domain",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "jsonld_article",
+  "category": "schema",
+  "description": "Generate Article JSON-LD.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "headline",
+    "required": true,
+    "default": null,
+    "help": "Headline.",
+    "is_flag": false
+   },
+   {
+    "name": "author",
+    "required": true,
+    "default": null,
+    "help": "Author.",
+    "is_flag": false
+   },
+   {
+    "name": "date_published",
+    "required": true,
+    "default": null,
+    "help": "Date published.",
+    "is_flag": false
+   },
+   {
+    "name": "date_modified",
+    "required": false,
+    "default": "",
+    "help": "Date modified.",
+    "is_flag": false
+   },
+   {
+    "name": "image",
+    "required": false,
+    "default": "",
+    "help": "Image.",
+    "is_flag": false
+   },
+   {
+    "name": "publisher",
+    "required": false,
+    "default": "",
+    "help": "Publisher.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "jsonld_breadcrumb",
+  "category": "schema",
+  "description": "Generate BreadcrumbList JSON-LD.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "paths",
+    "required": true,
+    "default": null,
+    "help": "Paths.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "jsonld_event",
+  "category": "schema",
+  "description": "Generate Event JSON-LD.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "name",
+    "required": true,
+    "default": null,
+    "help": "Name.",
+    "is_flag": false
+   },
+   {
+    "name": "start_date",
+    "required": true,
+    "default": null,
+    "help": "Start date.",
+    "is_flag": false
+   },
+   {
+    "name": "end_date",
+    "required": false,
+    "default": "",
+    "help": "End date.",
+    "is_flag": false
+   },
+   {
+    "name": "location_name",
+    "required": false,
+    "default": "",
+    "help": "Location name.",
+    "is_flag": false
+   },
+   {
+    "name": "location_address",
+    "required": false,
+    "default": "",
+    "help": "Location address.",
+    "is_flag": false
+   },
+   {
+    "name": "description",
+    "required": false,
+    "default": "",
+    "help": "Description.",
+    "is_flag": false
+   },
+   {
+    "name": "offers_price",
+    "required": false,
+    "default": "0",
+    "help": "Offers price.",
+    "is_flag": false
+   },
+   {
+    "name": "currency",
+    "required": false,
+    "default": "EUR",
+    "help": "Currency.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "jsonld_extract",
+  "category": "schema",
+  "description": "Extract JSON-LD blocks from a URL.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "url",
+    "required": true,
+    "default": null,
+    "help": "Url.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "jsonld_faq",
+  "category": "schema",
+  "description": "Generate FAQPage JSON-LD.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "qa",
+    "required": true,
+    "default": null,
+    "help": "Qa.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "jsonld_howto",
+  "category": "schema",
+  "description": "Generate HowTo JSON-LD.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "name",
+    "required": true,
+    "default": null,
+    "help": "Name.",
+    "is_flag": false
+   },
+   {
+    "name": "steps",
+    "required": true,
+    "default": null,
+    "help": "Steps.",
+    "is_flag": false
+   },
+   {
+    "name": "total_time",
+    "required": false,
+    "default": "",
+    "help": "Total time.",
+    "is_flag": false
+   },
+   {
+    "name": "tool",
+    "required": false,
+    "default": "",
+    "help": "Tool.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "jsonld_jobposting",
+  "category": "schema",
+  "description": "Generate JobPosting JSON-LD.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "title",
+    "required": true,
+    "default": null,
+    "help": "Title.",
+    "is_flag": false
+   },
+   {
+    "name": "description",
+    "required": true,
+    "default": null,
+    "help": "Description.",
+    "is_flag": false
+   },
+   {
+    "name": "hiring_organization",
+    "required": true,
+    "default": null,
+    "help": "Hiring organization.",
+    "is_flag": false
+   },
+   {
+    "name": "employment_type",
+    "required": false,
+    "default": "",
+    "help": "Employment type.",
+    "is_flag": false
+   },
+   {
+    "name": "date_posted",
+    "required": false,
+    "default": "",
+    "help": "Date posted.",
+    "is_flag": false
+   },
+   {
+    "name": "valid_through",
+    "required": false,
+    "default": "",
+    "help": "Valid through.",
+    "is_flag": false
+   },
+   {
+    "name": "salary",
+    "required": false,
+    "default": "0",
+    "help": "Salary.",
+    "is_flag": false
+   },
+   {
+    "name": "currency",
+    "required": false,
+    "default": "EUR",
+    "help": "Currency.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "jsonld_localbusiness",
+  "category": "schema",
+  "description": "Generate LocalBusiness JSON-LD.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "name",
+    "required": true,
+    "default": null,
+    "help": "Name.",
+    "is_flag": false
+   },
+   {
+    "name": "address",
+    "required": true,
+    "default": null,
+    "help": "Address.",
+    "is_flag": false
+   },
+   {
+    "name": "phone",
+    "required": false,
+    "default": "",
+    "help": "Phone.",
+    "is_flag": false
+   },
+   {
+    "name": "opening_hours",
+    "required": false,
+    "default": "",
+    "help": "Opening hours.",
+    "is_flag": false
+   },
+   {
+    "name": "geo",
+    "required": false,
+    "default": "",
+    "help": "Geo.",
+    "is_flag": false
+   },
+   {
+    "name": "price_range",
+    "required": false,
+    "default": "",
+    "help": "Price range.",
+    "is_flag": false
+   },
+   {
+    "name": "url",
+    "required": false,
+    "default": "",
+    "help": "Url.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "jsonld_organization",
+  "category": "schema",
+  "description": "Generate Organization JSON-LD.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "name",
+    "required": true,
+    "default": null,
+    "help": "Name.",
+    "is_flag": false
+   },
+   {
+    "name": "url",
+    "required": false,
+    "default": "",
+    "help": "Url.",
+    "is_flag": false
+   },
+   {
+    "name": "logo",
+    "required": false,
+    "default": "",
+    "help": "Logo.",
+    "is_flag": false
+   },
+   {
+    "name": "same_as",
+    "required": false,
+    "default": "",
+    "help": "Same as.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "jsonld_product",
+  "category": "schema",
+  "description": "Generate Product JSON-LD.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "name",
+    "required": true,
+    "default": null,
+    "help": "Name.",
+    "is_flag": false
+   },
+   {
+    "name": "description",
+    "required": false,
+    "default": "",
+    "help": "Description.",
+    "is_flag": false
+   },
+   {
+    "name": "sku",
+    "required": false,
+    "default": "",
+    "help": "Sku.",
+    "is_flag": false
+   },
+   {
+    "name": "price",
+    "required": false,
+    "default": "0",
+    "help": "Price.",
+    "is_flag": false
+   },
+   {
+    "name": "currency",
+    "required": false,
+    "default": "EUR",
+    "help": "Currency.",
+    "is_flag": false
+   },
+   {
+    "name": "availability",
+    "required": false,
+    "default": "InStock",
+    "help": "Availability.",
+    "is_flag": false
+   },
+   {
+    "name": "brand",
+    "required": false,
+    "default": "",
+    "help": "Brand.",
+    "is_flag": false
+   },
+   {
+    "name": "rating_value",
+    "required": false,
+    "default": "0",
+    "help": "Rating value.",
+    "is_flag": false
+   },
+   {
+    "name": "review_count",
+    "required": false,
+    "default": "0",
+    "help": "Review count.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "jsonld_review",
+  "category": "schema",
+  "description": "Generate Review JSON-LD.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "item_reviewed",
+    "required": true,
+    "default": null,
+    "help": "Item reviewed.",
+    "is_flag": false
+   },
+   {
+    "name": "author",
+    "required": true,
+    "default": null,
+    "help": "Author.",
+    "is_flag": false
+   },
+   {
+    "name": "rating_value",
+    "required": true,
+    "default": null,
+    "help": "Rating value.",
+    "is_flag": false
+   },
+   {
+    "name": "review_body",
+    "required": false,
+    "default": "",
+    "help": "Review body.",
+    "is_flag": false
+   },
+   {
+    "name": "date_published",
+    "required": false,
+    "default": "",
+    "help": "Date published.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "jsonld_validate",
+  "category": "schema",
+  "description": "Validate JSON-LD syntax and required fields.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "value",
+    "required": true,
+    "default": null,
+    "help": "Value.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "amazon_asin",
+  "category": "serp",
+  "description": "Show details for an Amazon ASIN.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "asin",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "amazon_competitors",
+  "category": "serp",
+  "description": "Find competing Amazon products.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "asin",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "limit",
+    "required": false,
+    "default": "20",
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "amazon_product_keywords",
+  "category": "serp",
+  "description": "List ranking keywords for an Amazon ASIN.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "asin",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "limit",
+    "required": false,
+    "default": "20",
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "amazon_products",
+  "category": "serp",
+  "description": "Search Amazon products.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "keyword",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "limit",
+    "required": false,
+    "default": "10",
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "amazon_sellers",
+  "category": "serp",
+  "description": "List Amazon sellers for an ASIN.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "asin",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "limit",
+    "required": false,
+    "default": "20",
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "brand_mentions",
+  "category": "serp",
+  "description": "Find web pages mentioning a phrase or brand.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "keyword",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "limit",
+    "required": false,
+    "default": "10",
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "competitor_keywords",
+  "category": "serp",
+  "description": "List a competitor's ranking keywords.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "domain",
+    "required": true,
+    "default": null,
+    "help": "Domain.",
+    "is_flag": false
+   },
+   {
+    "name": "country",
+    "required": false,
+    "default": "FR",
+    "help": "Country.",
+    "is_flag": false
+   },
+   {
+    "name": "limit",
+    "required": false,
+    "default": "50",
+    "help": "Limit.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "content_summary",
+  "category": "serp",
+  "description": "Summarize content metrics for targets.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "targets",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "features_matrix",
+  "category": "serp",
+  "description": "Compare SERP features across keywords.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "keywords",
+    "required": true,
+    "default": null,
+    "help": "Keywords.",
+    "is_flag": false
+   },
+   {
+    "name": "country",
+    "required": false,
+    "default": "FR",
+    "help": "Country.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "google_trends",
+  "category": "serp",
+  "description": "Show Google Trends interest over time.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "keyword",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "country",
+    "required": false,
+    "default": "FR",
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "time_range",
+    "required": false,
+    "default": "",
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "intent_analysis",
+  "category": "serp",
+  "description": "Classify search intent for several keywords.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "keywords",
+    "required": true,
+    "default": null,
+    "help": "Keywords.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "keyword_gap",
+  "category": "serp",
+  "description": "Find keywords missing from competitor profiles.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "domain",
+    "required": true,
+    "default": null,
+    "help": "Domain.",
+    "is_flag": false
+   },
+   {
+    "name": "competitors",
+    "required": true,
+    "default": null,
+    "help": "Competitors.",
+    "is_flag": false
+   },
+   {
+    "name": "country",
+    "required": false,
+    "default": "FR",
+    "help": "Country.",
+    "is_flag": false
+   },
+   {
+    "name": "limit",
+    "required": false,
+    "default": "50",
+    "help": "Limit.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "keyword_suggestions_tool",
+  "category": "serp",
+  "description": "Merge suggested and related keywords.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "keyword",
+    "required": true,
+    "default": null,
+    "help": "Keyword.",
+    "is_flag": false
+   },
+   {
+    "name": "country",
+    "required": false,
+    "default": "FR",
+    "help": "Country.",
+    "is_flag": false
+   },
+   {
+    "name": "limit",
+    "required": false,
+    "default": "30",
+    "help": "Limit.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "paa_extractor",
+  "category": "serp",
+  "description": "Extract People Also Ask questions and snippets.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "keyword",
+    "required": true,
+    "default": null,
+    "help": "Keyword.",
+    "is_flag": false
+   },
+   {
+    "name": "country",
+    "required": false,
+    "default": "FR",
+    "help": "Country.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "phrase_trends",
+  "category": "serp",
+  "description": "Show phrase citation trends over time.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "keyword",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "rank_bulk",
+  "category": "serp",
+  "description": "Check a domain's positions for several keywords.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "domain",
+    "required": true,
+    "default": null,
+    "help": "Domain.",
+    "is_flag": false
+   },
+   {
+    "name": "keywords",
+    "required": true,
+    "default": null,
+    "help": "Keywords.",
+    "is_flag": false
+   },
+   {
+    "name": "country",
+    "required": false,
+    "default": "FR",
+    "help": "Country.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "serp_compare",
+  "category": "serp",
+  "description": "Compare organic results for several keywords.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "keywords",
+    "required": true,
+    "default": null,
+    "help": "Keywords.",
+    "is_flag": false
+   },
+   {
+    "name": "country",
+    "required": false,
+    "default": "FR",
+    "help": "Country.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "serp_countries",
+  "category": "serp",
+  "description": "Compare a keyword across several countries.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "keyword",
+    "required": true,
+    "default": null,
+    "help": "Keyword.",
+    "is_flag": false
+   },
+   {
+    "name": "countries",
+    "required": false,
+    "default": "FR,GB,US",
+    "help": "Countries.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "serp_devices",
+  "category": "serp",
+  "description": "Compare desktop and mobile organic results.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "keyword",
+    "required": true,
+    "default": null,
+    "help": "Keyword.",
+    "is_flag": false
+   },
+   {
+    "name": "country",
+    "required": false,
+    "default": "FR",
+    "help": "Country.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "serp_features",
+  "category": "serp",
+  "description": "Show the features present in a SERP.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "keyword",
+    "required": true,
+    "default": null,
+    "help": "Keyword.",
+    "is_flag": false
+   },
+   {
+    "name": "country",
+    "required": false,
+    "default": "FR",
+    "help": "Country.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "serp_history",
+  "category": "serp",
+  "description": "Show historical organic positions.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "keyword",
+    "required": true,
+    "default": null,
+    "help": "Keyword.",
+    "is_flag": false
+   },
+   {
+    "name": "country",
+    "required": false,
+    "default": "FR",
+    "help": "Country.",
+    "is_flag": false
+   },
+   {
+    "name": "days",
+    "required": false,
+    "default": "30",
+    "help": "Days.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "serp_snapshot",
+  "category": "serp",
+  "description": "Archive a live SERP as standalone HTML.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "keyword",
+    "required": true,
+    "default": null,
+    "help": "Keyword.",
+    "is_flag": false
+   },
+   {
+    "name": "country",
+    "required": false,
+    "default": "FR",
+    "help": "Country.",
+    "is_flag": false
+   },
+   {
+    "name": "output",
+    "required": false,
+    "default": "data/serp-snapshots/",
+    "help": "Output.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "top_searches",
+  "category": "serp",
+  "description": "List a market's top searches.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "country",
+    "required": false,
+    "default": "FR",
+    "help": "Country.",
+    "is_flag": false
+   },
+   {
+    "name": "category",
+    "required": false,
+    "default": "",
+    "help": "Category.",
+    "is_flag": false
+   },
+   {
+    "name": "limit",
+    "required": false,
+    "default": "50",
+    "help": "Limit.",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "trends_by_region",
+  "category": "serp",
+  "description": "Show trends interest by subregion.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "keyword",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "country",
+    "required": false,
+    "default": "FR",
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "trends_demography",
+  "category": "serp",
+  "description": "Show trends interest by demographic segment.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "keyword",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "country",
+    "required": false,
+    "default": "FR",
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "youtube_comments",
+  "category": "serp",
+  "description": "Extract YouTube comments for voice-of-customer analysis.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "video",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "limit",
+    "required": false,
+    "default": "20",
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "youtube_keywords",
+  "category": "serp",
+  "description": "Search organic YouTube video results.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "keyword",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "limit",
+    "required": false,
+    "default": "10",
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "youtube_transcript",
+  "category": "serp",
+  "description": "Extract a YouTube transcript and top n-grams.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "video",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "n",
+    "required": false,
+    "default": "2",
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "limit",
+    "required": false,
+    "default": "10",
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "youtube_video_info",
+  "category": "serp",
+  "description": "Show metadata for a YouTube video.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "video",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "competitor_benchmark",
+  "category": "strategy",
+  "description": "Benchmark domain SEO and backlink KPIs.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "domains",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "country",
+    "required": false,
+    "default": "FR",
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "content_audit",
+  "category": "strategy",
+  "description": "Classify GSC pages for content action.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "data",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "difficulty_score",
+  "category": "strategy",
+  "description": "Retrieve keyword difficulty levels.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "keywords",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "country",
+    "required": false,
+    "default": "FR",
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "editorial_calendar",
+  "category": "strategy",
+  "description": "Schedule a prioritized editorial calendar.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "keywords",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "frequency",
+    "required": false,
+    "default": "4",
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "start_date",
+    "required": false,
+    "default": "",
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "effort_impact",
+  "category": "strategy",
+  "description": "Classify actions in an effort-impact matrix.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "actions",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "intent_mix",
+  "category": "strategy",
+  "description": "Summarize the search-intent mix.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "keywords",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "keyword_prioritization",
+  "category": "strategy",
+  "description": "Prioritize keywords from live SEO metrics.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "keywords",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "country",
+    "required": false,
+    "default": "FR",
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "semantic_silo",
+  "category": "strategy",
+  "description": "Build a pillar and subpage semantic silo.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "keywords",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "country",
+    "required": false,
+    "default": "FR",
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "seo_projection",
+  "category": "strategy",
+  "description": "Project compounding SEO traffic and value.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "current_traffic",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "growth",
+    "required": false,
+    "default": "5",
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "months",
+    "required": false,
+    "default": "12",
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "value_per_visit",
+    "required": false,
+    "default": "0",
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "topic_clusters",
+  "category": "strategy",
+  "description": "Build enriched thematic keyword clusters.",
+  "returns": "table",
+  "args": [
+   {
+    "name": "keywords",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "country",
+    "required": false,
+    "default": "FR",
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ },
+ {
+  "name": "traffic_potential",
+  "category": "strategy",
+  "description": "Estimate keyword traffic potential at a documented CTR.",
+  "returns": "str",
+  "args": [
+   {
+    "name": "domain",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "keywords",
+    "required": true,
+    "default": null,
+    "help": "",
+    "is_flag": false
+   },
+   {
+    "name": "country",
+    "required": false,
+    "default": "FR",
+    "help": "",
+    "is_flag": false
+   }
+  ]
+ }
+]
+  </script>
+  <script>
+    (() => {
+      'use strict';
+      const tools = JSON.parse(document.getElementById('tools-data').textContent);
+      const categories = ['analyzers','calculators','checkers','converters','generators','geo','links','misc','schema','serp','strategy'];
+      const colors = {analyzers:'#a78bfa',calculators:'#22d3ee',checkers:'#34d399',converters:'#fbbf24',generators:'#fb7185',geo:'#2dd4bf',links:'#60a5fa',misc:'#c084fc',schema:'#f472b6',serp:'#f97316',strategy:'#84cc16'};
+      const labels = {analyzers:'Analyseurs',calculators:'Calculateurs',checkers:'Vérificateurs',converters:'Convertisseurs',generators:'Générateurs',geo:'Géo',links:'Liens',misc:'Divers',schema:'Schéma',serp:'SERP',strategy:'Stratégie'};
+      const byId = id => document.getElementById(id);
+      const grid = byId('grid'), search = byId('search'), chips = byId('chips'), modal = byId('modal');
+      let activeCategory = 'all', lastFocus = null;
+      const normalize = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+      const escapeHTML = value => String(value ?? '').replace(/[&<>"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char]));
+      tools.sort((a,b) => categories.indexOf(a.category)-categories.indexOf(b.category) || a.name.localeCompare(b.name,'fr'));
+      const counts = Object.fromEntries(categories.map(category => [category,tools.filter(tool => tool.category === category).length]));
+      byId('stat-total').textContent = tools.length;
+      byId('stat-categories').textContent = categories.length;
+      byId('stat-with-args').textContent = tools.filter(tool => tool.args.length).length;
+      byId('stat-without-args').textContent = tools.filter(tool => !tool.args.length).length;
+
+      function buildChips(){
+        const entries = [['all','Toutes',tools.length],...categories.map(category => [category,labels[category],counts[category]])];
+        chips.innerHTML = entries.map(([key,label,count]) => `<button type="button" class="chip${key === activeCategory ? ' active' : ''}" data-category="${key}">${label} · ${count}</button>`).join('');
+      }
+      function render(){
+        const query = normalize(search.value.trim());
+        const visible = tools.filter(tool => (activeCategory === 'all' || tool.category === activeCategory) && (!query || normalize([tool.name,tool.description,...tool.args.map(arg => arg.name)].join(' ')).includes(query)));
+        byId('results').textContent = `${visible.length} outil${visible.length > 1 ? 's' : ''} affiché${visible.length > 1 ? 's' : ''}`;
+        grid.innerHTML = visible.length ? visible.map(tool => {
+          const index = tools.indexOf(tool), argText = tool.args.length ? `⚙️ ${tool.args.length} arg${tool.args.length > 1 ? 's' : ''}` : '🎯 sans argument';
+          return `<article class="card" tabindex="0" role="button" aria-label="Voir ${escapeHTML(tool.name)}" data-index="${index}"><div class="card-inner"><span class="category" style="--cat:${colors[tool.category]}">${escapeHTML(labels[tool.category])}</span><h2>${escapeHTML(tool.name)}</h2><p class="description">${escapeHTML(tool.description)}</p><div class="meta"><span class="pill">${argText}</span><span class="pill">${tool.returns === 'table' ? '📊 table' : '📝 texte'}</span></div></div></article>`;
+        }).join('') : '<div class="empty">Aucun outil ne correspond à cette recherche.</div>';
+      }
+      function exampleValue(arg){
+        if(arg.is_flag) return '';
+        const help = String(arg.help || '').trim().replace(/\s+/g,' ');
+        return help ? help.slice(0,12).trim() : 'valeur';
+      }
+      function openModal(tool, trigger){
+        lastFocus = trigger;
+        const category = byId('modal-category');
+        category.textContent = labels[tool.category]; category.style.setProperty('--cat',colors[tool.category]);
+        byId('modal-title').textContent = tool.name; byId('modal-description').textContent = tool.description;
+        byId('arguments').innerHTML = tool.args.length ? `<div class="table-wrap"><table><thead><tr><th>Nom</th><th>Requis</th><th>Défaut</th><th>Aide</th></tr></thead><tbody>${tool.args.map(arg => `<tr><td><code>--${escapeHTML(arg.name)}</code></td><td><span class="required ${arg.required ? 'yes' : 'no'}">${arg.required ? 'oui' : 'non'}</span></td><td>${arg.default === null || arg.default === '' ? '—' : escapeHTML(arg.default)}</td><td>${escapeHTML(arg.help || '—')}</td></tr>`).join('')}</tbody></table></div>` : '<div class="no-args">Aucun argument — outil sans paramètre.</div>';
+        const required = tool.args.filter(arg => arg.required).map(arg => `--${arg.name}${arg.is_flag ? '' : ` ${exampleValue(arg)}`}`);
+        byId('example').textContent = ['seo tool',tool.name,...required].join(' ');
+        modal.classList.add('open'); document.body.style.overflow = 'hidden'; byId('close-modal').focus();
+      }
+      function closeModal(){modal.classList.remove('open');document.body.style.overflow='';if(lastFocus)lastFocus.focus()}
+      chips.addEventListener('click', event => {const button=event.target.closest('[data-category]');if(!button)return;activeCategory=button.dataset.category;buildChips();render()});
+      search.addEventListener('input',render);
+      grid.addEventListener('click',event=>{const card=event.target.closest('.card');if(card)openModal(tools[Number(card.dataset.index)],card)});
+      grid.addEventListener('keydown',event=>{if((event.key==='Enter'||event.key===' ')&&event.target.classList.contains('card')){event.preventDefault();openModal(tools[Number(event.target.dataset.index)],event.target)}});
+      byId('close-modal').addEventListener('click',closeModal);
+      modal.addEventListener('click',event=>{if(event.target===modal)closeModal()});
+      document.addEventListener('keydown',event=>{if(event.key==='Escape'&&modal.classList.contains('open'))closeModal()});
+      buildChips(); render();
+    })();
+  </script>
+</body>
+</html>
