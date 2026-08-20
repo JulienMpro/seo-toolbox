@@ -63,6 +63,18 @@ python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 ```
 
+For the optional local web demonstration, install the web extra instead:
+
+```bash
+pip install -e ".[dev,web]"
+uvicorn api.main:app --port 8010
+```
+
+Then open `http://127.0.0.1:8010`. The UI calls the same cached DataForSEO
+modules as the CLI and reads the same environment variables. It is intended for
+local use or deployment behind authentication; do not expose it publicly without
+adding authentication and appropriate production hardening.
+
 ## Configuration
 
 | Variable | Rôle |

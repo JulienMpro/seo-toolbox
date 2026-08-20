@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}SEO Toolbox{% endblock %}</title>
+  <style>
+    :root { --ink:#182230; --muted:#64748b; --line:#dbe2ea; --paper:#fff; --wash:#f4f7fa; --brand:#0f766e; --brand-dark:#115e59; --danger:#b42318; --warn:#92400e; --radius:12px; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); background:var(--wash); font:15px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    a { color:var(--brand-dark); }
+    header { background:#13212d; color:#fff; }
+    .topbar, main, footer { width:min(1120px,calc(100% - 32px)); margin:auto; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; min-height:68px; gap:24px; }
+    .brand { color:#fff; text-decoration:none; font-size:20px; font-weight:750; letter-spacing:-.02em; }
+    .version { margin-left:7px; color:#a7b6c5; font-size:12px; font-weight:500; }
+    nav { display:flex; flex-wrap:wrap; gap:16px; }
+    nav a { color:#d9e3ec; text-decoration:none; font-size:14px; }
+    nav a:hover { color:#fff; }
+    main { min-height:calc(100vh - 132px); padding:38px 0 56px; }
+    h1 { margin:0 0 6px; font-size:30px; letter-spacing:-.03em; }
+    h2 { margin:30px 0 14px; font-size:20px; }
+    .lede { color:var(--muted); margin:0 0 26px; }
+    .banner, .error, .empty { padding:11px 14px; border-radius:8px; margin-bottom:18px; }
+    .banner { background:#fff7ed; border:1px solid #fed7aa; color:var(--warn); }
+    .error { background:#fff1f0; border:1px solid #fda29b; color:var(--danger); }
+    .empty { background:#f8fafc; border:1px dashed var(--line); color:var(--muted); }
+    .panel, .card, .metric { background:var(--paper); border:1px solid var(--line); border-radius:var(--radius); box-shadow:0 1px 2px rgba(15,23,42,.04); }
+    .panel { padding:22px; margin-top:20px; }
+    form { display:flex; align-items:end; flex-wrap:wrap; gap:14px; }
+    label { display:grid; gap:6px; color:#344054; font-size:13px; font-weight:650; }
+    input, select { min-width:150px; height:42px; padding:0 11px; color:var(--ink); background:#fff; border:1px solid #b9c4d0; border-radius:7px; font:inherit; }
+    input[type=url], input[type=text] { width:min(420px,78vw); }
+    button { height:42px; padding:0 17px; color:#fff; background:var(--brand); border:0; border-radius:7px; font:inherit; font-weight:700; cursor:pointer; }
+    button:hover { background:var(--brand-dark); }
+    .hint { width:100%; margin:3px 0 0; color:var(--muted); font-size:13px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(245px,1fr)); gap:15px; }
+    .card { display:block; padding:20px; color:inherit; text-decoration:none; transition:transform .12s,border-color .12s; }
+    .card:hover { transform:translateY(-2px); border-color:#8fb8b3; }
+    .card strong { display:block; margin-bottom:5px; font-size:17px; }
+    .card span { color:var(--muted); }
+    .metrics { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin:20px 0; }
+    .metric { padding:15px; }
+    .metric span { display:block; color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
+    .metric strong { display:block; margin-top:3px; font-size:22px; }
+    .table-wrap { overflow-x:auto; border:1px solid var(--line); border-radius:10px; background:#fff; }
+    table { width:100%; border-collapse:collapse; }
+    th, td { padding:11px 13px; border-bottom:1px solid #e8edf2; text-align:left; vertical-align:top; }
+    th { color:#475467; background:#f8fafc; font-size:12px; text-transform:uppercase; letter-spacing:.035em; }
+    tr:last-child td { border-bottom:0; }
+    .serp-list { display:grid; gap:12px; }
+    .serp-item { padding:17px 19px; }
+    .serp-item h3 { margin:2px 0 5px; font-size:17px; }
+    .serp-item h3 a { text-decoration:none; }
+    .rank, .domain { color:var(--muted); font-size:13px; }
+    .serp-item p { margin:6px 0 0; color:#475467; }
+    footer { padding:20px 0 28px; color:var(--muted); border-top:1px solid var(--line); font-size:13px; }
+    @media (max-width:760px) { .topbar { align-items:flex-start; flex-direction:column; padding:16px 0; } nav { gap:11px 15px; } main { padding-top:26px; } input[type=url],input[type=text] { width:calc(100vw - 76px); } }
+  </style>
+</head>
+<body>
+  <header><div class="topbar">
+    <a class="brand" href="/">SEO Toolbox <span class="version">v{{ version }}</span></a>
+    <nav aria-label="Main navigation"><a href="/keywords">Keywords</a><a href="/serp">SERP</a><a href="/geo">AI mentions</a><a href="/backlinks">Backlinks</a><a href="/audit">Audit</a></nav>
+  </div></header>
+  <main>
+    {% if credentials_missing %}<div class="banner"><strong>API credentials missing.</strong> Set DATAFORSEO_USERNAME and DATAFORSEO_PASSWORD. The technical audit remains available without them.</div>{% endif %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer>SEO Toolbox local demonstration UI · Do not expose publicly without authentication.</footer>
+</body>
+</html>

@@ -1,0 +1,5 @@
+{% extends "base.html" %}{% block title %}AI Mentions · SEO Toolbox{% endblock %}
+{% block content %}<h1>AI Mentions</h1><p class="lede">Domains mentioned for a keyword by a selected AI engine.</p>
+<section class="panel"><form method="get"><label>Keyword<input name="keyword" value="{{ keyword }}" required></label><label>Engine<select name="engine">{% for item in engines %}<option value="{{ item }}" {% if item == engine %}selected{% endif %}>{{ item }}</option>{% endfor %}</select></label><button>Find mentions</button><p class="hint">This live DataForSEO request can take 5–30 seconds.</p></form></section>
+{% if error %}<div class="error"><strong>AI mentions request failed:</strong> {{ error }}</div>{% elif results is not none %}<h2>Mentions</h2>{% if results %}<div class="table-wrap"><table><thead><tr><th>Domain</th><th>Rank</th><th>Mention count</th></tr></thead><tbody>{% for row in results %}<tr><td>{{ row.domain|nd }}</td><td>{{ row.rank|nd }}</td><td>{{ row.mention_count|nd }}</td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="empty">No mentions returned (N/D).</div>{% endif %}{% endif %}
+{% endblock %}

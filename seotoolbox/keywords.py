@@ -26,6 +26,8 @@ COUNTRIES = {
     "UK": {"language_code": "en", "location_code": 2826},
     "US": {"language_code": "en", "location_code": 2840},
     "CA": {"language_code": "en", "location_code": 2124},
+    "BE": {"language_code": "fr", "location_name": "Belgium"},
+    "CH": {"language_code": "fr", "location_name": "Switzerland"},
     "DE": {"language_code": "de", "location_name": "Germany"},
     "ES": {"language_code": "es", "location_name": "Spain"},
     "IT": {"language_code": "it", "location_name": "Italy"},
