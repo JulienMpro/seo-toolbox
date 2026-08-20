@@ -47,4 +47,4 @@ def list_tools(category: str | None = None) -> list[ToolSpec]:
     return sorted(tools, key=lambda tool: (tool.category, tool.name))
 
 
-from . import calculators, converters, misc  # noqa: E402,F401
+from . import calculators, converters, generators, misc, schema  # noqa: E402,F401
