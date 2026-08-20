@@ -52,13 +52,17 @@ def phrase_trends(keyword: str, client: DataForSEOClient | None = None) -> list[
     return rows
 
 
-def content_summary(targets: str, client: DataForSEOClient | None = None) -> list[dict[str, Any]]:
-    """Return aggregate content metrics for URLs or domains."""
-    target_list = [x.strip() for x in targets.splitlines() if x.strip()]
-    rows = _call("content_analysis/summary/live", {"targets": target_list}, client)
-    return [{"target": x.get("target") or x.get("domain"), "pages": x.get("pages_count") or x.get("pages"),
-             "words": x.get("words_count") or x.get("words"), "backlinks": x.get("backlinks"),
-             "average_words": x.get("average_words") or x.get("avg_words")} for x in rows]
+def content_summary(keyword: str, client: DataForSEOClient | None = None) -> list[dict[str, Any]]:
+    """Return aggregate citation metrics for a content-analysis keyword."""
+    rows = _call("content_analysis/summary/live", {"keyword": keyword}, client)
+    return [{"total_count": x.get("total_count", "N/D"),
+             "rank": x.get("rank", "N/D"),
+             "top_domains": x.get("top_domains", "N/D"),
+             "sentiment_connotations": x.get("sentiment_connotations", "N/D"),
+             "connotation_types": x.get("connotation_types", "N/D"),
+             "page_types": x.get("page_types", "N/D"),
+             "countries": x.get("countries", "N/D"),
+             "languages": x.get("languages", "N/D")} for x in rows]
 
 
 def amazon_products(keyword: str, limit: int = 10, client: DataForSEOClient | None = None) -> list[dict[str, Any]]:
@@ -77,7 +81,8 @@ def amazon_products(keyword: str, limit: int = 10, client: DataForSEOClient | No
 def amazon_product_keywords(asin: str, limit: int = 20, client: DataForSEOClient | None = None) -> list[dict[str, Any]]:
     """List keywords for which an Amazon product ranks."""
     rows = []
-    for x in _call("dataforseo_labs/amazon/ranked_keywords/live", {"asin": asin, "limit": limit}, client)[:limit]:
+    payload = {"asin": asin, "location_name": "United States", "language_code": "en", "limit": limit}
+    for x in _call("dataforseo_labs/amazon/ranked_keywords/live", payload, client)[:limit]:
         data = x.get("keyword_data") if isinstance(x.get("keyword_data"), dict) else x
         info = data.get("keyword_info") if isinstance(data.get("keyword_info"), dict) else {}
         ranked = x.get("ranked_serp_element") if isinstance(x.get("ranked_serp_element"), dict) else {}
@@ -195,7 +200,7 @@ def brand_visibility_ia(brand: str, keyword: str, engines: str = "chatgpt,perple
 SERP = "serp"
 register(ToolSpec("brand_mentions", brand_mentions, "Find web pages mentioning a phrase or brand.", SERP, [A("keyword", True), A("limit", False, "10")], "table"))
 register(ToolSpec("phrase_trends", phrase_trends, "Show phrase citation trends over time.", SERP, [A("keyword", True)], "table"))
-register(ToolSpec("content_summary", content_summary, "Summarize content metrics for targets.", SERP, [A("targets", True)], "table"))
+register(ToolSpec("content_summary", content_summary, "Summarize citation metrics for a content keyword.", SERP, [A("keyword", True)], "table"))
 register(ToolSpec("amazon_products", amazon_products, "Search Amazon products.", SERP, [A("keyword", True), A("limit", False, "10")], "table"))
 register(ToolSpec("amazon_product_keywords", amazon_product_keywords, "List ranking keywords for an Amazon ASIN.", SERP, [A("asin", True), A("limit", False, "20")], "table"))
 register(ToolSpec("amazon_competitors", amazon_competitors, "Find competing Amazon products.", SERP, [A("asin", True), A("limit", False, "20")], "table"))

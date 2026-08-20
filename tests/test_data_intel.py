@@ -33,17 +33,50 @@ def test_content_tools():
     }
     assert "page_type" not in client.calls[0][1]
     assert data.phrase_trends("brand", FakeClient([{"trends": [{"date": "2026-01", "count": 3}]}]))[0]["value"] == 3
-    assert data.content_summary("a.test", FakeClient([{"target": "a.test", "pages_count": 4}]))[0]["pages"] == 4
+    summary_client = FakeClient([{"total_count": 4, "rank": 100, "top_domains": [{"domain": "a.test", "count": 2}]}])
+    assert data.content_summary("brand", summary_client)[0] == {
+        "total_count": 4,
+        "rank": 100,
+        "top_domains": [{"domain": "a.test", "count": 2}],
+        "sentiment_connotations": "N/D",
+        "connotation_types": "N/D",
+        "page_types": "N/D",
+        "countries": "N/D",
+        "languages": "N/D",
+    }
+    assert summary_client.calls == [("content_analysis/summary/live", {"keyword": "brand"})]
 
 
 def test_amazon_tools():
     product = {"data_asin": "A", "title": "Chair", "rating": {"value": 4.5, "votes_count": 2}}
     assert data.amazon_products("chair", client=FakeClient([product]))[0]["asin"] == "A"
     kw = {"keyword_data": {"keyword": "chair", "keyword_info": {"search_volume": 8}}, "ranked_serp_element": {"serp_item": {"rank_absolute": 2}}}
-    assert data.amazon_product_keywords("A", client=FakeClient([kw]))[0]["position"] == 2
+    keywords_client = FakeClient([kw])
+    assert data.amazon_product_keywords("A", limit=3, client=keywords_client)[0]["position"] == 2
+    assert keywords_client.calls == [("dataforseo_labs/amazon/ranked_keywords/live", {
+        "asin": "A", "location_name": "United States", "language_code": "en", "limit": 3,
+    })]
     assert data.amazon_competitors("A", client=FakeClient([{"asin": "B"}]))[0]["asin"] == "B"
     assert data.amazon_sellers("A", client=FakeClient([{"seller_name": "Shop"}]))[0]["seller"] == "Shop"
     assert data.amazon_asin("A", FakeClient([{"title": "Chair"}]))[0]["title"] == "Chair"
+
+
+def test_content_summary_uses_required_keyword_payload():
+    client = FakeClient([{"total_count": 0}])
+
+    data.content_summary("plombier paris", client)
+
+    assert client.calls == [("content_analysis/summary/live", {"keyword": "plombier paris"})]
+
+
+def test_amazon_product_keywords_uses_required_market_payload():
+    client = FakeClient([])
+
+    data.amazon_product_keywords("B0H9KH97SK", limit=3, client=client)
+
+    assert client.calls == [("dataforseo_labs/amazon/ranked_keywords/live", {
+        "asin": "B0H9KH97SK", "location_name": "United States", "language_code": "en", "limit": 3,
+    })]
 
 
 def test_trend_tools():

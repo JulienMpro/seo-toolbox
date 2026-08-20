@@ -22,7 +22,7 @@ An **open-source** toolbox for SEO consultants: **165 mini-tools** covering ever
 | **Strategy** | 11 | editorial calendar, KW prioritization, clusters, semantic cocoon, competitor benchmarking… |
 | **GEO / AI** | 3 | brand visibility in AI answers, LLM mentions (chatgpt/perplexity/claude/gemini)… |
 
-### 12 module commands (in addition to the mini-tools)
+### 13 module commands (in addition to the mini-tools)
 
 `seo keywords` · `seo ranks` · `seo geo` · `seo backlinks` · `seo serp` · `seo audit` · `seo gsc` · `seo ga4` · `seo local` · `seo logs` · `seo monitor` · `seo report` · `seo content`
 
@@ -66,7 +66,7 @@ export DATAFORSEO_PASSWORD=...
 seo tools list
 seo tools list --category serp
 
-# Use a tool (help: seo tool <nom> --help)
+# Use a tool (help: seo tool <name> --help)
 seo tool serp_compare --keywords "plombier paris\nplombier lyon" --country FR
 seo tool roi_seo --budget 2000 --basket 300 --margin 40 --conversion 2 --months 12
 seo tool jsonld_faq --qa "Quel prix ?|50 euros"
