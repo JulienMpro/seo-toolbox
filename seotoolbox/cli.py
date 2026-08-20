@@ -155,7 +155,7 @@ def run_tool(ctx: typer.Context, name: str) -> None:
             _emit(result, "table")
         else:
             console.print(str(result), highlight=False, markup=False)
-    except (ValueError, TypeError, httpx.HTTPError, OSError) as exc:
+    except (ApiError, DataForSEOError, ValueError, TypeError, httpx.HTTPError, OSError) as exc:
         console.print(f"[red]Error:[/red] {exc}", highlight=False)
         raise typer.Exit(code=1) from exc
 

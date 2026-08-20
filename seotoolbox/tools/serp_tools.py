@@ -138,7 +138,7 @@ def intent_analysis(keywords: str) -> list[dict[str, Any]]:
     rows = []
     for item in keyword_service.intent(_values(keywords)):
         row = _row(item)
-        rows.append({"keyword": row.get("keyword"), "intent": row.get("intent"), "category": row.get("category")})
+        rows.append({"keyword": row.get("keyword"), "intent": row.get("intent") or "N/D", "category": row.get("category") or "N/D"})
     return rows
 
 

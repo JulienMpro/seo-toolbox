@@ -46,6 +46,11 @@ def test_keyword_tools_reuse_services():
         assert len(serp_tools.keyword_suggestions_tool("seo")) == 2
 
 
+def test_intent_analysis_displays_missing_values():
+    with patch.object(serp_tools.keyword_service, "intent", return_value=[IntentInfo("seo", None)]):
+        assert serp_tools.intent_analysis("seo") == [{"keyword": "seo", "intent": "N/D", "category": "N/D"}]
+
+
 def test_direct_serp_endpoints_are_normalized():
     FakeClient.responses = {
         "dataforseo_labs/google/historical_serps/live": [{"items": [{"date": "2026-01-01", "items": [{"rank_absolute": 1, "domain": "a.test"}]}]}],

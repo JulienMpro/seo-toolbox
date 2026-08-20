@@ -65,13 +65,14 @@ def _metrics(item: dict[str, Any]) -> dict[str, Any]:
     info = data.get("keyword_info") if isinstance(data.get("keyword_info"), dict) else {}
     props = data.get("keyword_properties") if isinstance(data.get("keyword_properties"), dict) else {}
     intent_data = data.get("search_intent_info") if isinstance(data.get("search_intent_info"), dict) else {}
+    keyword_intent = data.get("keyword_intent") if isinstance(data.get("keyword_intent"), dict) else {}
     serp = data.get("serp_info") if isinstance(data.get("serp_info"), dict) else {}
     return {
         "volume": info.get("search_volume", data.get("search_volume")),
         "cpc": info.get("cpc", data.get("cpc")),
         "competition": info.get("competition", data.get("competition")),
         "difficulty": props.get("keyword_difficulty", data.get("keyword_difficulty")),
-        "search_intent": intent_data.get("main_intent", data.get("search_intent")),
+        "search_intent": intent_data.get("main_intent") or keyword_intent.get("label") or data.get("search_intent"),
         "serp_features": serp.get("serp_item_types", data.get("serp_features")),
     }
 
@@ -151,13 +152,17 @@ def related(keyword: str, country: str = "US", limit: int = 30, client: DataForS
     return _keyword_list(ENDPOINTS["related"], "keyword", keyword, country, limit, client)
 
 
-def intent(keywords: list[str], client: DataForSEOClient | None = None) -> list[IntentInfo]:
+def intent(
+    keywords: list[str], language_name: str = "English", client: DataForSEOClient | None = None
+) -> list[IntentInfo]:
+    """Classify keywords by search intent in the requested language."""
     clean = [keyword.strip() for keyword in keywords if keyword.strip()]
     if not clean:
         return []
     api = client or DataForSEOClient()
     found: dict[str, str | None] = {}
-    for item in _items(api.get_result(ENDPOINTS["intent"], {"keywords": clean, "language_code": "en"})):
+    payload = {"keywords": clean, "language_name": language_name}
+    for item in _items(api.get_result(ENDPOINTS["intent"], payload)):
         keyword = _keyword(item)
         if keyword:
             found[keyword.casefold()] = _metrics(item)["search_intent"]

@@ -55,6 +55,17 @@ def test_ideas_normalizes_and_enriches_in_batches():
     assert client.calls[0][1]["limit"] == 2
 
 
+def test_intent_sends_required_language_name():
+    client = FakeClient({keywords.ENDPOINTS["intent"]: [{"items": [{
+        "keyword": "seo", "keyword_intent": {"label": "commercial", "probability": 0.9}
+    }]}]})
+
+    result = keywords.intent(["seo"], client=client)
+
+    assert result[0].intent == "commercial"
+    assert client.calls[0][1] == {"keywords": ["seo"], "language_name": "English"}
+
+
 def test_keywords_for_site_handles_missing_fields():
     client = FakeClient({keywords.ENDPOINTS["for_site"]: [{"items": [{"keyword_data": {"keyword": "seo"}}]}]})
 
@@ -80,4 +91,3 @@ def test_cluster_uses_bigram_similarity():
     result = keywords.cluster(["seo tool", "seo tools", "plumber paris"], threshold=0.6)
 
     assert result == [["seo tool", "seo tools"], ["plumber paris"]]
-
