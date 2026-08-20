@@ -7,6 +7,7 @@ import httpx
 from fastapi.testclient import TestClient
 
 from api.main import app
+from seotoolbox.tools import list_tools
 from seotoolbox.models import (
     AiMention, AuditReport, BacklinkSummary, CrawlResult, Issue, KeywordIdea,
     ReferringDomain, SerpResult,
@@ -46,6 +47,34 @@ def test_empty_pages_render() -> None:
         response = client.get(route)
         assert response.status_code == 200
         assert heading in response.text
+
+
+def test_tools_page_contains_registry_and_filters() -> None:
+    response = client.get("/tools")
+    assert response.status_code == 200
+    for tool in list_tools():
+        assert tool.name in response.text
+    assert 'data-category="serp"' in response.text
+    assert "Search by name or description" in response.text
+    assert "seo tool ${tool.name}" in response.text
+
+
+def test_tools_api_exposes_all_registry_metadata() -> None:
+    response = client.get("/api/tools")
+    assert response.status_code == 200
+    payload = response.json()
+    assert len(payload) == 165
+    assert [item["name"] for item in payload] == [tool.name for tool in list_tools()]
+    assert set(payload[0]) == {"name", "category", "description", "returns", "args"}
+    assert "fn" not in payload[0]
+
+
+def test_navigation_and_extended_audit_limits() -> None:
+    response = client.get("/audit")
+    assert 'Tools <span class="nav-badge">165</span>' in response.text
+    assert '/tools#calculators' in response.text
+    for limit in (5, 10, 25, 50, 100, 250, 500, 1000):
+        assert f">{limit}</option>" in response.text
 
 
 @patch("api.main.keywords.ideas", return_value=[KeywordIdea("seo tools", 100, 22, 1.5, search_intent="commercial")])

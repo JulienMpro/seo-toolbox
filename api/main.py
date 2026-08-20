@@ -11,10 +11,11 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
 from seotoolbox import audit, backlinks, geo, keywords, serp
+from seotoolbox.tools import ToolSpec, list_tools
 
 VERSION = "0.5.0"
 COUNTRIES = ("FR", "GB", "US", "DE", "ES", "IT", "BE", "CH", "CA")
-LIMITS = (5, 10, 25, 50)
+LIMITS = (5, 10, 25, 50, 100, 250, 500, 1000)
 ENGINES = ("chatgpt", "perplexity", "gemini")
 
 app = FastAPI(title="SEO Toolbox", version=VERSION)
@@ -28,7 +29,38 @@ def _nd(value: Any) -> Any:
 templates.env.filters["nd"] = _nd
 
 
+def _serialize_tool(tool: ToolSpec) -> dict[str, Any]:
+    """Return the public, JSON-safe registry metadata used by the tools UI."""
+    return {
+        "name": tool.name,
+        "category": tool.category,
+        "description": tool.description,
+        "returns": tool.returns,
+        "args": [
+            {
+                "name": arg.name,
+                "required": arg.required,
+                "default": arg.default,
+                "help": arg.help,
+                "is_flag": arg.is_flag,
+            }
+            for arg in tool.args
+        ],
+    }
+
+
+def _tool_catalog() -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    tools = [_serialize_tool(tool) for tool in list_tools()]
+    counts: dict[str, int] = {}
+    for tool in tools:
+        category = tool["category"]
+        counts[category] = counts.get(category, 0) + 1
+    categories = [{"name": name, "count": count} for name, count in sorted(counts.items())]
+    return tools, categories
+
+
 def _context(request: Request, **values: Any) -> dict[str, Any]:
+    _, tool_categories = _tool_catalog()
     return {
         "request": request,
         "version": VERSION,
@@ -37,6 +69,7 @@ def _context(request: Request, **values: Any) -> dict[str, Any]:
         ),
         "countries": COUNTRIES,
         "limits": LIMITS,
+        "tool_categories": tool_categories,
         **values,
     }
 
@@ -51,6 +84,20 @@ def _run(operation: Callable[[], Any]) -> tuple[Any, str | None]:
 @app.get("/health")
 async def health() -> dict[str, str]:
     return {"status": "ok", "version": VERSION}
+
+
+@app.get("/api/tools")
+async def tools_api() -> list[dict[str, Any]]:
+    tools, _ = _tool_catalog()
+    return tools
+
+
+@app.get("/tools", response_class=HTMLResponse)
+async def tools_page(request: Request) -> HTMLResponse:
+    tools, categories = _tool_catalog()
+    return templates.TemplateResponse(
+        request, "tools.html", _context(request, tools=tools, categories=categories)
+    )
 
 
 @app.get("/", response_class=HTMLResponse)

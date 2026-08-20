@@ -14,9 +14,18 @@
     .topbar { display:flex; align-items:center; justify-content:space-between; min-height:68px; gap:24px; }
     .brand { color:#fff; text-decoration:none; font-size:20px; font-weight:750; letter-spacing:-.02em; }
     .version { margin-left:7px; color:#a7b6c5; font-size:12px; font-weight:500; }
-    nav { display:flex; flex-wrap:wrap; gap:16px; }
+    nav { display:flex; align-items:center; flex-wrap:wrap; gap:16px; }
     nav a { color:#d9e3ec; text-decoration:none; font-size:14px; }
     nav a:hover { color:#fff; }
+    .nav-tools { position:relative; }
+    .nav-tools summary { color:#d9e3ec; cursor:pointer; font-size:14px; list-style:none; }
+    .nav-tools summary::-webkit-details-marker { display:none; }
+    .nav-tools summary::after { content:" ▾"; color:#a7b6c5; }
+    .nav-tools[open] summary,.nav-tools summary:hover { color:#fff; }
+    .nav-badge { margin-left:4px; padding:2px 6px; border-radius:999px; background:var(--brand); color:#fff; font-size:11px; font-weight:750; }
+    .nav-menu { position:absolute; z-index:30; right:0; top:30px; display:grid; grid-template-columns:repeat(2,minmax(120px,1fr)); width:290px; padding:9px; gap:2px; border:1px solid #334556; border-radius:10px; background:#13212d; box-shadow:0 16px 32px rgba(2,6,23,.28); }
+    .nav-menu a { padding:7px 9px; border-radius:6px; text-transform:capitalize; }
+    .nav-menu a:hover { background:#203443; }
     main { min-height:calc(100vh - 132px); padding:38px 0 56px; }
     h1 { margin:0 0 6px; font-size:30px; letter-spacing:-.03em; }
     h2 { margin:30px 0 14px; font-size:20px; }
@@ -55,13 +64,13 @@
     .rank, .domain { color:var(--muted); font-size:13px; }
     .serp-item p { margin:6px 0 0; color:#475467; }
     footer { padding:20px 0 28px; color:var(--muted); border-top:1px solid var(--line); font-size:13px; }
-    @media (max-width:760px) { .topbar { align-items:flex-start; flex-direction:column; padding:16px 0; } nav { gap:11px 15px; } main { padding-top:26px; } input[type=url],input[type=text] { width:calc(100vw - 76px); } }
+    @media (max-width:760px) { .topbar { align-items:flex-start; flex-direction:column; padding:16px 0; } nav { gap:11px 15px; } .nav-menu { left:0; right:auto; } main { padding-top:26px; } input[type=url],input[type=text] { width:calc(100vw - 76px); } }
   </style>
 </head>
 <body>
   <header><div class="topbar">
     <a class="brand" href="/">SEO Toolbox <span class="version">v{{ version }}</span></a>
-    <nav aria-label="Main navigation"><a href="/keywords">Keywords</a><a href="/serp">SERP</a><a href="/geo">AI mentions</a><a href="/backlinks">Backlinks</a><a href="/audit">Audit</a></nav>
+    <nav aria-label="Main navigation"><a href="/keywords">Keywords</a><a href="/serp">SERP</a><a href="/geo">AI mentions</a><a href="/backlinks">Backlinks</a><a href="/audit">Audit</a><details class="nav-tools"><summary>Tools <span class="nav-badge">165</span></summary><div class="nav-menu"><a href="/tools">All tools</a>{% for category in tool_categories %}<a href="/tools#{{ category.name }}">{{ category.name }} ({{ category.count }})</a>{% endfor %}</div></details></nav>
   </div></header>
   <main>
     {% if credentials_missing %}<div class="banner"><strong>API credentials missing.</strong> Set DATAFORSEO_USERNAME and DATAFORSEO_PASSWORD. The technical audit remains available without them.</div>{% endif %}
