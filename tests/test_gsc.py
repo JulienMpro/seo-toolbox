@@ -2,6 +2,7 @@ import httpx
 import pytest
 
 from seotoolbox.gsc import get_access_token, list_properties, search_analytics
+from seotoolbox import google_auth
 
 
 def test_credentials_are_required(monkeypatch):
@@ -15,7 +16,7 @@ def test_refresh_and_properties(monkeypatch):
     monkeypatch.setenv("GSC_CLIENT_ID", "id")
     monkeypatch.setenv("GSC_CLIENT_SECRET", "secret")
     monkeypatch.setenv("GSC_REFRESH_TOKEN", "refresh")
-    monkeypatch.setattr("seotoolbox.gsc.httpx.post", lambda url, **kwargs: httpx.Response(
+    monkeypatch.setattr(google_auth.httpx, "post", lambda url, **kwargs: httpx.Response(
         200, json={"access_token": "token"}, request=httpx.Request("POST", url)))
     assert get_access_token() == "token"
     monkeypatch.setattr("seotoolbox.gsc.httpx.get", lambda url, **kwargs: httpx.Response(
@@ -34,3 +35,17 @@ def test_search_analytics_normalizes_rows(monkeypatch):
     rows = search_analytics("sc-domain:example.com", "2026-01-01", "2026-01-02", ["query"], 20, "token")
     assert rows[0].keys == ["seo"]
     assert captured["rowLimit"] == 20
+
+
+def test_gsc_uses_exact_endpoints(monkeypatch):
+    urls = []
+    monkeypatch.setattr("seotoolbox.gsc.httpx.get", lambda url, **kwargs: (
+        urls.append(url) or httpx.Response(200, json={}, request=httpx.Request("GET", url))))
+    monkeypatch.setattr("seotoolbox.gsc.httpx.post", lambda url, **kwargs: (
+        urls.append(url) or httpx.Response(200, json={}, request=httpx.Request("POST", url))))
+    list_properties("token")
+    search_analytics("sc-domain:example.com", "2026-01-01", "2026-01-02", ["query"], 1, "token")
+    assert urls == [
+        "https://www.googleapis.com/webmasters/v3/sites",
+        "https://www.googleapis.com/webmasters/v3/sites/sc-domain%3Aexample.com/searchAnalytics/query",
+    ]

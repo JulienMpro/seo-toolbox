@@ -22,6 +22,7 @@ from . import serp as serp_service
 from . import audit as audit_service
 from . import crux as crux_service
 from . import gsc as gsc_service
+from . import ga4 as ga4_service
 from . import local as local_service
 from . import logs as logs_service
 from . import monitor as monitor_service
@@ -37,6 +38,7 @@ backlinks_app = typer.Typer(help="Backlink profile and gap tools.")
 serp_app = typer.Typer(help="Live SERP analysis tools.")
 audit_app = typer.Typer(help="Technical crawl and Core Web Vitals tools.")
 gsc_app = typer.Typer(help="Google Search Console analytics tools.")
+ga4_app = typer.Typer(help="Google Analytics 4 reporting tools.")
 local_app = typer.Typer(help="Local business listings and local-pack ranks.")
 logs_app = typer.Typer(help="Local web server log analysis.")
 monitor_app = typer.Typer(help="Crawl baseline and change monitoring.")
@@ -49,6 +51,7 @@ app.add_typer(backlinks_app, name="backlinks")
 app.add_typer(serp_app, name="serp")
 app.add_typer(audit_app, name="audit")
 app.add_typer(gsc_app, name="gsc")
+app.add_typer(ga4_app, name="ga4")
 app.add_typer(local_app, name="local")
 app.add_typer(logs_app, name="logs")
 app.add_typer(monitor_app, name="monitor")
@@ -370,6 +373,38 @@ def gsc_pages(property_name: str = typer.Option(..., "--property"), days: int = 
               save: Path | None = typer.Option(None)) -> None:
     """Show top Search Console pages."""
     _run(lambda: gsc_service.top_pages(property_name, days, limit), output, save)
+
+
+def _ga4_property_id() -> str:
+    import os
+    if not all(os.getenv(name) for name in
+               ("GSC_CLIENT_ID", "GSC_CLIENT_SECRET", "GSC_REFRESH_TOKEN")):
+        raise ValueError("GSC credentials missing")
+    property_id = os.getenv("GA4_PROPERTY_ID")
+    if not property_id:
+        raise ValueError("GA4_PROPERTY_ID missing")
+    return property_id
+
+
+@ga4_app.command("daily")
+def ga4_daily(days: int = typer.Option(28, min=1), output: str = typer.Option("table"),
+              save: Path | None = typer.Option(None)) -> None:
+    """Show daily GA4 traffic."""
+    _run(lambda: ga4_service.daily_traffic(_ga4_property_id(), days), output, save)
+
+
+@ga4_app.command("sources")
+def ga4_sources(days: int = typer.Option(28, min=1), limit: int = typer.Option(10, min=1),
+                output: str = typer.Option("table"), save: Path | None = typer.Option(None)) -> None:
+    """Show GA4 traffic by channel group."""
+    _run(lambda: ga4_service.traffic_by_source(_ga4_property_id(), days, limit), output, save)
+
+
+@ga4_app.command("pages")
+def ga4_pages(days: int = typer.Option(28, min=1), limit: int = typer.Option(10, min=1),
+              output: str = typer.Option("table"), save: Path | None = typer.Option(None)) -> None:
+    """Show top GA4 page paths."""
+    _run(lambda: ga4_service.top_pages(_ga4_property_id(), days, limit), output, save)
 
 
 @local_app.command("listings")

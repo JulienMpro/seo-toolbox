@@ -34,6 +34,7 @@ seo-toolbox/
 │   ├── audit.py       # spider maison (sitemap → crawl → rapports)
 │   ├── crux.py        # CWV field (API CrUX/PageSpeed)
 │   ├── gsc.py         # API Google Search Console (OAuth)
+│   ├── ga4.py         # API Google Analytics 4 Data (OAuth)
 │   ├── serp.py        # SERP live + features + historique
 │   ├── geo.py         # AI Optimization API (llm_mentions, chatgpt)
 │   ├── local.py       # business listings + rank local
@@ -69,6 +70,7 @@ pip install -e ".[dev]"
 | `DATAFORSEO_USERNAME` | Login API DataForSEO |
 | `DATAFORSEO_PASSWORD` | Mot de passe API DataForSEO |
 | `GSC_CLIENT_ID` / `GSC_CLIENT_SECRET` / `GSC_REFRESH_TOKEN` | OAuth Google Search Console |
+| `GA4_PROPERTY_ID` | Numeric Google Analytics 4 property ID |
 | `PSI_API_KEY` | Clé PageSpeed Insights optionnelle (limites plus élevées) |
 
 ## Usage (CLI)
@@ -98,6 +100,9 @@ seo audit crux --urls https://exemple.fr,https://exemple.fr/contact --strategy m
 seo gsc properties
 seo gsc queries --property sc-domain:exemple.fr --days 28 --limit 20
 seo gsc pages --property sc-domain:exemple.fr --days 28 --limit 20
+seo ga4 daily --days 28
+seo ga4 sources --days 28 --limit 10
+seo ga4 pages --days 28 --limit 10
 seo local listings --query "plombier" --city paris --country FR --limit 20
 seo local rank --keyword "plombier" --city paris --country FR --limit 10
 seo logs analyze --file access.log --output md
@@ -115,6 +120,12 @@ The monitoring alert URL receives a generic `{"text": "..."}` JSON payload; use 
 Slack/Telegram-compatible incoming webhook or an adapter. Alert failures never block
 the baseline update. PDF export is available from Python when WeasyPrint is installed
 separately (`pip install weasyprint`).
+
+## Connectors
+
+Google Search Console and Google Analytics 4 can be connected through their direct
+OAuth APIs or exposed to AI agents through MCP. See the complete setup and verification
+guide in [Connector setup](docs/connecteurs.md).
 
 ## Licence
 

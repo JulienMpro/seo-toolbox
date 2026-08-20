@@ -2,29 +2,13 @@
 
 from __future__ import annotations
 
-import os
 from datetime import date, timedelta
 from urllib.parse import quote
 
 import httpx
 
+from .google_auth import get_access_token
 from .models import GscRow
-
-
-def get_access_token() -> str:
-    """Exchange credentials from environment variables for an OAuth access token."""
-    names = ("GSC_CLIENT_ID", "GSC_CLIENT_SECRET", "GSC_REFRESH_TOKEN")
-    values = [os.getenv(name) for name in names]
-    if not all(values):
-        raise ValueError("GSC credentials missing")
-    response = httpx.post("https://oauth2.googleapis.com/token", data={
-        "client_id": values[0], "client_secret": values[1], "refresh_token": values[2],
-        "grant_type": "refresh_token"}, timeout=20)
-    response.raise_for_status()
-    token = response.json().get("access_token")
-    if not token:
-        raise ValueError("GSC access token missing from OAuth response")
-    return str(token)
 
 
 def list_properties(access_token: str) -> list[str]:

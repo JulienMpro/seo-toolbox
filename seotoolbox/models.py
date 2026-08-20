@@ -224,6 +224,12 @@ class GscRow(SerializableModel):
 
 
 @dataclass
+class Ga4Row(SerializableModel):
+    dimensions: list[str]
+    metrics: list[float]
+
+
+@dataclass
 class LocalListing(SerializableModel):
     title: str | None = None
     address: str | None = None

@@ -75,6 +75,7 @@ Jamais de secret en dur dans le code ; un `.env` local est gitignoré.
 - [x] Module 8 : Monitoring et alertes
 - [x] Module 9 : Reporting white-label
 - [x] Module 10 : Analyse de contenu
+- [x] Connecteurs documentés (GSC/GA4)
 - [ ] API FastAPI + MCP server
 
 ## Vérification rapide après modification
