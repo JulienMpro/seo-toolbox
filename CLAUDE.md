@@ -70,6 +70,11 @@ Jamais de secret en dur dans le code ; un `.env` local est gitignoré.
 - [x] Module 3 : Backlinks
 - [x] Module 4 : Audit technique (spider + CrUX + GSC)
 - [x] Module 5 : Analyse SERP
+- [x] Module 6 : SEO local
+- [x] Module 7 : Analyse des logs serveur
+- [x] Module 8 : Monitoring et alertes
+- [x] Module 9 : Reporting white-label
+- [x] Module 10 : Analyse de contenu
 - [ ] API FastAPI + MCP server
 
 ## Vérification rapide après modification

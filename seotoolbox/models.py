@@ -221,3 +221,76 @@ class GscRow(SerializableModel):
     impressions: float | None = None
     ctr: float | None = None
     position: float | None = None
+
+
+@dataclass
+class LocalListing(SerializableModel):
+    title: str | None = None
+    address: str | None = None
+    phone: str | None = None
+    category: str | None = None
+    rating: float | None = None
+    reviews_count: int | None = None
+    place_id: str | None = None
+    lat: float | None = None
+    lng: float | None = None
+
+
+@dataclass
+class LocalRank(SerializableModel):
+    keyword: str
+    city: str
+    rank: int | None = None
+    title: str | None = None
+    address: str | None = None
+    rating: float | None = None
+    reviews_count: int | None = None
+
+
+@dataclass
+class LogEntry(SerializableModel):
+    ip: str
+    date: str
+    method: str
+    path: str
+    status: int
+    ua: str
+
+
+@dataclass
+class LogReport(SerializableModel):
+    entries_count: int
+    status_stats: dict[int, int]
+    top_urls: list[tuple[str, int]]
+    top_ips: list[tuple[str, int]]
+    bot_hits: list[tuple[str, int]]
+    problem_urls: list[tuple[int, str, int]]
+
+
+@dataclass
+class MonitorChange(SerializableModel):
+    url: str
+    field: str
+    old_value: Any = None
+    new_value: Any = None
+
+
+@dataclass
+class MonitorReport(SerializableModel):
+    changes: list[MonitorChange]
+    added: list[str]
+    removed: list[str]
+    checked: int
+
+
+@dataclass
+class TermFreq(SerializableModel):
+    term: str
+    frequency: int
+
+
+@dataclass
+class ContentScore(SerializableModel):
+    url: str
+    score: int
+    checks: list[tuple[str, bool, int]]

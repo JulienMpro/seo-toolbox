@@ -99,7 +99,7 @@
 
 | Endpoint | Capacité |
 |---|---|
-| `business_data/google/business_listings/search/live` | Recherche d'établissements Google Business Profile |
+| `business_data/business_listings/search/live` | Recherche d'établissements Google Business Profile |
 
 ## 9. GEO / IA (AI Optimization API) — l'avantage concurrentiel
 

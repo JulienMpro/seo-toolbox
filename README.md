@@ -14,9 +14,11 @@ Boîte à outils **open-source** pour consultants SEO : reproduit l'essentiel de
 | Backlinks (profil, flux, ancres, gap, disavow) | DataForSEO Backlinks | ✅ disponible |
 | Audit technique (crawl complet, CWV, GSC, CrUX) | Spider maison + API gratuites | ✅ disponible |
 | Analyse SERP | DataForSEO SERP | ✅ disponible |
-| Logs serveur | 100 % maison | 📋 planifié |
-| Monitoring + alertes | Cron + diff | 📋 planifié |
-| Reporting white-label (markdown → HTML/PDF) | 100 % maison | 📋 planifié |
+| SEO local (listings, local pack) | DataForSEO Business Data + SERP | ✅ disponible |
+| Logs serveur | 100 % maison | ✅ disponible |
+| Monitoring + alertes webhook | Spider maison + SQLite | ✅ disponible |
+| Reporting white-label (markdown → HTML/PDF optionnel) | 100 % maison | ✅ disponible |
+| Analyse et optimisation de contenu | DataForSEO SERP + NLP maison | ✅ disponible |
 
 Le benchmark complet (matrice ~80 features payantes → reproduction) est dans [`TOOLBOX-CONSULTANT-SEO.md`](TOOLBOX-CONSULTANT-SEO.md).
 
@@ -37,7 +39,8 @@ seo-toolbox/
 │   ├── local.py       # business listings + rank local
 │   ├── logs.py        # analyse logs serveur
 │   ├── monitor.py     # diff + alertes
-│   └── report.py      # markdown → HTML/PDF white-label
+│   ├── report.py      # markdown → HTML/PDF white-label
+│   └── content.py     # termes SERP + score de contenu réel
 ├── api/               # FastAPI (REST + MCP server) — phase 2
 ├── web/               # UI web — phase 2
 ├── cli.py             # interface CLI (Typer)
@@ -95,10 +98,23 @@ seo audit crux --urls https://exemple.fr,https://exemple.fr/contact --strategy m
 seo gsc properties
 seo gsc queries --property sc-domain:exemple.fr --days 28 --limit 20
 seo gsc pages --property sc-domain:exemple.fr --days 28 --limit 20
+seo local listings --query "plombier" --city paris --country FR --limit 20
+seo local rank --keyword "plombier" --city paris --country FR --limit 10
+seo logs analyze --file access.log --output md
+seo logs robots --file access.log
+seo monitor init --url https://exemple.fr --limit 100
+seo monitor check --url https://exemple.fr --limit 100 --alert-url https://webhook.example/seo
+seo report build --input rapport.md --title "Audit SEO — exemple.fr" --output rapport.html --brand-color "#0ea5e9"
+seo content terms --keyword "plombier paris" --country FR --limit 10
+seo content score --url https://exemple.fr/page --keyword "plombier paris" --country FR
 ```
 
 All reporting commands accept `--output table|csv|md|json`; use `--save PATH`
 with CSV, Markdown, or JSON output. Missing API values are displayed as `N/D`.
+The monitoring alert URL receives a generic `{"text": "..."}` JSON payload; use a
+Slack/Telegram-compatible incoming webhook or an adapter. Alert failures never block
+the baseline update. PDF export is available from Python when WeasyPrint is installed
+separately (`pip install weasyprint`).
 
 ## Licence
 

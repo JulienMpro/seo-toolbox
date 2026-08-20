@@ -12,16 +12,19 @@ ENDPOINTS = {"live": "serp/google/organic/live/advanced", "locations": "serp/loc
 
 
 def _raw(keyword: str, country: str, limit: int, device: str,
-         client: DataForSEOClient | None) -> list[dict[str, Any]]:
+         client: DataForSEOClient | None, location_name: str | None = None) -> list[dict[str, Any]]:
     payload = {"keyword": keyword, "limit": limit, "device": device, **_country(country)}
+    if location_name:
+        payload.pop("location_code", None)
+        payload["location_name"] = location_name
     return (client or DataForSEOClient()).get_result(ENDPOINTS["live"], payload)
 
 
 def live(keyword: str, country: str = "US", limit: int = 20, device: str = "desktop",
-         client: DataForSEOClient | None = None) -> list[SerpResult]:
+         client: DataForSEOClient | None = None, location_name: str | None = None) -> list[SerpResult]:
     """Return normalized organic results from a live Google SERP."""
     output = []
-    for result in _raw(keyword, country, limit, device, client):
+    for result in _raw(keyword, country, limit, device, client, location_name):
         items = result.get("items") if isinstance(result.get("items"), list) else []
         for item in items:
             if isinstance(item, dict) and item.get("type") == "organic":

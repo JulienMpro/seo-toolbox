@@ -22,6 +22,11 @@ from . import serp as serp_service
 from . import audit as audit_service
 from . import crux as crux_service
 from . import gsc as gsc_service
+from . import local as local_service
+from . import logs as logs_service
+from . import monitor as monitor_service
+from . import report as report_service
+from . import content as content_service
 from .client import ApiError, DataForSEOError
 
 app = typer.Typer(help="Pay-per-request SEO research tools powered by DataForSEO.")
@@ -32,6 +37,11 @@ backlinks_app = typer.Typer(help="Backlink profile and gap tools.")
 serp_app = typer.Typer(help="Live SERP analysis tools.")
 audit_app = typer.Typer(help="Technical crawl and Core Web Vitals tools.")
 gsc_app = typer.Typer(help="Google Search Console analytics tools.")
+local_app = typer.Typer(help="Local business listings and local-pack ranks.")
+logs_app = typer.Typer(help="Local web server log analysis.")
+monitor_app = typer.Typer(help="Crawl baseline and change monitoring.")
+report_app = typer.Typer(help="White-label Markdown reporting.")
+content_app = typer.Typer(help="Content terms and on-page scoring.")
 app.add_typer(keywords_app, name="keywords")
 app.add_typer(ranks_app, name="ranks")
 app.add_typer(geo_app, name="geo")
@@ -39,6 +49,11 @@ app.add_typer(backlinks_app, name="backlinks")
 app.add_typer(serp_app, name="serp")
 app.add_typer(audit_app, name="audit")
 app.add_typer(gsc_app, name="gsc")
+app.add_typer(local_app, name="local")
+app.add_typer(logs_app, name="logs")
+app.add_typer(monitor_app, name="monitor")
+app.add_typer(report_app, name="report")
+app.add_typer(content_app, name="content")
 console = Console()
 
 
@@ -355,6 +370,108 @@ def gsc_pages(property_name: str = typer.Option(..., "--property"), days: int = 
               save: Path | None = typer.Option(None)) -> None:
     """Show top Search Console pages."""
     _run(lambda: gsc_service.top_pages(property_name, days, limit), output, save)
+
+
+@local_app.command("listings")
+def local_listings(query: str = typer.Option(...), city: str = typer.Option(...),
+                   country: str = typer.Option("FR"), limit: int = typer.Option(20, min=1),
+                   output: str = typer.Option("table"), save: Path | None = typer.Option(None)) -> None:
+    """Search Google business listings in a city."""
+    _run(lambda: local_service.listings(query, city, country, limit), output, save)
+
+
+@local_app.command("rank")
+def local_rank(keyword: str = typer.Option(...), city: str = typer.Option(...),
+               country: str = typer.Option("FR"), limit: int = typer.Option(10, min=1),
+               output: str = typer.Option("table"), save: Path | None = typer.Option(None)) -> None:
+    """Show businesses in a locally targeted SERP pack."""
+    _run(lambda: local_service.local_rank(keyword, city, country, limit), output, save)
+
+
+def _log_rows(path: Path, bot: str | None) -> list[dict[str, Any]]:
+    report = logs_service.analyze_logs(logs_service.parse_log(path, bot))
+    rows: list[dict[str, Any]] = [{"section": "summary", "key": "entries", "value": report.entries_count}]
+    rows.extend({"section": "status", "key": f"{status // 100}xx", "value": count}
+                for status, count in report.status_stats.items())
+    rows.extend({"section": "top URL", "key": url, "value": count} for url, count in report.top_urls)
+    rows.extend({"section": "top IP", "key": ip, "value": count} for ip, count in report.top_ips)
+    rows.extend({"section": "bot hits", "key": date, "value": count} for date, count in report.bot_hits)
+    rows.extend({"section": "problem", "key": f"{status} {url}", "value": count}
+                for status, url, count in report.problem_urls)
+    return rows
+
+
+@logs_app.command("analyze")
+def logs_analyze(file: Path = typer.Option(..., exists=True, dir_okay=False), bot: str | None = typer.Option(None),
+                 output: str = typer.Option("table"), save: Path | None = typer.Option(None)) -> None:
+    """Analyze a common or combined web access log."""
+    _run(lambda: _log_rows(file, bot), output, save)
+
+
+@logs_app.command("robots")
+def logs_robots(file: Path = typer.Option(..., exists=True, dir_okay=False), output: str = typer.Option("table"),
+                save: Path | None = typer.Option(None)) -> None:
+    """Analyze Googlebot entries in a web access log."""
+    _run(lambda: _log_rows(file, "googlebot"), output, save)
+
+
+@monitor_app.command("init")
+def monitor_init(url: str = typer.Option(...), limit: int = typer.Option(100, min=1),
+                 db: Path = typer.Option(Path("data/monitor.db"), "--db")) -> None:
+    """Initialize or replace a crawl monitoring baseline."""
+    try:
+        count = monitor_service.init_baseline(url, limit, db)
+        console.print(f"Baseline initialized with {count} page(s)")
+    except (ValueError, httpx.HTTPError) as exc:
+        console.print(f"[red]Error:[/red] {exc}", highlight=False)
+        raise typer.Exit(code=1) from exc
+
+
+@monitor_app.command("check")
+def monitor_check(url: str = typer.Option(...), limit: int = typer.Option(100, min=1),
+                  db: Path = typer.Option(Path("data/monitor.db"), "--db"),
+                  alert_url: str | None = typer.Option(None), output: str = typer.Option("table"),
+                  save: Path | None = typer.Option(None)) -> None:
+    """Compare a new crawl with the baseline and optionally notify a webhook."""
+    try:
+        result = monitor_service.check(url, limit, db)
+        if result.changes and alert_url:
+            try:
+                httpx.post(alert_url, json={"text": f"SEO monitor detected {len(result.changes)} change(s) for {url}"}, timeout=10)
+            except httpx.HTTPError:
+                console.print("[yellow]Warning: alert webhook failed[/yellow]")
+        if not result.changes and output.lower() == "table" and not save:
+            console.print("No changes")
+        else:
+            _emit(result.changes, output.lower(), save)
+    except (ValueError, httpx.HTTPError) as exc:
+        console.print(f"[red]Error:[/red] {exc}", highlight=False)
+        raise typer.Exit(code=1) from exc
+
+
+@report_app.command("build")
+def report_build(input_path: Path = typer.Option(..., "--input", exists=True, dir_okay=False),
+                 title: str = typer.Option(...), output_path: Path = typer.Option(..., "--output"),
+                 brand_color: str = typer.Option("#0ea5e9")) -> None:
+    """Build a standalone white-label HTML report from Markdown."""
+    destination = report_service.build_report(input_path, title, output_path, brand_color)
+    console.print(f"Saved report to {destination}")
+
+
+@content_app.command("terms")
+def content_terms(keyword: str = typer.Option(...), country: str = typer.Option("FR"),
+                  limit: int = typer.Option(10, min=1), ngram_size: int = typer.Option(2, min=1),
+                  output: str = typer.Option("table"), save: Path | None = typer.Option(None)) -> None:
+    """Extract recurring n-grams from top organic results."""
+    _run(lambda: content_service.serp_terms(keyword, country, limit, ngram_size), output, save)
+
+
+@content_app.command("score")
+def content_score(url: str = typer.Option(...), keyword: str = typer.Option(...),
+                  country: str = typer.Option("FR"), output: str = typer.Option("table"),
+                  save: Path | None = typer.Option(None)) -> None:
+    """Score verified on-page content signals for a URL."""
+    _run(lambda: [content_service.content_score(url, keyword, country)], output, save)
 
 
 if __name__ == "__main__":

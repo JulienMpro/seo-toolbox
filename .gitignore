@@ -22,3 +22,4 @@ build/
 # Codex / agents
 .codex/
 *.log
+!tests/fixtures/sample.log
