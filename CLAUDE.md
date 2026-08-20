@@ -65,10 +65,11 @@ Jamais de secret en dur dans le code ; un `.env` local est gitignoré.
 
 ## Roadmap (contributions bienvenues)
 
-- [ ] Module 1 : Keyword Research (volumes, KD, intent, clustering, gap) — en cours
-- [ ] Module 2 : Rank Tracking + tracking IA/GEO
-- [ ] Module 3 : Backlinks
+- [x] Module 1 : Keyword Research (volumes, KD, intent, clustering, gap)
+- [x] Module 2 : Rank Tracking + tracking IA/GEO
+- [x] Module 3 : Backlinks
 - [ ] Module 4 : Audit technique (spider + CrUX + GSC)
+- [x] Module 5 : Analyse SERP
 - [ ] API FastAPI + MCP server
 
 ## Vérification rapide après modification

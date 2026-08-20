@@ -13,12 +13,24 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
+from . import backlinks as backlinks_service
+from . import geo as geo_service
 from . import keywords as service
+from . import ranktracker as ranks_service
+from . import serp as serp_service
 from .client import ApiError, DataForSEOError
 
 app = typer.Typer(help="Pay-per-request SEO research tools powered by DataForSEO.")
 keywords_app = typer.Typer(help="Keyword research, intent, gap, and clustering tools.")
+ranks_app = typer.Typer(help="Domain rank tracking tools.")
+geo_app = typer.Typer(help="AI and GEO visibility tools.")
+backlinks_app = typer.Typer(help="Backlink profile and gap tools.")
+serp_app = typer.Typer(help="Live SERP analysis tools.")
 app.add_typer(keywords_app, name="keywords")
+app.add_typer(ranks_app, name="ranks")
+app.add_typer(geo_app, name="geo")
+app.add_typer(backlinks_app, name="backlinks")
+app.add_typer(serp_app, name="serp")
 console = Console()
 
 
@@ -146,6 +158,109 @@ def cluster(words: str = typer.Option(..., "--keywords"), threshold: float = typ
         groups = service.cluster(words.split(","), threshold)
         return [{"cluster": index, "keywords": group} for index, group in enumerate(groups, start=1)]
     _run(operation, output, save)
+
+
+@ranks_app.command("domain")
+def ranks_domain(words: str, domain: str = typer.Option(...), country: str = typer.Option("US"), limit: int = typer.Option(50, min=1), output: str = typer.Option("table"), save: Path | None = typer.Option(None)) -> None:
+    """Show current positions for comma-separated keywords."""
+    _run(lambda: ranks_service.domain_rank(words.split(","), domain, country, limit), output, save)
+
+
+@ranks_app.command("history")
+def ranks_history(words: str, domain: str = typer.Option(...), country: str = typer.Option("US"), days: int = typer.Option(90, min=1), output: str = typer.Option("table"), save: Path | None = typer.Option(None)) -> None:
+    """Show position history over a trailing number of days."""
+    from datetime import date, timedelta
+    end = date.today()
+    _run(lambda: ranks_service.rank_history(words.split(","), domain, country, (end - timedelta(days=days)).isoformat(), end.isoformat()), output, save)
+
+
+@ranks_app.command("competitors")
+def ranks_competitors(domain: str = typer.Option(...), country: str = typer.Option("US"), limit: int = typer.Option(20, min=1), output: str = typer.Option("table"), save: Path | None = typer.Option(None)) -> None:
+    """Show competing domains in organic results."""
+    _run(lambda: ranks_service.serp_competitors(domain, country, limit), output, save)
+
+
+@geo_app.command("mentions")
+def geo_mentions(word: str, engine: str | None = typer.Option(None), country: str = typer.Option("US"), limit: int = typer.Option(20, min=1), output: str = typer.Option("table"), save: Path | None = typer.Option(None)) -> None:
+    """Search LLM mentions for a keyword."""
+    _run(lambda: geo_service.mentions(word, [engine] if engine else None, country, limit=limit), output, save)
+
+
+@geo_app.command("aggregated")
+def geo_aggregated(words: str, engines: str = typer.Option("chatgpt,perplexity,gemini"), output: str = typer.Option("table"), save: Path | None = typer.Option(None)) -> None:
+    """Show aggregate LLM visibility metrics."""
+    _run(lambda: geo_service.aggregated(words.split(","), engines.split(",")), output, save)
+
+
+@geo_app.command("top-pages")
+def geo_top_pages(words: str, engines: str = typer.Option("chatgpt,perplexity,gemini"), limit: int = typer.Option(20, min=1), output: str = typer.Option("table"), save: Path | None = typer.Option(None)) -> None:
+    """Show pages most frequently cited by LLMs."""
+    _run(lambda: geo_service.top_pages(words.split(","), engines.split(","), limit), output, save)
+
+
+@backlinks_app.command("summary")
+def backlinks_summary(domain: str = typer.Option(...), output: str = typer.Option("table"), save: Path | None = typer.Option(None)) -> None:
+    """Show a domain's backlink profile."""
+    _run(lambda: [backlinks_service.summary(domain)], output, save)
+
+
+@backlinks_app.command("list")
+def backlinks_list(domain: str = typer.Option(...), limit: int = typer.Option(30, min=1), output: str = typer.Option("table"), save: Path | None = typer.Option(None)) -> None:
+    """List backlinks for a domain."""
+    _run(lambda: backlinks_service.backlinks(domain, limit), output, save)
+
+
+@backlinks_app.command("referring-domains")
+def backlinks_referring_domains(domain: str = typer.Option(...), limit: int = typer.Option(20, min=1), output: str = typer.Option("table"), save: Path | None = typer.Option(None)) -> None:
+    """List referring domains."""
+    _run(lambda: backlinks_service.referring_domains(domain, limit), output, save)
+
+
+@backlinks_app.command("anchors")
+def backlinks_anchors(domain: str = typer.Option(...), limit: int = typer.Option(20, min=1), output: str = typer.Option("table"), save: Path | None = typer.Option(None)) -> None:
+    """Show anchor text distribution."""
+    _run(lambda: backlinks_service.anchors(domain, limit), output, save)
+
+
+@backlinks_app.command("new-lost")
+def backlinks_new_lost(domain: str = typer.Option(...), days: int = typer.Option(30, min=1), output: str = typer.Option("table"), save: Path | None = typer.Option(None)) -> None:
+    """Show new and lost backlinks over time."""
+    _run(lambda: backlinks_service.new_lost(domain, days), output, save)
+
+
+@backlinks_app.command("gap")
+def backlinks_gap(domain: str = typer.Option(...), competitors: str = typer.Option(...), limit: int = typer.Option(20, min=1), output: str = typer.Option("table"), save: Path | None = typer.Option(None)) -> None:
+    """Show backlink intersections with competitors."""
+    _run(lambda: backlinks_service.gap([domain, *competitors.split(",")], limit), output, save)
+
+
+@backlinks_app.command("competitors")
+def backlinks_competitors(domain: str = typer.Option(...), limit: int = typer.Option(10, min=1), output: str = typer.Option("table"), save: Path | None = typer.Option(None)) -> None:
+    """Show backlink competitors."""
+    _run(lambda: backlinks_service.competitors(domain, limit), output, save)
+
+
+@backlinks_app.command("disavow")
+def backlinks_disavow(domain: str = typer.Option(...), output: Path = typer.Option(...), max_spam: float = typer.Option(60)) -> None:
+    """Export toxic domains in Google Disavow format."""
+    try:
+        destination = backlinks_service.disavow_file(domain, output, max_spam)
+        console.print(f"Saved disavow file to {destination}")
+    except (ApiError, DataForSEOError, ValueError) as exc:
+        console.print(f"[red]Error:[/red] {exc}", highlight=False)
+        raise typer.Exit(code=1) from exc
+
+
+@serp_app.command("live")
+def serp_live(word: str, country: str = typer.Option("US"), limit: int = typer.Option(20, min=1), device: str = typer.Option("desktop"), output: str = typer.Option("table"), save: Path | None = typer.Option(None)) -> None:
+    """Show live organic search results."""
+    _run(lambda: serp_service.live(word, country, limit, device), output, save)
+
+
+@serp_app.command("features")
+def serp_features(word: str, country: str = typer.Option("US"), output: str = typer.Option("table"), save: Path | None = typer.Option(None)) -> None:
+    """Show detected SERP features."""
+    _run(lambda: [serp_service.features(word, country)], output, save)
 
 
 if __name__ == "__main__":

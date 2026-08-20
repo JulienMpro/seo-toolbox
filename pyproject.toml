@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "seotoolbox"
-version = "0.1.0"
+version = "0.2.0"
 description = "A pay-per-request SEO research CLI powered by DataForSEO"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -25,4 +25,3 @@ include = ["seotoolbox*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-

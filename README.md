@@ -8,12 +8,12 @@ Boîte à outils **open-source** pour consultants SEO : reproduit l'essentiel de
 
 | Module | Source de données | Statut |
 |---|---|---|
-| Keyword Research (volumes, KD, intent, clustering, gap) | DataForSEO Labs | 🚧 en développement |
-| Rank Tracking (positions, historique, SERP features, local) | DataForSEO Labs + SERP | 📋 planifié |
-| Tracking IA/GEO (mentions ChatGPT/Perplexity) | DataForSEO AI Optimization | 📋 planifié |
-| Backlinks (profil, flux, ancres, gap, disavow) | DataForSEO Backlinks | 📋 planifié |
+| Keyword Research (volumes, KD, intent, clustering, gap) | DataForSEO Labs | ✅ disponible |
+| Rank Tracking (positions, historique, concurrents) | DataForSEO Labs | ✅ disponible |
+| Tracking IA/GEO (mentions et pages citées) | DataForSEO AI Optimization | ✅ disponible |
+| Backlinks (profil, flux, ancres, gap, disavow) | DataForSEO Backlinks | ✅ disponible |
 | Audit technique (crawl complet, CWV, GSC, CrUX) | Spider maison + API gratuites | 📋 planifié |
-| Analyse SERP | DataForSEO SERP | 📋 planifié |
+| Analyse SERP | DataForSEO SERP | ✅ disponible |
 | Logs serveur | 100 % maison | 📋 planifié |
 | Monitoring + alertes | Cron + diff | 📋 planifié |
 | Reporting white-label (markdown → HTML/PDF) | 100 % maison | 📋 planifié |
@@ -63,7 +63,7 @@ pip install -e ".[dev]"
 
 | Variable | Rôle |
 |---|---|
-| `DATAFORSEO_LOGIN` | Login API DataForSEO |
+| `DATAFORSEO_USERNAME` | Login API DataForSEO |
 | `DATAFORSEO_PASSWORD` | Mot de passe API DataForSEO |
 | `GSC_CLIENT_ID` / `GSC_CLIENT_SECRET` | OAuth Google Search Console (module GSC) |
 
@@ -72,10 +72,26 @@ pip install -e ".[dev]"
 ```bash
 seo keywords research "plombier paris" --country FR --limit 50
 seo keywords gap --domain exemple.fr --competitors conc1.fr,conc2.fr
-seo audit https://exemple.fr --output rapport.md
-seo backlinks exemple.fr --summary
-seo geo exemple.fr --engine chatgpt
+seo ranks domain "plombier paris" --domain exemple.fr --country FR --limit 20
+seo ranks history "plombier paris" --domain exemple.fr --country FR --days 90
+seo ranks competitors --domain exemple.fr --country FR --limit 20
+seo geo mentions "geo seo" --engine chatgpt --limit 20
+seo geo aggregated "geo seo,optimisation ia" --engines chatgpt,perplexity
+seo geo top-pages "geo seo,optimisation ia" --limit 20
+seo backlinks summary --domain exemple.fr
+seo backlinks list --domain exemple.fr --limit 30
+seo backlinks referring-domains --domain exemple.fr --limit 20
+seo backlinks anchors --domain exemple.fr --limit 20
+seo backlinks new-lost --domain exemple.fr --days 30
+seo backlinks gap --domain exemple.fr --competitors conc1.fr,conc2.fr --limit 20
+seo backlinks competitors --domain exemple.fr --limit 10
+seo backlinks disavow --domain exemple.fr --output disavow.txt --max-spam 60
+seo serp live "plombier paris" --country FR --limit 20 --device desktop
+seo serp features "plombier paris" --country FR
 ```
+
+All reporting commands accept `--output table|csv|md|json`; use `--save PATH`
+with CSV, Markdown, or JSON output. Missing API values are displayed as `N/D`.
 
 ## Licence
 
