@@ -38,6 +38,10 @@ def test_instant_audit_reads_live_meta_shape():
 def test_domain_compare_reuses_wrappers(monkeypatch):
     monkeypatch.setattr(domain_intel.backlinks, "bulk_ranks", lambda targets, client: [{"target": targets[0], "rank": 9}])
     monkeypatch.setattr(domain_intel.backlinks, "summary", lambda domain, client: SimpleNamespace(rank=None, backlinks=10, referring_domains=3, spam_score=1))
-    monkeypatch.setattr(domain_intel.keywords, "keywords_for_site", lambda *args: [SimpleNamespace(position=4)])
+    monkeypatch.setattr(domain_intel.keywords, "keywords_for_site", lambda *args, **kwargs: ([SimpleNamespace(position=4)], 5000))
     row = domain_intel.domain_compare("a.test", client=FakeClient([]))[0]
     assert row["rank"] == 9 and row["best_position"] == 4
+    assert row["keyword_count"] == 5000
+
+    monkeypatch.setattr(domain_intel.keywords, "keywords_for_site", lambda *args, **kwargs: ([SimpleNamespace(position=4)], None))
+    assert domain_intel.domain_compare("a.test", client=FakeClient([]))[0]["keyword_count"] is None

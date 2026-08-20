@@ -60,11 +60,12 @@ def domain_compare(domains: str, country: str = "US", client: DataForSEOClient |
     rows = []
     for domain in targets:
         summary = backlinks.summary(domain, api)
-        ranked = keywords.keywords_for_site(domain, country, 1000, api)
+        ranked, total = keywords.keywords_for_site(
+            domain, country, 1000, api, return_total=True)
         positions = [item.position for item in ranked if isinstance(item.position, (int, float))]
         rows.append({"domain": domain, "rank": rank_by_domain.get(domain, summary.rank),
                      "backlinks": summary.backlinks, "referring_domains": summary.referring_domains,
-                     "spam": summary.spam_score, "keyword_count": len(ranked),
+                     "spam": summary.spam_score, "keyword_count": total,
                      "best_position": min(positions) if positions else None})
     return rows
 

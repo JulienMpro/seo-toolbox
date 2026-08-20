@@ -77,6 +77,25 @@ def test_keywords_for_site_handles_missing_fields():
     assert client.calls[0][1]["include_serp_info"] is True
 
 
+def test_keywords_for_site_optionally_returns_provider_total():
+    client = FakeClient({keywords.ENDPOINTS["for_site"]: [{
+        "total_count": 5000, "items": [item("seo"), item("audit seo")],
+    }]})
+
+    ranked, total = keywords.keywords_for_site(
+        "example.com", client=client, return_total=True)
+
+    assert len(ranked) == 2
+    assert total == 5000
+
+    missing_client = FakeClient({keywords.ENDPOINTS["for_site"]: [{
+        "items": [item("seo")],
+    }]})
+    _, missing_total = keywords.keywords_for_site(
+        "example.com", client=missing_client, return_total=True)
+    assert missing_total is None
+
+
 def test_gap_calls_each_competitor_and_deduplicates():
     client = FakeClient({keywords.ENDPOINTS["gap"]: [{"items": [item("unique kw", 10)]}]})
 

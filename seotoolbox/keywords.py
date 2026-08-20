@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Iterable
-from typing import Any
+from typing import Any, Literal, overload
 
 from .client import ApiError, DataForSEOClient, DataForSEOError
 from .models import IntentInfo, KeywordIdea, KeywordOverview, KeywordRanked
@@ -187,10 +187,32 @@ def _ranked(item: dict[str, Any]) -> KeywordRanked | None:
     )
 
 
-def keywords_for_site(domain: str, country: str = "US", limit: int = 50, client: DataForSEOClient | None = None) -> list[KeywordRanked]:
+@overload
+def keywords_for_site(
+    domain: str, country: str = "US", limit: int = 50,
+    client: DataForSEOClient | None = None, *, return_total: Literal[False] = False,
+) -> list[KeywordRanked]: ...
+
+
+@overload
+def keywords_for_site(
+    domain: str, country: str = "US", limit: int = 50,
+    client: DataForSEOClient | None = None, *, return_total: Literal[True],
+) -> tuple[list[KeywordRanked], int | None]: ...
+
+
+def keywords_for_site(
+    domain: str, country: str = "US", limit: int = 50,
+    client: DataForSEOClient | None = None, *, return_total: bool = False,
+) -> list[KeywordRanked] | tuple[list[KeywordRanked], int | None]:
     api = client or DataForSEOClient()
     payload = {"target": domain, "limit": limit, "include_serp_info": True, **_country(country)}
-    return [ranked for item in _items(api.get_result(ENDPOINTS["for_site"], payload))[:limit] if (ranked := _ranked(item))]
+    results = api.get_result(ENDPOINTS["for_site"], payload)
+    ranked_items = [ranked for item in _items(results)[:limit] if (ranked := _ranked(item))]
+    if not return_total:
+        return ranked_items
+    total = next((result.get("total_count") for result in results if "total_count" in result), None)
+    return ranked_items, total if isinstance(total, int) and not isinstance(total, bool) else None
 
 
 def gap(domain: str, competitors: list[str], country: str = "US", limit: int = 50, client: DataForSEOClient | None = None) -> list[KeywordRanked]:

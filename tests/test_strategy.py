@@ -54,6 +54,6 @@ def test_benchmark_and_clusters(monkeypatch):
     monkeypatch.setattr(strategy.keyword_service, "related", lambda seed, country, limit: [])
     monkeypatch.setattr(strategy.keyword_service, "overview", lambda words, country: [KeywordOverview(word, volume=10) for word in words])
     assert strategy.topic_clusters("red shoes\nblue hats")
-    monkeypatch.setattr(strategy.keyword_service, "keywords_for_site", lambda domain, country, limit: [KeywordRanked("x", position=4)])
+    monkeypatch.setattr(strategy.keyword_service, "keywords_for_site", lambda domain, country, limit, **kwargs: ([KeywordRanked("x", position=4)], 5000))
     monkeypatch.setattr(strategy.backlinks, "summary", lambda domain: BacklinkSummary(10, 2, 3))
     assert strategy.competitor_benchmark("example.com")[0]["backlinks"] == 10

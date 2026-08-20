@@ -136,9 +136,9 @@ def test_dataforseo_misc_payloads_and_verified_mappings(monkeypatch):
 
     monkeypatch.setattr(domain_intel.backlinks, "bulk_ranks", lambda targets, client: [{"target": targets[0], "rank": 80}])
     monkeypatch.setattr(domain_intel.backlinks, "summary", lambda domain, client: BacklinkSummary(100, 20, 70, 3))
-    monkeypatch.setattr(domain_intel.keywords, "keywords_for_site", lambda domain, country, limit, client: [KeywordRanked("référencement", position=4)])
+    monkeypatch.setattr(domain_intel.keywords, "keywords_for_site", lambda domain, country, limit, client, **kwargs: ([KeywordRanked("référencement", position=4)], 5000))
     row = domain_intel.domain_compare("example.fr", "FR", FakeClient([]))[0]
-    assert row == {"domain": "example.fr", "rank": 80, "backlinks": 100, "referring_domains": 20, "spam": 3, "keyword_count": 1, "best_position": 4}
+    assert row == {"domain": "example.fr", "rank": 80, "backlinks": 100, "referring_domains": 20, "spam": 3, "keyword_count": 5000, "best_position": 4}
 
 
 def test_strategy_local_calculators_with_real_french_scenarios():
@@ -182,9 +182,9 @@ def test_strategy_provider_tools_use_french_and_never_invent_missing_metrics(mon
 
 
 def test_competitor_benchmark_maps_verified_backlink_fields(monkeypatch):
-    monkeypatch.setattr(strategy.keyword_service, "keywords_for_site", lambda domain, country, limit: [KeywordRanked("seo", position=3)])
+    monkeypatch.setattr(strategy.keyword_service, "keywords_for_site", lambda domain, country, limit, **kwargs: ([KeywordRanked("seo", position=3)], 5000))
     monkeypatch.setattr(strategy.backlinks, "summary", lambda domain: BacklinkSummary(backlinks=120, referring_domains=30, rank=75, spam_score=2))
     row = strategy.competitor_benchmark("example.fr", "FR")[0]
-    assert row == {"domain": "example.fr", "ranked_keywords": 1, "average_position": 3.0, "backlinks": 120, "referring_domains": 30, "rank": 75}
-    monkeypatch.setattr(strategy.keyword_service, "keywords_for_site", lambda domain, country, limit: [])
-    assert strategy.competitor_benchmark("zero.fr", "FR")[0]["ranked_keywords"] == 0
+    assert row == {"domain": "example.fr", "ranked_keywords": 5000, "average_position": 3.0, "backlinks": 120, "referring_domains": 30, "rank": 75}
+    monkeypatch.setattr(strategy.keyword_service, "keywords_for_site", lambda domain, country, limit, **kwargs: ([], None))
+    assert strategy.competitor_benchmark("zero.fr", "FR")[0]["ranked_keywords"] is None

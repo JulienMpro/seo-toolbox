@@ -215,14 +215,14 @@ def competitor_benchmark(domains: str, country: str = "FR") -> list[dict[str, An
     """Compare ranked-keyword and backlink KPIs, returning N/D fields on provider failure."""
     rows = []
     for domain in _lines(domains):
-        ranked_available = True
         try:
-            ranked = keyword_service.keywords_for_site(domain, country, 1000)
+            ranked, total = keyword_service.keywords_for_site(
+                domain, country, 1000, return_total=True)
         except (ApiError, DataForSEOError, OSError):
-            ranked, ranked_available = [], False
+            ranked, total = [], None
         summary = _safe(lambda domain=domain: backlinks.summary(domain), None)
         positions = [item.position for item in ranked if item.position is not None]
-        rows.append({"domain": domain, "ranked_keywords": len(ranked) if ranked_available else None, "average_position": round(sum(positions) / len(positions), 1) if positions else None, "backlinks": summary.backlinks if summary else None, "referring_domains": summary.referring_domains if summary else None, "rank": summary.rank if summary else None})
+        rows.append({"domain": domain, "ranked_keywords": total, "average_position": round(sum(positions) / len(positions), 1) if positions else None, "backlinks": summary.backlinks if summary else None, "referring_domains": summary.referring_domains if summary else None, "rank": summary.rank if summary else None})
     return rows
 
 
