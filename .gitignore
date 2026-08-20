@@ -1,0 +1,24 @@
+# Secrets & données perso — jamais commités
+.env
+.env.*
+*.db
+*.sqlite
+data/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+
+# Codex / agents
+.codex/
+*.log

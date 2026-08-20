@@ -21,7 +21,7 @@ Une toolbox de consultant SEO **100% Python** peut reproduire l'essentiel des fe
 
 | Famille | Outils benchmarkés | Livrable source |
 |---|---|---|
-| Suites tout-en-un | Ahrefs, Semrush, Moz Pro, SE Ranking, Serpstat, Mangools | collecte brute `/root/clients/benchmark-features/` (339 Ko) |
+| Suites tout-en-un | Ahrefs, Semrush, Moz Pro, SE Ranking, Serpstat, Mangools | collecte brute pages officielles (339 Ko) |
 | Crawl & audit technique | Screaming Frog, Sitebulb, OnCrawl, Lumar, Botify, JetOctopus, ContentKing/Conductor, Ryte, WooRank | `benchmark-outils-crawl-audit-seo-features.md` (~170 features) |
 | Spécialisés | AccuRanker, Wincher, Nightwatch, STAT, ProRankTracker, Majestic, Monitor Backlinks, SEOptimer, LRT, Surfer, Clearscope, Frase, MarketMuse, NeuronWriter, Sistrix, Conductor, BrightLocal, Whitespark, Yext, Splunk + 18 gratuits sans API | `benchmark-toolbox-seo-features-2026.md` |
 
@@ -158,7 +158,7 @@ Légende : 🟢 = DataForSEO couvre · 🔵 = maison sans API (Python/gratuit) �
 | Feature payante | Endpoint DataForSEO / méthode |
 |---|---|
 | Crawl récurrent + détection de changements | 🔵 cron + diff (patterns `drift-baseline.py` / `drift-compare.py` existants) |
-| Alertes (Slack/Telegram/email) | 🔵 Hermes cron + notifications Telegram |
+| Alertes (Slack/Telegram/email) | 🔵 planification cron + notifications |
 | Historique des changements (60 mois) | 🔵 base SQLite maison |
 | QA pré-publication (templates, seuils) | 🔵 script maison (pattern `render-check.py`) |
 
@@ -220,7 +220,7 @@ seo-toolbox/
 2. **API FastAPI + UI web** — phase 2 : dashboards par projet client, rapports exportables, MCP server pour interroger depuis un LLM.
 3. Pas de desktop app (Streamlit/Gradio écartés : UI lourde, moins pro pour du white-label).
 
-**Dépendances** : httpx, typer, rich, pandas, sqlite3 (stdlib), beautifulsoup4, rapidfuzz (clustering), playwright (render JS optionnel), reportlab/weasyprint (PDF). Toutes gratuites/open-source — vérification santé des libs à faire avant validation (critère Julien).
+**Dépendances** : httpx, typer, rich, pandas, sqlite3 (stdlib), beautifulsoup4, rapidfuzz (clustering), playwright (render JS optionnel), reportlab/weasyprint (PDF). Toutes gratuites/open-source — vérification santé des libs à faire avant validation.
 
 ---
 
@@ -245,8 +245,8 @@ seo-toolbox/
 
 ## 6. Sources
 
-- Collecte brute suites SEO (août 2026) : `/root/clients/benchmark-features/` (ahrefs_*.md, semrush_feat_*.md, seranking*.md, serpstat*.md, moz_*.md, mangools_*.md — pages officielles)
-- Crawl/audit : `/root/clients/benchmark-outils-crawl-audit-seo-features.md` (38 URLs officielles)
-- Spécialisés + gratuits : `/root/clients/benchmark-toolbox-seo-features-2026.md` (~45 URLs officielles)
-- Endpoints : `/root/julienmouttet/seo-toolbox/catalogue-dataforseo-endpoints.md` (catalogue MCP DataForSEO, ~65 endpoints)
+- Collecte brute suites SEO (août 2026) : pages officielles (ahrefs, semrush, seranking, serpstat, moz, mangools)
+- Crawl/audit : `benchmark-outils-crawl-audit-seo-features.md` (joint au repo, 38 URLs officielles)
+- Spécialisés + gratuits : `benchmark-toolbox-seo-features-2026.md` (joint au repo, ~45 URLs officielles)
+- Endpoints : `catalogue-dataforseo-endpoints.md` (joint au repo, ~65 endpoints)
 - Prix DataForSEO : N/D (page pricing JS-rendered, non vérifiable en curl — à valider sur dataforseo.com)

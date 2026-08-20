@@ -1,7 +1,7 @@
 # Catalogue DataForSEO — endpoints disponibles (mapping brut)
 
 > Base de travail pour la toolbox consultant SEO. Chaque endpoint = une capacité exploitable.
-> Source : catalogue MCP DataForSEO connecté à Hermes (août 2026) — endpoints réels de l'API v3.
+> Source : catalogue des endpoints de l'API DataForSEO v3 (août 2026).
 > Ce fichier sert d'annexe au benchmark : il permet de mapper chaque feature payante → endpoint.
 
 ## 1. Keyword Research (Labs + Keywords Data)
