@@ -6,6 +6,7 @@ This file guides AI agents (Claude Code, Codex, Cursor, etc.) working on this re
 
 - What: open-source toolbox for SEO consultants — **165 mini-tools** + 13 business modules, powered by the DataForSEO API + in-house modules.
 - Stack: Python 3.11+, Typer CLI (`seo`), httpx, Rich; optional FastAPI + Jinja2 web UI (`api/`). pytest tests.
+- API DataForSEO : official docs [docs.dataforseo.com](https://docs.dataforseo.com/), sign up via [dataforseo](https://dataforseo.com/?aff=180453).
 - Public repo: `JulienMpro/seo-toolbox`. Credentials are NEVER stored in the repo (env vars only).
 
 ## Golden rules (non-negotiable)

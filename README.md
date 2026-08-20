@@ -29,7 +29,7 @@ An **open-source** toolbox for SEO consultants: **165 mini-tools** covering ever
 ### Documented connectors
 
 - **Google Search Console** and **Google Analytics 4**: complete guide in [`docs/connecteurs.md`](docs/connecteurs.md) — via **Google Cloud Console** (OAuth) or **MCP** (for AI agents). Nothing is connected by default: credentials are configured through environment variables.
-- **DataForSEO**: `DATAFORSEO_USERNAME` / `DATAFORSEO_PASSWORD` (env).
+- **DataForSEO**: [dataforseo](https://dataforseo.com/?aff=180453) — official documentation: [docs.dataforseo.com](https://docs.dataforseo.com/) — `DATAFORSEO_USERNAME` / `DATAFORSEO_PASSWORD` (env).
 
 ### Demo web UI
 
