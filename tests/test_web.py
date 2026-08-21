@@ -56,7 +56,8 @@ def test_tools_page_contains_registry_and_filters() -> None:
         assert tool.name in response.text
     assert 'data-category="serp"' in response.text
     assert "Search by name or description" in response.text
-    assert "seo tool ${tool.name}" in response.text
+    assert 'href="/tools/' in response.text
+    assert "tool-modal" not in response.text
 
 
 def test_tools_api_exposes_all_registry_metadata() -> None:
@@ -65,7 +66,8 @@ def test_tools_api_exposes_all_registry_metadata() -> None:
     payload = response.json()
     assert len(payload) == 165
     assert [item["name"] for item in payload] == [tool.name for tool in list_tools()]
-    assert set(payload[0]) == {"name", "category", "description", "returns", "args"}
+    assert {"name", "category", "description", "returns", "args"} <= set(payload[0])
+    assert {"ui", "archetype", "labels", "widgets"} <= set(payload[0])
     assert all(arg["type"] in {"str", "int", "float", "bool"} for item in payload for arg in item["args"])
     assert "fn" not in payload[0]
 

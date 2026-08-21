@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}{% if tool %}{{ tool.name|replace('_', ' ')|title }}{% else %}Tool not found{% endif %} · SEO Toolbox{% endblock %}
+{% block content %}
+<style>
+  .breadcrumbs { margin-bottom:18px; color:var(--muted); font-size:13px; }
+  .breadcrumbs a { color:var(--muted); }
+  .tool-page { max-width:980px; }
+  .tool-category { display:inline-block; padding:3px 8px; color:var(--brand-dark); background:#e7f5f3; border-radius:999px; font-size:11px; font-weight:750; letter-spacing:.04em; text-transform:uppercase; }
+  .tool-page-head h1 { margin-top:10px; text-transform:none; }
+  .tool-form { display:grid; align-items:stretch; gap:16px; }
+  .tool-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+  .tool-field { display:grid; align-content:start; gap:6px; }
+  .tool-field.wide { grid-column:1/-1; }
+  .tool-field textarea { width:100%; min-height:150px; resize:vertical; padding:11px; color:var(--ink); border:1px solid #b9c4d0; border-radius:7px; font:inherit; }
+  .tool-field input,.tool-field select { width:100%; min-width:0; }
+  .tool-check { display:flex; align-items:flex-start; gap:10px; min-height:62px; padding:14px; border:1px solid var(--line); border-radius:8px; background:#fff; }
+  .tool-check input { width:auto; height:auto; margin-top:3px; }
+  .tool-help { color:var(--muted); font-size:12px; font-weight:400; }
+  .required { color:var(--danger); }
+  .tool-run { width:max-content; min-width:110px; }
+  .tool-result { margin-top:22px; }
+  .tool-error { padding:12px 14px; border:1px solid #f3b4b4; border-radius:8px; color:var(--danger); background:#fff1f1; }
+  .result-tools { display:flex; gap:8px; margin-bottom:8px; }
+  .result-tools button,.zone-copy { height:32px; padding:0 11px; border:1px solid var(--line); background:#fff; color:var(--brand-dark); font-size:13px; }
+  .code-output,.tool-command { padding:14px; border-radius:8px; color:#d5faf5; background:#13212d; white-space:pre-wrap; overflow-wrap:anywhere; }
+  .output-text { width:100%; min-height:170px; padding:12px; border:1px solid var(--line); border-radius:8px; background:var(--wash); font:inherit; }
+  .result-zones { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+  .result-zone { padding:14px; border:1px solid var(--line); border-radius:10px; background:#fff; }
+  .result-zone h3 { margin:0 0 10px; font-size:14px; }
+  .result-zone pre { min-height:90px; margin:10px 0 0; white-space:pre-wrap; color:#475467; }
+  .status-badge { display:inline-block; padding:2px 7px; border-radius:999px; font-size:12px; font-weight:700; }
+  .status-ok { color:#067647; background:#ecfdf3; }.status-warn { color:#92400e; background:#fffaeb; }.status-error { color:#b42318; background:#fef3f2; }
+  .summary-chips { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }.summary-chip { padding:5px 10px; border-radius:999px; background:#e7f5f3; color:var(--brand-dark); font-size:13px; font-weight:700; }
+  .diff-line { display:block; padding:1px 8px; font-family:ui-monospace,monospace; white-space:pre-wrap; }.diff-add { color:#067647;background:#ecfdf3;}.diff-remove { color:#b42318;background:#fef3f2;}
+  .score { font-size:46px; font-weight:800; }.score-track { height:12px; overflow:hidden; border-radius:999px; background:#e8edf2; }.score-fill { height:100%; background:var(--brand); }
+  .related-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; }.related-card { padding:14px; min-height:105px; }.related-card strong { font-size:15px; overflow-wrap:anywhere; }
+  .back-tools { display:inline-block; margin-top:28px; }
+  @media(max-width:760px) { .tool-fields,.result-zones { grid-template-columns:1fr; } .tool-field.wide { grid-column:auto; } }
+</style>
+{% if not tool %}
+<section class="tool-page"><h1>Tool not found</h1><p class="lede">This tool does not exist or is no longer available.</p><a href="/tools">← Browse all tools</a></section>
+{% else %}
+<article class="tool-page">
+  <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="/tools">Tools</a> › <a href="/tools#{{ tool.category }}">{{ tool.category|capitalize }}</a> › {{ tool.name }}</nav>
+  <header class="tool-page-head"><span class="tool-category">{{ tool.category }}</span><h1>{{ tool.name|replace('_', ' ')|title }}</h1><p class="lede">{{ tool.description }}</p></header>
+  <section class="panel"><div id="tool-mount" data-tool-page data-zone-label="In both" data-runner-url="/api/tools/{{ tool.name }}/run"></div><div class="tool-result" id="tool-result" aria-live="polite"></div></section>
+  <h2>Example command</h2><pre class="tool-command"><code>seo tool {{ tool.name }}{% for arg in tool.args if arg.required %} --{{ arg.name|replace('_', '-') }}{% if not arg.is_flag %} &lt;{{ arg.name }}&gt;{% endif %}{% endfor %}</code></pre>
+  {% if related %}<section><h2>Related tools</h2><div class="related-grid">{% for item in related %}<a class="card related-card" href="/tools/{{ item.name }}"><strong>{{ item.name|replace('_', ' ')|title }}</strong><span>{{ item.description }}</span></a>{% endfor %}</div></section>{% endif %}
+  <a class="back-tools" href="/tools">← Back to all tools</a>
+</article>
+<script id="tool-data" type="application/json">{{ tool|tojson }}</script>
+<script src="/static/tool.js" defer></script>
+{% endif %}
+{% endblock %}

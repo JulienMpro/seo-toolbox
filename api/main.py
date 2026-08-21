@@ -10,11 +10,13 @@ from typing import Any, Callable, get_type_hints
 import httpx
 from fastapi import Body, FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from seotoolbox import audit, backlinks, geo, keywords, serp
 from seotoolbox.client import ApiError, DataForSEOError
 from seotoolbox.tools import REGISTRY, ToolSpec, coerce_tool_args, list_tools
+from seotoolbox.tools.ui import serialize_ui, similar_tools
 
 VERSION = "0.5.0"
 COUNTRIES = ("FR", "GB", "US", "DE", "ES", "IT", "BE", "CH", "CA")
@@ -23,6 +25,7 @@ ENGINES = ("chatgpt", "perplexity", "gemini")
 
 app = FastAPI(title="SEO Toolbox", version=VERSION)
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
+app.mount("/static", StaticFiles(directory=Path(__file__).parent / "static"), name="static")
 
 
 def _nd(value: Any) -> Any:
@@ -35,6 +38,7 @@ templates.env.filters["nd"] = _nd
 def _serialize_tool(tool: ToolSpec) -> dict[str, Any]:
     """Return the public, JSON-safe registry metadata used by the tools UI."""
     hints = get_type_hints(tool.fn)
+    ui = serialize_ui(tool)
     return {
         "name": tool.name,
         "category": tool.category,
@@ -50,9 +54,17 @@ def _serialize_tool(tool: ToolSpec) -> dict[str, Any]:
                 "type": getattr(hints.get(arg.name, str), "__name__", "str")
                 if hints.get(arg.name, str) in {str, int, float, bool}
                 else "str",
+                "label": ui["labels"].get(arg.name, arg.name.replace("_", " ").capitalize()),
+                "widget": ui["widgets"].get(arg.name, "text"),
+                "choices": ui["choices"].get(arg.name, []),
+                "placeholder": ui["placeholders"].get(arg.name) or ui["examples"].get(arg.name) or arg.help,
             }
             for arg in tool.args
         ],
+        "ui": ui,
+        "archetype": ui["archetype"],
+        "labels": ui["labels"],
+        "widgets": ui["widgets"],
     }
 
 
@@ -136,6 +148,23 @@ async def tools_page(request: Request) -> HTMLResponse:
     tools, categories = _tool_catalog()
     return templates.TemplateResponse(
         request, "tools.html", _context(request, tools=tools, categories=categories)
+    )
+
+
+@app.get("/tools/{name}", response_class=HTMLResponse)
+async def tool_page(request: Request, name: str) -> HTMLResponse:
+    spec = REGISTRY.get(name)
+    if spec is None:
+        return templates.TemplateResponse(
+            request,
+            "tool.html",
+            _context(request, tool=None, related=[]),
+            status_code=404,
+        )
+    tool = _serialize_tool(spec)
+    related = [_serialize_tool(item) for item in similar_tools(name)]
+    return templates.TemplateResponse(
+        request, "tool.html", _context(request, tool=tool, related=related)
     )
 
 

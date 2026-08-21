@@ -10,35 +10,12 @@
   .tool-chip { flex:none; height:34px; padding:0 12px; border:1px solid var(--line); border-radius:999px; background:#fff; color:#475467; font-size:13px; font-weight:650; }
   .tool-chip:hover,.tool-chip.active { border-color:var(--brand); background:var(--brand); color:#fff; }
   .tools-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px; }
-  .tool-card { min-height:175px; text-align:left; height:auto; padding:18px; color:var(--ink); background:#fff; border:1px solid var(--line); border-radius:var(--radius); font-weight:400; }
-  .tool-card:hover,.tool-card:focus-visible { background:#fff; border-color:#75aaa5; transform:translateY(-2px); }
+  .tool-card { min-height:175px; padding:18px; color:var(--ink); background:#fff; border:1px solid var(--line); border-radius:var(--radius); text-decoration:none; transition:transform .12s,border-color .12s; }
+  .tool-card:hover,.tool-card:focus-visible { border-color:#75aaa5; transform:translateY(-2px); }
   .tool-card h2 { margin:13px 0 7px; font-size:17px; overflow-wrap:anywhere; }
   .tool-card p { margin:0; color:var(--muted); }
   .tool-category { display:inline-block; padding:3px 8px; color:var(--brand-dark); background:#e7f5f3; border-radius:999px; font-size:11px; font-weight:750; letter-spacing:.04em; text-transform:uppercase; }
   .tools-empty { grid-column:1/-1; }
-  .tool-modal { position:fixed; inset:0; z-index:50; display:none; align-items:center; justify-content:center; padding:20px; background:rgba(15,23,42,.62); }
-  .tool-modal.open { display:flex; }
-  .tool-dialog { width:min(850px,100%); max-height:88vh; overflow:auto; padding:24px; background:#fff; border-radius:14px; box-shadow:0 24px 70px rgba(15,23,42,.3); }
-  .tool-dialog-head { display:flex; justify-content:space-between; gap:20px; }
-  .tool-dialog h2 { margin:10px 0 8px; overflow-wrap:anywhere; }
-  .tool-close { width:38px; height:38px; padding:0; background:#eef2f6; color:var(--ink); }
-  .tool-close:hover { background:#e2e8f0; }
-  .tool-description { color:#475467; }
-  .tool-dialog h3 { margin:23px 0 10px; font-size:14px; text-transform:uppercase; letter-spacing:.04em; }
-  .required { font-weight:700; color:var(--danger); }
-  .optional { color:var(--muted); }
-  .tool-form { display:grid; gap:14px; }
-  .tool-field { display:grid; gap:6px; }
-  .tool-field label { font-weight:700; }
-  .tool-check { display:flex; align-items:center; gap:9px; }
-  .tool-check input { width:auto; }
-  .tool-help { color:var(--muted); font-size:13px; }
-  .tool-run { width:max-content; min-width:100px; }
-  .tool-result { margin-top:20px; }
-  .tool-result pre { padding:14px; border:1px solid var(--line); border-radius:8px; background:var(--wash); white-space:pre-wrap; overflow-wrap:anywhere; }
-  .tool-error { padding:12px 14px; border:1px solid #f3b4b4; border-radius:8px; color:var(--danger); background:#fff1f1; }
-  .tool-example-label { margin-bottom:6px!important; color:var(--muted); font-size:12px!important; }
-  .tool-command { padding:14px; border-radius:8px; color:#d5faf5; background:#13212d; white-space:pre-wrap; overflow-wrap:anywhere; }
   @media(max-width:600px) { .tools-head { align-items:start; flex-direction:column; } .tool-controls { position:static; } }
 </style>
 <div class="tools-head"><div><h1>165 SEO Mini-Tools</h1><p class="lede">Browse every focused tool in the Python registry.</p></div><div class="tool-count" id="tool-results" aria-live="polite">{{ tools|length }} tools</div></div>
@@ -47,7 +24,6 @@
   <div class="tool-chips" id="tool-chips"><button class="tool-chip active" type="button" data-category="all">All ({{ tools|length }})</button>{% for category in categories %}<button class="tool-chip" type="button" data-category="{{ category.name }}">{{ category.name|capitalize }} ({{ category.count }})</button>{% endfor %}</div>
 </section>
 <section class="tools-grid" id="tools-grid" aria-live="polite"></section>
-<div class="tool-modal" id="tool-modal" role="dialog" aria-modal="true" aria-labelledby="tool-modal-title"><article class="tool-dialog"><div class="tool-dialog-head"><div><span class="tool-category" id="tool-modal-category"></span><h2 id="tool-modal-title"></h2></div><button class="tool-close" id="tool-close" type="button" aria-label="Close">✕</button></div><p class="tool-description" id="tool-modal-description"></p><h3>Run tool</h3><form class="tool-form" id="tool-form"><div id="tool-arguments"></div><button class="tool-run" id="tool-run" type="submit">Run</button></form><div class="tool-result" id="tool-result" aria-live="polite"></div><h3 class="tool-example-label">Example command</h3><pre class="tool-command"><code id="tool-example"></code></pre></article></div>
 <script id="tools-data" type="application/json">{{ tools|tojson }}</script>
 <script>
 (() => {
@@ -55,79 +31,24 @@
   const grid = document.getElementById('tools-grid');
   const search = document.getElementById('tool-search');
   const results = document.getElementById('tool-results');
-  const modal = document.getElementById('tool-modal');
-  const form = document.getElementById('tool-form');
-  const result = document.getElementById('tool-result');
-  const runButton = document.getElementById('tool-run');
   let category = 'all';
-  let activeTool = null;
-  let running = false;
   const escapeHtml = value => { const node = document.createElement('div'); node.textContent = value ?? ''; return node.innerHTML; };
   function render() {
     const query = search.value.trim().toLowerCase();
     const visible = tools.filter(tool => (category === 'all' || tool.category === category) && (`${tool.name} ${tool.description}`).toLowerCase().includes(query));
     results.textContent = `${visible.length} tool${visible.length === 1 ? '' : 's'}`;
-    grid.innerHTML = visible.length ? visible.map(tool => `<button type="button" class="tool-card" data-tool="${escapeHtml(tool.name)}"><span class="tool-category">${escapeHtml(tool.category)}</span><h2>${escapeHtml(tool.name)}</h2><p>${escapeHtml(tool.description)}</p></button>`).join('') : '<div class="empty tools-empty">No tools match these filters.</div>';
+    grid.innerHTML = visible.length ? visible.map(tool => `<a class="tool-card" href="/tools/${encodeURIComponent(tool.name)}"><span class="tool-category">${escapeHtml(tool.category)}</span><h2>${escapeHtml(tool.name)}</h2><p>${escapeHtml(tool.description)}</p></a>`).join('') : '<div class="empty tools-empty">No tools match these filters.</div>';
   }
-  function openTool(name) {
-    const tool = tools.find(item => item.name === name); if (!tool) return;
-    activeTool = tool;
-    document.getElementById('tool-modal-category').textContent = tool.category;
-    document.getElementById('tool-modal-title').textContent = tool.name;
-    document.getElementById('tool-modal-description').textContent = tool.description;
-    document.getElementById('tool-arguments').innerHTML = tool.args.length ? tool.args.map(arg => {
-      const id = `tool-arg-${arg.name}`;
-      const required = arg.required ? '<span class="required"> *</span>' : '';
-      const help = arg.help ? `<span class="tool-help">${escapeHtml(arg.help)}</span>` : '';
-      if (arg.type === 'bool' || arg.is_flag) {
-        return `<div class="tool-field"><label class="tool-check" for="${escapeHtml(id)}"><input id="${escapeHtml(id)}" name="${escapeHtml(arg.name)}" type="checkbox" data-type="bool"${arg.default === true || arg.default === 'true' ? ' checked' : ''}> ${escapeHtml(arg.name)}${required}</label>${help}</div>`;
-      }
-      const inputType = arg.type === 'int' || arg.type === 'float' ? 'number' : 'text';
-      const step = arg.type === 'float' ? ' step="any"' : '';
-      const value = arg.default !== null ? ` value="${escapeHtml(arg.default)}"` : '';
-      return `<div class="tool-field"><label for="${escapeHtml(id)}">${escapeHtml(arg.name)}${required}</label><input id="${escapeHtml(id)}" name="${escapeHtml(arg.name)}" type="${inputType}" data-type="${escapeHtml(arg.type)}"${step}${value} placeholder="${escapeHtml(arg.help || '')}"${arg.required ? ' required' : ''}>${help}</div>`;
-    }).join('') : '<div class="empty">This tool has no arguments.</div>';
-    const required = tool.args.filter(arg => arg.required).map(arg => ` --${arg.name}${arg.is_flag ? '' : ` ${arg.help ? arg.help.slice(0, 12) : 'value'}`}`).join('');
-    document.getElementById('tool-example').textContent = `seo tool ${tool.name}${required}`;
-    result.innerHTML = '';
-    modal.classList.add('open'); document.body.style.overflow = 'hidden';
-  }
-  function closeModal() { if (running) return; modal.classList.remove('open'); document.body.style.overflow = ''; activeTool = null; }
-  function renderOutput(payload) {
-    if (payload.returns === 'table') {
-      if (!payload.output.length) { result.innerHTML = '<div class="empty">No results.</div>'; return; }
-      const headers = Object.keys(payload.output[0]);
-      result.innerHTML = `<div class="table-wrap exportable"><table class="exportable" data-export-name="${escapeHtml(activeTool.name)}"><thead><tr>${headers.map(key => `<th>${escapeHtml(key)}</th>`).join('')}</tr></thead><tbody>${payload.output.map(row => `<tr>${headers.map(key => { const value = row[key]; return `<td>${escapeHtml(value === null || value === '' ? 'N/D' : Array.isArray(value) ? value.join(', ') : typeof value === 'object' ? JSON.stringify(value) : value)}</td>`; }).join('')}</tr>`).join('')}</tbody></table></div>`;
-      window.initExportableTables(result);
-    } else {
-      const pre = document.createElement('pre'); pre.textContent = payload.output ?? ''; result.replaceChildren(pre);
-    }
-  }
-  form.addEventListener('submit', async event => {
-    event.preventDefault(); if (!activeTool || running) return;
-    const args = {};
-    activeTool.args.forEach(arg => {
-      const input = form.elements.namedItem(arg.name);
-      if (arg.type === 'bool' || arg.is_flag) args[arg.name] = input.checked;
-      else if (input.value !== '' || arg.required) args[arg.name] = arg.type === 'int' ? Number.parseInt(input.value, 10) : arg.type === 'float' ? Number.parseFloat(input.value) : input.value;
-    });
-    running = true; runButton.disabled = true; runButton.textContent = 'Running…'; document.getElementById('tool-close').disabled = true; result.innerHTML = '<div class="tool-help">Running…</div>';
-    try {
-      const response = await fetch('/api/tools/' + encodeURIComponent(activeTool.name) + '/run', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(args)});
-      const payload = await response.json();
-      if (!response.ok) throw new Error(payload.error || 'The tool could not be run.');
-      renderOutput(payload);
-    } catch (error) {
-      result.innerHTML = `<div class="tool-error">${escapeHtml(error.message || 'The tool could not be run.')}</div>`;
-    } finally {
-      running = false; runButton.disabled = false; runButton.textContent = 'Run'; document.getElementById('tool-close').disabled = false;
-    }
+  document.getElementById('tool-chips').addEventListener('click', event => {
+    const chip = event.target.closest('[data-category]'); if (!chip) return;
+    category = chip.dataset.category;
+    document.querySelectorAll('.tool-chip').forEach(item => item.classList.toggle('active', item === chip));
+    history.replaceState(null, '', category === 'all' ? '/tools' : `#${encodeURIComponent(category)}`); render();
   });
-  document.getElementById('tool-chips').addEventListener('click', event => { const chip = event.target.closest('[data-category]'); if (!chip) return; category = chip.dataset.category; document.querySelectorAll('.tool-chip').forEach(item => item.classList.toggle('active', item === chip)); history.replaceState(null, '', category === 'all' ? '/tools' : `#${category}`); render(); });
-  grid.addEventListener('click', event => { const card = event.target.closest('[data-tool]'); if (card) openTool(card.dataset.tool); });
-  search.addEventListener('input', render); document.getElementById('tool-close').addEventListener('click', closeModal);
-  modal.addEventListener('click', event => { if (event.target === modal) closeModal(); }); document.addEventListener('keydown', event => { if (event.key === 'Escape') closeModal(); });
-  const initial = decodeURIComponent(location.hash.slice(1)); const chip = document.querySelector(`[data-category="${CSS.escape(initial)}"]`); if (chip) chip.click(); else render();
+  search.addEventListener('input', render);
+  const initial = decodeURIComponent(location.hash.slice(1));
+  const chip = Array.from(document.querySelectorAll('[data-category]')).find(item => item.dataset.category === initial);
+  if (chip) chip.click(); else render();
 })();
 </script>
 {% endblock %}

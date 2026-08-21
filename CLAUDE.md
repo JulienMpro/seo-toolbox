@@ -31,6 +31,13 @@ This file guides AI agents (Claude Code, Codex, Cursor, etc.) working on this re
 - **Add a tool** = 1 function + 1 `register(ToolSpec(...))` + 1 test. The CLI (`seo tool <nom>`), help, and `seo tools list` are generated automatically. `returns="table"` → list of dicts (`None` values are displayed as `N/D`).
 - Function name = snake_case tool name. Existing categories: calculators, converters, generators, analyzers, checkers, serp, links, schema, strategy, misc, geo.
 
+### Mini-tool web UI
+
+- `seotoolbox/tools/ui.py` maps every registry tool to one of ten UX archetypes and stores labels, widgets, choices, and result hints.
+- `/tools/{name}` renders a dedicated page; `api/static/tool.js` builds its archetype-specific form and results.
+- Every new registry tool must receive a `TOOL_UI` entry so the completeness test remains green.
+- Related tools are selected from the same category, with matching archetypes first.
+
 ## Known pitfalls (verified live — do not repeat)
 
 1. **`search_intent` requires a location**: payload `{"keywords": [...], "language_name": "English"}` — `language_code` alone → `Invalid Field: 'language_name'`. The `keywords.intent()` function already handles this (`language_name` parameter, defaults to English).
