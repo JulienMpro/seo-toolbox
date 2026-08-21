@@ -45,33 +45,33 @@ _BY_ARCHETYPE = {
     "list": _names("""serp_compare rank_bulk intent_analysis keyword_gap features_matrix
         llm_volume keyword_prioritization difficulty_score topic_clusters intent_mix
         traffic_potential competitor_benchmark link_profile_compare authority_score
-        prospect_emails domain_compare cannibalization competitor_keywords"""),
+        prospect_emails domain_compare cannibalization"""),
     "single": _names("""paa_extractor serp_features serp_devices serp_countries serp_history
         keyword_suggestions_tool top_searches content_length_target keyword_expansion
-        content_brief faq_generator llm_response_extract brand_visibility_ia brand_mentions
+        content_brief faq_generator llm_response_extract brand_mentions competitor_keywords
         phrase_trends content_summary google_trends trends_by_region trends_demography
         youtube_keywords youtube_video_info youtube_comments youtube_transcript amazon_products
         amazon_product_keywords amazon_competitors amazon_sellers amazon_asin anchor_distribution
-        dofollow_ratio disavow_generator toxic_links link_gap referring_domains_analysis
+        dofollow_ratio disavow_generator toxic_links referring_domains_analysis
         new_lost_links link_profile_evolution most_linked_pages pbn_detection broken_link_building
         whois_lite technology_detection instant_audit check_http meta_raw_extractor serp_snapshot
-        jsonld_extract"""),
+        jsonld_extract brand_visibility_ia link_gap"""),
     "checker": _names("""http_status_bulk redirect_chain robots_checker sitemap_validator
         canonical_checker hreflang_checker schema_validator viewport_checker og_validator
         mixed_content url_syntax hreflang_reciprocity title_meta_validator
-        canonical_hreflang_check lighthouse_cwv jsonld_validate"""),
+        canonical_hreflang_check lighthouse_cwv"""),
     "analyzer": _names("""keyword_density co_occurrence ngrams readability thin_content
         entity_extractor keyword_extractor page_similarity heading_checker title_meta_analyzer
         internal_anchors internal_link_score merge_candidates content_length tfidf_analysis
-        content_audit"""),
-    "calculator": _names("""roi_seo traffic_projection position_value ctr_curve ads_equivalent
+        content_audit jsonld_validate"""),
+    "calculator": _names("""roi_seo traffic_projection position_value ads_equivalent
         conversion_rate implicit_cpc cac_ltv crawl_time sitemap_split backlink_value content_cost
         time_to_rank opportunity_cost organic_revenue seo_projection"""),
     "checklist": {"eeat_score"},
     "generator": _names("""redirect_generator robots_generator sitemap_generator meta_generator
         hreflang_generator anchor_generator title_variants meta_variants internal_link_generator
         breadcrumb_generator snippet_generator canonical_generator og_generator prompt_generator
-        redirect_map_generator semantic_silo editorial_calendar effort_impact lorem_seo"""),
+        redirect_map_generator semantic_silo editorial_calendar effort_impact lorem_seo ctr_curve"""),
     "schema": _names("""jsonld_article jsonld_faq jsonld_localbusiness jsonld_product
         jsonld_breadcrumb jsonld_review jsonld_event jsonld_organization jsonld_howto
         jsonld_jobposting"""),
@@ -101,6 +101,17 @@ _LABELS = {
     "referral_traffic": "Monthly referral visits", "authority": "Authority score",
     "kd": "Keyword difficulty", "age": "Domain age (months)",
     "value_per_visit": "Value per visit (€)", "current_traffic": "Current monthly visits",
+    "click_rate": "Click realization rate (%)", "conversions": "Conversions",
+    "articles": "Articles", "user_agent": "User agent", "x_default": "Default-language URL",
+    "force_https": "Force HTTPS", "remove_www": "Remove www", "remove_trailing_slash": "Remove trailing slash",
+    "remove_params": "Parameters to remove", "site_name": "Site name", "time_range": "Time range",
+    "spam_threshold": "Spam threshold", "same_as": "Profile URLs (one per line)",
+    "date_published": "Publication date", "date_modified": "Modified date", "opening_hours": "Opening hours",
+    "price_range": "Price range", "rating_value": "Rating value", "review_count": "Review count",
+    "item_reviewed": "Item reviewed", "review_body": "Review text", "start_date": "Start date",
+    "end_date": "End date", "location_name": "Location name", "location_address": "Location address",
+    "offers_price": "Offer price", "total_time": "Total time", "hiring_organization": "Hiring organization",
+    "employment_type": "Employment type", "date_posted": "Posting date", "valid_through": "Valid through",
 }
 
 _TEXTAREAS = _names("""value text text1 text2 before after indexed urls keywords domains
@@ -114,8 +125,15 @@ _CHOICES = {
     "html_entities.mode": ["encode", "decode"],
     "jsonld_minify.mode": ["minify", "beautify"],
     "snippet_generator.type": ["paragraph", "list", "table"],
-    "date_convert.input_format": ["iso", "epoch", "fr", "sitemap"],
-    "date_convert.output_format": ["iso", "epoch", "fr", "sitemap"],
+    "text_diff.mode": ["unified", "side-by-side"],
+    "ctr_curve.device": ["both", "desktop", "mobile"],
+    "og_generator.type": ["website", "article", "product", "profile"],
+    "prompt_generator.type": ["audit", "brief", "geo", "meta", "strategy", "email"],
+    "jsonld_product.availability": ["InStock", "OutOfStock", "PreOrder", "Discontinued"],
+    "jsonld_jobposting.employment_type": ["FULL_TIME", "PART_TIME", "CONTRACTOR", "TEMPORARY", "INTERN", "VOLUNTEER", "PER_DIEM", "OTHER"],
+    "google_trends.time_range": ["", "past_day", "past_7_days", "past_30_days", "past_90_days", "past_year", "past_5_years"],
+    "date_convert.input_format": ["iso", "timestamp", "fr", "lastmod"],
+    "date_convert.output_format": ["iso", "timestamp", "fr", "lastmod"],
 }
 
 
@@ -123,10 +141,15 @@ def _humanize(name: str) -> str:
     return _LABELS.get(name, name.replace("_", " ").capitalize())
 
 
+def _placeholder(name: str, label: str, help_text: str) -> str:
+    return help_text.strip() or f"Enter {label.rstrip('.').lower()}"
+
+
 def _base_ui(name: str, archetype: str) -> ToolUI:
     spec = REGISTRY[name]
     hints = get_type_hints(spec.fn)
     labels = {arg.name: _humanize(arg.name) for arg in spec.args}
+    placeholders = {arg.name: _placeholder(arg.name, labels[arg.name], arg.help) for arg in spec.args}
     widgets: dict[str, str] = {}
     choices: dict[str, list[str]] = {}
     for arg in spec.args:
@@ -146,7 +169,7 @@ def _base_ui(name: str, archetype: str) -> ToolUI:
         mode = "code"
     if archetype == "converter":
         mode = "code"
-    return ToolUI(archetype, labels, widgets, choices, result_mode=mode)
+    return ToolUI(archetype, labels, widgets, choices, placeholders=placeholders, result_mode=mode)
 
 
 TOOL_UI: dict[str, ToolUI] = {
@@ -164,6 +187,11 @@ TOOL_UI["sitemap_diff"].result_labels = {"first": "Before", "second": "After"}
 TOOL_UI["keyword_rank_change"].result_labels = {"first": "Before", "second": "After"}
 TOOL_UI["indexation_checker"].result_labels = {"first": "Indexed export", "second": "URLs"}
 TOOL_UI["thin_content"].labels["text"] = "Value is a URL"
+TOOL_UI["jsonld_validate"].widgets["value"] = "textarea"
+TOOL_UI["brand_visibility_ia"].widgets["engines"] = "text"
+TOOL_UI["link_gap"].widgets["competitor"] = "text"
+TOOL_UI["jsonld_faq"].widgets["qa"] = "textarea"
+TOOL_UI["snippet_generator"].widgets["content"] = "textarea"
 TOOL_UI["tz_convert"].placeholders.update({"source": "Europe/Paris", "target": "America/New_York"})
 for _name in ("serp_compare", "features_matrix", "competitor_benchmark", "link_profile_compare", "domain_compare"):
     TOOL_UI[_name].best_highlight = True
@@ -174,6 +202,21 @@ for _name in ("http_status_bulk", "redirect_chain", "robots_checker", "sitemap_v
               "og_validator", "mixed_content", "url_syntax", "hreflang_reciprocity",
               "title_meta_validator", "canonical_hreflang_check", "lighthouse_cwv", "jsonld_validate"):
     TOOL_UI[_name].badge_columns = {"status": {"ok": ["ok", "valid", "200", "pass"], "warn": ["warn", "redirect"], "err": ["error", "invalid", "fail", "404", "500"]}}
+
+_BOOL_BADGES = {"ok": ["true", "yes", "present"], "warn": [], "err": ["false", "no", "missing"]}
+TOOL_UI["sitemap_validator"].badge_columns.update({"valid": _BOOL_BADGES})
+TOOL_UI["canonical_checker"].badge_columns.update({
+    "present": _BOOL_BADGES, "self_canonical": _BOOL_BADGES,
+    "conflict": {"ok": ["false", "no"], "warn": [], "err": ["true", "yes"]},
+})
+TOOL_UI["og_validator"].badge_columns.update({
+    key: _BOOL_BADGES for key in ("og_title", "og_description", "og_image", "twitter_card")
+})
+TOOL_UI["title_meta_analyzer"].badge_columns = {
+    "title_ok": _BOOL_BADGES, "meta_ok": _BOOL_BADGES,
+    "duplicate": {"ok": ["false", "no"], "warn": [], "err": ["true", "yes"]},
+    "truncated": {"ok": ["false", "no"], "warn": [], "err": ["true", "yes"]},
+}
 
 _SYNTAX = {
     "robots_generator": "text", "sitemap_generator": "xml", "hreflang_generator": "plain",
@@ -212,7 +255,7 @@ def serialize_ui(spec: ToolSpec) -> dict[str, Any]:
             "label": ui.labels.get(arg.name, _humanize(arg.name)),
             "widget": ui.widgets.get(arg.name, "text"),
             "choices": ui.choices.get(arg.name, []),
-            "placeholder": ui.placeholders.get(arg.name) or ui.examples.get(arg.name) or arg.help,
+            "placeholder": ui.placeholders.get(arg.name) or ui.examples.get(arg.name) or _placeholder(arg.name, ui.labels.get(arg.name, _humanize(arg.name)), arg.help),
         }
         for arg in spec.args
     ]

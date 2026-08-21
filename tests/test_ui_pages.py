@@ -1,5 +1,8 @@
 """Tests for dedicated, data-driven mini-tool pages."""
 
+import asyncio
+
+import httpx
 from fastapi.testclient import TestClient
 import pytest
 
@@ -8,7 +11,21 @@ from seotoolbox.tools import REGISTRY
 from seotoolbox.tools.ui import ARCHETYPES, TOOL_UI, similar_tools, ui_for
 
 
+class _SyncASGITransport(httpx.BaseTransport):
+    def handle_request(self, request: httpx.Request) -> httpx.Response:
+        async def send() -> tuple[int, httpx.Headers, bytes, dict]:
+            transport = httpx.ASGITransport(app=app)
+            response = await transport.handle_async_request(request)
+            content = await response.aread()
+            await transport.aclose()
+            return response.status_code, response.headers, content, response.extensions
+
+        status, headers, content, extensions = asyncio.run(send())
+        return httpx.Response(status, headers=headers, content=content, extensions=extensions, request=request)
+
+
 client = TestClient(app)
+client._transport = _SyncASGITransport()  # type: ignore[attr-defined]
 
 
 def test_ui_mapping_complete() -> None:
@@ -67,9 +84,7 @@ def test_serialize_ui() -> None:
 def test_focused_ui_overrides() -> None:
     assert ui_for("thin_content").labels["text"] == "Value is a URL"
     assert ui_for("date_convert").widgets["input_format"] == "select"
-    assert ui_for("date_convert").choices["input_format"] == ["iso", "epoch", "fr", "sitemap"]
-    assert ui_for("date_convert").choices["output_format"] == ["iso", "epoch", "fr", "sitemap"]
-    assert ui_for("tz_convert").placeholders == {
-        "source": "Europe/Paris",
-        "target": "America/New_York",
-    }
+    assert ui_for("date_convert").choices["input_format"] == ["iso", "timestamp", "fr", "lastmod"]
+    assert ui_for("date_convert").choices["output_format"] == ["iso", "timestamp", "fr", "lastmod"]
+    assert ui_for("tz_convert").placeholders["source"] == "Europe/Paris"
+    assert ui_for("tz_convert").placeholders["target"] == "America/New_York"
