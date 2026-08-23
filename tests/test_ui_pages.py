@@ -34,6 +34,19 @@ def test_ui_mapping_complete() -> None:
     assert all(ui.display_name and "_" not in ui.display_name for ui in TOOL_UI.values())
 
 
+@pytest.mark.parametrize(
+    ("name", "display_name"),
+    [
+        ("brand_visibility_ia", "Brand Visibility IA"),
+        ("list_to_urls", "List to URLs"),
+        ("time_to_rank", "Time to Rank"),
+        ("trends_by_region", "Trends by Region"),
+    ],
+)
+def test_display_names(name: str, display_name: str) -> None:
+    assert TOOL_UI[name].display_name == display_name
+
+
 def test_list_and_single_ctas_are_verbal() -> None:
     focused = [ui for ui in TOOL_UI.values() if ui.archetype in {"list", "single"}]
     assert len(focused) == 64
@@ -102,7 +115,7 @@ def test_serialize_ui() -> None:
     assert payload["labels"]["value"] == "Input"
     assert payload["widgets"]["value"] == "textarea"
     assert payload["ui"]["archetype"] == "converter"
-    assert payload["display_name"] == "Text To Slug"
+    assert payload["display_name"] == "Text to Slug"
     assert payload["cta"] == "Convert"
     assert payload["no_api"] is True
     assert payload["args"][0]["widget"] == "textarea"

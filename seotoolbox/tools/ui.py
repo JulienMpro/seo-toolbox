@@ -35,15 +35,19 @@ class ToolUI:
 
 _DISPLAY_OVERRIDES = {
     "amazon_asin": "Amazon ASIN",
+    "brand_visibility_ia": "Brand Visibility IA",
     "bytes_human": "Human-readable Bytes",
     "cac_ltv": "CAC / LTV",
     "canonical_hreflang_check": "Canonical / Hreflang Check",
+    "check_http": "Check HTTP",
     "csv_json": "CSV ↔ JSON",
     "ctr_curve": "CTR Curve",
     "eeat_score": "E-E-A-T Score",
+    "faq_generator": "FAQ Generator",
     "html_entities": "HTML Entities",
     "html_to_md": "HTML to Markdown",
     "http_status_bulk": "HTTP Status Bulk",
+    "implicit_cpc": "Implicit CPC",
     "jsonld_article": "JSON-LD Article",
     "jsonld_breadcrumb": "JSON-LD Breadcrumb",
     "jsonld_event": "JSON-LD Event",
@@ -57,8 +61,11 @@ _DISPLAY_OVERRIDES = {
     "jsonld_product": "JSON-LD Product",
     "jsonld_review": "JSON-LD Review",
     "jsonld_validate": "JSON-LD Validate",
+    "list_to_urls": "List to URLs",
     "llm_response_extract": "LLM Response Extract",
     "llm_volume": "LLM Search Volume",
+    "lighthouse_cwv": "Lighthouse CWV",
+    "lorem_seo": "Lorem SEO",
     "md_to_html": "Markdown to HTML",
     "ngrams": "N-grams",
     "og_generator": "OG Generator",
@@ -72,6 +79,7 @@ _DISPLAY_OVERRIDES = {
     "serp_features": "SERP Features",
     "serp_history": "SERP History",
     "serp_snapshot": "SERP Snapshot",
+    "seo_projection": "SEO Projection",
     "sitemap_diff": "Sitemap Diff",
     "tfidf_analysis": "TF-IDF Analysis",
     "url_decode": "URL Decode",
@@ -86,7 +94,11 @@ def _display_name(name: str) -> str:
     if name in _DISPLAY_OVERRIDES:
         return _DISPLAY_OVERRIDES[name]
     words = name.split("_")
-    display = " ".join(word.capitalize() for word in words)
+    small_words = {"to", "by", "of", "and", "for", "in", "on", "at", "a", "an", "the"}
+    display = " ".join(
+        word.lower() if index and word.lower() in small_words else word.capitalize()
+        for index, word in enumerate(words)
+    )
     return display.replace("Co Occurrence", "Co-occurrence")
 
 
