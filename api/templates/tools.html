@@ -1,54 +1,13 @@
 {% extends "base.html" %}
-{% block title %}165 SEO Mini-Tools · SEO Toolbox{% endblock %}
+{% block title %}165 SEO Tools · SEO Toolbox{% endblock %}
 {% block content %}
-<style>
-  .tools-head { display:flex; align-items:end; justify-content:space-between; gap:20px; margin-bottom:24px; }
-  .tool-count { color:var(--muted); white-space:nowrap; }
-  .tool-controls { position:sticky; top:10px; z-index:10; padding:16px; margin-bottom:22px; background:rgba(255,255,255,.96); backdrop-filter:blur(8px); }
-  .tool-search { width:100%!important; max-width:none; }
-  .tool-chips { display:flex; gap:8px; margin-top:13px; overflow-x:auto; }
-  .tool-chip { flex:none; height:34px; padding:0 12px; border:1px solid var(--line); border-radius:999px; background:#fff; color:#475467; font-size:13px; font-weight:650; }
-  .tool-chip:hover,.tool-chip.active { border-color:var(--brand); background:var(--brand); color:#fff; }
-  .tools-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px; }
-  .tool-card { min-height:175px; padding:18px; color:var(--ink); background:#fff; border:1px solid var(--line); border-radius:var(--radius); text-decoration:none; transition:transform .12s,border-color .12s; }
-  .tool-card:hover,.tool-card:focus-visible { border-color:#75aaa5; transform:translateY(-2px); }
-  .tool-card h2 { margin:13px 0 7px; font-size:17px; overflow-wrap:anywhere; }
-  .tool-card p { margin:0; color:var(--muted); }
-  .tool-category { display:inline-block; padding:3px 8px; color:var(--brand-dark); background:#e7f5f3; border-radius:999px; font-size:11px; font-weight:750; letter-spacing:.04em; text-transform:uppercase; }
-  .tools-empty { grid-column:1/-1; }
-  @media(max-width:600px) { .tools-head { align-items:start; flex-direction:column; } .tool-controls { position:static; } }
-</style>
-<div class="tools-head"><div><h1>165 SEO Mini-Tools</h1><p class="lede">Browse every focused tool in the Python registry.</p></div><div class="tool-count" id="tool-results" aria-live="polite">{{ tools|length }} tools</div></div>
+<div class="tools-head"><div><h1>SEO tool directory</h1><p class="lede">Find a focused tool, get the result, move on.</p></div><div class="tool-count" id="tool-results" aria-live="polite">{{ tools|length }} tools</div></div>
 <section class="panel tool-controls" aria-label="Tool filters">
-  <label for="tool-search">Search tools</label><input class="tool-search" id="tool-search" type="search" placeholder="Search by name or description…" autocomplete="off">
-  <div class="tool-chips" id="tool-chips"><button class="tool-chip active" type="button" data-category="all">All ({{ tools|length }})</button>{% for category in categories %}<button class="tool-chip" type="button" data-category="{{ category.name }}">{{ category.name|capitalize }} ({{ category.count }})</button>{% endfor %}</div>
+  <label for="tool-search">Search tools</label><input class="tool-search" id="tool-search" type="search" placeholder="Search by name or description… Try tfidf or co occurrence." autocomplete="off">
+  <div class="tool-chip-row" id="category-chips" aria-label="Categories"><button class="chip active" type="button" data-category="all">All ({{ tools|length }})</button>{% for category in categories %}<button class="chip" type="button" data-category="{{ category.name }}">{{ category.name|capitalize }} ({{ category.count }})</button>{% endfor %}</div>
+  <div class="tool-chip-row" id="archetype-chips" aria-label="Tool types"><button class="chip active" type="button" data-archetype="all">All types</button>{% for archetype in ['converter','compare','list','single','checker','analyzer','calculator','checklist','generator','schema'] %}<button class="chip" type="button" data-archetype="{{ archetype }}">{{ archetype|capitalize }}</button>{% endfor %}<button class="chip" id="no-api-chip" type="button" aria-pressed="false">No API only</button></div>
 </section>
-<section class="tools-grid" id="tools-grid" aria-live="polite"></section>
+<div id="tools-directory" aria-live="polite"></div>
 <script id="tools-data" type="application/json">{{ tools|tojson }}</script>
-<script>
-(() => {
-  const tools = JSON.parse(document.getElementById('tools-data').textContent);
-  const grid = document.getElementById('tools-grid');
-  const search = document.getElementById('tool-search');
-  const results = document.getElementById('tool-results');
-  let category = 'all';
-  const escapeHtml = value => { const node = document.createElement('div'); node.textContent = value ?? ''; return node.innerHTML; };
-  function render() {
-    const query = search.value.trim().toLowerCase();
-    const visible = tools.filter(tool => (category === 'all' || tool.category === category) && (`${tool.name} ${tool.description}`).toLowerCase().includes(query));
-    results.textContent = `${visible.length} tool${visible.length === 1 ? '' : 's'}`;
-    grid.innerHTML = visible.length ? visible.map(tool => `<a class="tool-card" href="/tools/${encodeURIComponent(tool.name)}"><span class="tool-category">${escapeHtml(tool.category)}</span><h2>${escapeHtml(tool.name)}</h2><p>${escapeHtml(tool.description)}</p></a>`).join('') : '<div class="empty tools-empty">No tools match these filters.</div>';
-  }
-  document.getElementById('tool-chips').addEventListener('click', event => {
-    const chip = event.target.closest('[data-category]'); if (!chip) return;
-    category = chip.dataset.category;
-    document.querySelectorAll('.tool-chip').forEach(item => item.classList.toggle('active', item === chip));
-    history.replaceState(null, '', category === 'all' ? '/tools' : `#${encodeURIComponent(category)}`); render();
-  });
-  search.addEventListener('input', render);
-  const initial = decodeURIComponent(location.hash.slice(1));
-  const chip = Array.from(document.querySelectorAll('[data-category]')).find(item => item.dataset.category === initial);
-  if (chip) chip.click(); else render();
-})();
-</script>
 {% endblock %}
+{% block scripts %}<script src="/static/tools.js"></script>{% endblock %}

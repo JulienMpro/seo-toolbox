@@ -7,7 +7,8 @@
   const result = document.getElementById('tool-result');
   const esc = value => { const node = document.createElement('div'); node.textContent = value ?? ''; return node.innerHTML; };
   const display = value => value === null || value === undefined || value === '' ? 'N/D' : Array.isArray(value) ? value.join(', ') || 'N/D' : typeof value === 'object' ? JSON.stringify(value) : String(value);
-  const ctas = {converter:'Convert', compare:'Compare', list:'Run', single:'Run', checker:'Check', analyzer:'Analyze', calculator:'Calculate', checklist:'Calculate score', generator:'Generate', schema:'Generate JSON-LD'};
+  const cta = ui.cta;
+  document.querySelector('[data-tool-icon]').innerHTML = ToolCatalog.icon(ui.archetype);
 
   function field(arg) {
     const id = `tool-arg-${arg.name}`;
@@ -32,9 +33,15 @@
     return `<label class="tool-field${wide}" for="${esc(id)}"><span>${esc(label)}${required}</span>${control}${help}</label>`;
   }
 
-  mount.innerHTML = `<form class="tool-form" id="tool-form"><div class="tool-fields">${tool.args.map(field).join('') || '<div class="empty">This tool has no arguments.</div>'}</div><button class="tool-run" type="submit">${ctas[ui.archetype]}</button></form>`;
+  const hasSample = tool.no_api && Object.keys(ui.examples || {}).length > 0;
+  mount.innerHTML = `<form class="tool-form" id="tool-form"><div class="tool-fields">${tool.args.map(field).join('') || '<div class="empty">This tool has no arguments.</div>'}</div><div class="tool-actions"><button class="btn btn-primary tool-run" type="submit">${esc(cta)}</button>${hasSample ? '<button class="btn btn-ghost" type="button" data-sample>Try sample</button><span class="sample-hint" hidden>Sample — replace with your own.</span>' : ''}</div></form>`;
   const form = document.getElementById('tool-form');
   const runButton = form.querySelector('.tool-run');
+  form.querySelector('[data-sample]')?.addEventListener('click', () => {
+    Object.entries(ui.examples).forEach(([name,value]) => { const input=form.elements[name]; if (!input) return; if (input.type==='checkbox') input.checked=value===true||value==='true'; else input.value=value; });
+    form.querySelector('.sample-hint').hidden=false;
+  });
+  document.getElementById('copy-command')?.addEventListener('click', event => copy(document.getElementById('example-command').textContent, event.currentTarget));
 
   function values() {
     const payload = {};
@@ -163,13 +170,13 @@
   async function run() {
     if (!form.reportValidity()) return;
     const current = ++sequence; runButton.disabled = true; runButton.textContent = 'Running…';
-    result.innerHTML = '<div class="empty">Running…</div>';
+    result.innerHTML = '<div class="empty loading-state"><span class="spinner" aria-hidden="true"></span><span>Running…</span></div>';
     try {
       const response = await fetch(`/api/tools/${encodeURIComponent(tool.name)}/run`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(values())});
       const payload = await response.json(); if (!response.ok || payload.error) throw new Error(payload.error || `Request failed (${response.status})`);
       if (current === sequence) render(payload);
-    } catch (error) { if (current === sequence) result.innerHTML = `<div class="tool-error">${esc(error.message || 'The tool could not be run.')}</div>`; }
-    finally { if (current === sequence) { runButton.disabled = false; runButton.textContent = ctas[ui.archetype]; } }
+    } catch (error) { if (current === sequence) { const credentials = !tool.no_api && mount.dataset.credentialsMissing === 'true'; result.innerHTML = `<div class="tool-error"><strong>N/D — ${esc(error.message || 'the tool could not be run.')}</strong><p>${credentials ? 'Set DATAFORSEO_USERNAME and DATAFORSEO_PASSWORD, or try a No API tool.' : 'Check the inputs and try again.'}</p></div>`; } }
+    finally { if (current === sequence) { runButton.disabled = false; runButton.textContent = cta; } }
   }
   form.addEventListener('submit', event => { event.preventDefault(); run(); });
   if (ui.archetype === 'converter') {

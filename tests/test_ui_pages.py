@@ -31,6 +31,19 @@ client._transport = _SyncASGITransport()  # type: ignore[attr-defined]
 def test_ui_mapping_complete() -> None:
     assert set(TOOL_UI) == set(REGISTRY)
     assert all(ui.archetype in ARCHETYPES for ui in TOOL_UI.values())
+    assert all(ui.display_name and "_" not in ui.display_name for ui in TOOL_UI.values())
+
+
+def test_list_and_single_ctas_are_verbal() -> None:
+    focused = [ui for ui in TOOL_UI.values() if ui.archetype in {"list", "single"}]
+    assert len(focused) == 64
+    assert all(ui.cta and ui.cta != "Run" and len(ui.cta.split()) <= 3 for ui in focused)
+
+
+def test_no_api_metadata_is_registry_scoped() -> None:
+    no_api = {name for name, ui in TOOL_UI.items() if ui.no_api}
+    assert no_api
+    assert no_api <= set(REGISTRY)
 
 
 def test_similar_tools() -> None:
@@ -70,6 +83,17 @@ def test_tools_grid_no_modal() -> None:
     response = client.get("/tools")
     assert response.status_code == 200
     assert "tool-modal" not in response.text
+    assert 'data-category="checkers"' in response.text
+    assert 'id="tools-directory"' in response.text
+    assert '/static/tools.js' in response.text
+
+
+def test_command_palette_is_available_globally() -> None:
+    for path in ("/", "/tools", "/keywords"):
+        response = client.get(path)
+        assert 'id="command-palette"' in response.text
+        assert 'data-palette-open' in response.text
+        assert '/static/catalog.js' in response.text
 
 
 def test_serialize_ui() -> None:
@@ -78,6 +102,9 @@ def test_serialize_ui() -> None:
     assert payload["labels"]["value"] == "Input"
     assert payload["widgets"]["value"] == "textarea"
     assert payload["ui"]["archetype"] == "converter"
+    assert payload["display_name"] == "Text To Slug"
+    assert payload["cta"] == "Convert"
+    assert payload["no_api"] is True
     assert payload["args"][0]["widget"] == "textarea"
 
 

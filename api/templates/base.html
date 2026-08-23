@@ -4,162 +4,29 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}SEO Toolbox{% endblock %}</title>
-  <style>
-    :root { --ink:#182230; --muted:#64748b; --line:#dbe2ea; --paper:#fff; --wash:#f4f7fa; --brand:#0f766e; --brand-dark:#115e59; --danger:#b42318; --warn:#92400e; --radius:12px; }
-    * { box-sizing:border-box; }
-    body { margin:0; color:var(--ink); background:var(--wash); font:15px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
-    a { color:var(--brand-dark); }
-    header { background:#13212d; color:#fff; }
-    .topbar, main, footer { width:min(1120px,calc(100% - 32px)); margin:auto; }
-    .topbar { display:flex; align-items:center; justify-content:space-between; min-height:68px; gap:24px; }
-    .brand { color:#fff; text-decoration:none; font-size:20px; font-weight:750; letter-spacing:-.02em; }
-    .version { margin-left:7px; color:#a7b6c5; font-size:12px; font-weight:500; }
-    nav { display:flex; align-items:center; flex-wrap:wrap; gap:16px; }
-    nav a { color:#d9e3ec; text-decoration:none; font-size:14px; }
-    nav a:hover { color:#fff; }
-    .nav-tools { position:relative; }
-    .nav-tools summary { color:#d9e3ec; cursor:pointer; font-size:14px; list-style:none; }
-    .nav-tools summary::-webkit-details-marker { display:none; }
-    .nav-tools summary::after { content:" ▾"; color:#a7b6c5; }
-    .nav-tools[open] summary,.nav-tools summary:hover { color:#fff; }
-    .nav-badge { margin-left:4px; padding:2px 6px; border-radius:999px; background:var(--brand); color:#fff; font-size:11px; font-weight:750; }
-    .nav-menu { position:absolute; z-index:30; right:0; top:30px; display:grid; grid-template-columns:repeat(2,minmax(120px,1fr)); width:290px; padding:9px; gap:2px; border:1px solid #334556; border-radius:10px; background:#13212d; box-shadow:0 16px 32px rgba(2,6,23,.28); }
-    .nav-menu a { padding:7px 9px; border-radius:6px; text-transform:capitalize; }
-    .nav-menu a:hover { background:#203443; }
-    main { min-height:calc(100vh - 132px); padding:38px 0 56px; }
-    h1 { margin:0 0 6px; font-size:30px; letter-spacing:-.03em; }
-    h2 { margin:30px 0 14px; font-size:20px; }
-    .lede { color:var(--muted); margin:0 0 26px; }
-    .banner, .error, .empty { padding:11px 14px; border-radius:8px; margin-bottom:18px; }
-    .banner { background:#fff7ed; border:1px solid #fed7aa; color:var(--warn); }
-    .error { background:#fff1f0; border:1px solid #fda29b; color:var(--danger); }
-    .empty { background:#f8fafc; border:1px dashed var(--line); color:var(--muted); }
-    .panel, .card, .metric { background:var(--paper); border:1px solid var(--line); border-radius:var(--radius); box-shadow:0 1px 2px rgba(15,23,42,.04); }
-    .panel { padding:22px; margin-top:20px; }
-    form { display:flex; align-items:end; flex-wrap:wrap; gap:14px; }
-    label { display:grid; gap:6px; color:#344054; font-size:13px; font-weight:650; }
-    input, select { min-width:150px; height:42px; padding:0 11px; color:var(--ink); background:#fff; border:1px solid #b9c4d0; border-radius:7px; font:inherit; }
-    input[type=url], input[type=text] { width:min(420px,78vw); }
-    button { height:42px; padding:0 17px; color:#fff; background:var(--brand); border:0; border-radius:7px; font:inherit; font-weight:700; cursor:pointer; }
-    button:hover { background:var(--brand-dark); }
-    .hint { width:100%; margin:3px 0 0; color:var(--muted); font-size:13px; }
-    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(245px,1fr)); gap:15px; }
-    .card { display:block; padding:20px; color:inherit; text-decoration:none; transition:transform .12s,border-color .12s; }
-    .card:hover { transform:translateY(-2px); border-color:#8fb8b3; }
-    .card strong { display:block; margin-bottom:5px; font-size:17px; }
-    .card span { color:var(--muted); }
-    .metrics { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin:20px 0; }
-    .metric { padding:15px; }
-    .metric span { display:block; color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
-    .metric strong { display:block; margin-top:3px; font-size:22px; }
-    .table-wrap { overflow-x:auto; border:1px solid var(--line); border-radius:10px; background:#fff; }
-    .table-export { display:flex; justify-content:flex-end; gap:7px; margin:0 0 8px; }
-    .table-export-button { height:32px; padding:0 11px; border:1px solid var(--line); background:#fff; color:var(--brand-dark); font-size:13px; font-weight:650; }
-    .table-export-button:hover { border-color:var(--brand); background:#e7f5f3; }
-    table { width:100%; border-collapse:collapse; }
-    th, td { padding:11px 13px; border-bottom:1px solid #e8edf2; text-align:left; vertical-align:top; }
-    th { color:#475467; background:#f8fafc; font-size:12px; text-transform:uppercase; letter-spacing:.035em; }
-    tr:last-child td { border-bottom:0; }
-    .serp-list { display:grid; gap:12px; }
-    .serp-item { padding:17px 19px; }
-    .serp-item h3 { margin:2px 0 5px; font-size:17px; }
-    .serp-item h3 a { text-decoration:none; }
-    .rank, .domain { color:var(--muted); font-size:13px; }
-    .serp-item p { margin:6px 0 0; color:#475467; }
-    footer { padding:20px 0 28px; color:var(--muted); border-top:1px solid var(--line); font-size:13px; }
-    @media (max-width:760px) { .topbar { align-items:flex-start; flex-direction:column; padding:16px 0; } nav { gap:11px 15px; } .nav-menu { left:0; right:auto; } main { padding-top:26px; } input[type=url],input[type=text] { width:calc(100vw - 76px); } }
-  </style>
+  <link rel="stylesheet" href="/static/app.css">
 </head>
 <body>
-  <header><div class="topbar">
+  <header class="site-header"><div class="topbar">
     <a class="brand" href="/">SEO Toolbox <span class="version">v{{ version }}</span></a>
-    <nav aria-label="Main navigation"><a href="/keywords">Keywords</a><a href="/serp">SERP</a><a href="/geo">AI mentions</a><a href="/backlinks">Backlinks</a><a href="/audit">Audit</a><details class="nav-tools"><summary>Tools <span class="nav-badge">165</span></summary><div class="nav-menu"><a href="/tools">All tools</a>{% for category in tool_categories %}<a href="/tools#{{ category.name }}">{{ category.name }} ({{ category.count }})</a>{% endfor %}</div></details></nav>
+    <div class="nav-wrap">
+      <nav class="main-nav" aria-label="Main navigation"><a href="/keywords">Keywords</a><a href="/serp">SERP</a><a href="/geo">AI mentions</a><a href="/backlinks">Backlinks</a><a href="/audit">Audit</a><details class="nav-tools"><summary>Tools <span class="nav-badge">165</span></summary><div class="nav-menu"><a href="/tools">All tools</a>{% for category in tool_categories %}<a href="/tools#{{ category.name }}">{{ category.name }} ({{ category.count }})</a>{% endfor %}</div></details></nav>
+      <button class="palette-trigger" type="button" data-palette-open aria-label="Open tool search"><span class="kbd">⌘K</span></button>
+    </div>
   </div></header>
   <main>
-    {% if credentials_missing %}<div class="banner"><strong>API credentials missing.</strong> Set DATAFORSEO_USERNAME and DATAFORSEO_PASSWORD. The technical audit remains available without them.</div>{% endif %}
+    {% if credentials_missing %}<div class="banner"><strong>API credentials missing.</strong> Set DATAFORSEO_USERNAME and DATAFORSEO_PASSWORD. No-API tools and the technical audit remain available.</div>{% endif %}
     {% block content %}{% endblock %}
   </main>
   <footer>SEO Toolbox local demonstration UI · Do not expose publicly without authentication.</footer>
-  <script>
-  (() => {
-    const BOM = '\ufeff';
-
-    function tableCsv(table) {
-      const lines = Array.from(table.querySelectorAll('tr')).map(row =>
-        Array.from(row.querySelectorAll('th, td')).map(cell => {
-          let value = cell.textContent.trim();
-          if (value === 'N/D') value = '';
-          return /[;"\r\n]/.test(value) ? `"${value.replaceAll('"', '""')}"` : value;
-        }).join(';')
-      );
-      return BOM + lines.join('\r\n');
-    }
-
-    function tableTsv(table) {
-      return Array.from(table.querySelectorAll('tr')).map(row =>
-        Array.from(row.querySelectorAll('th, td')).map(cell => {
-          let value = cell.textContent.trim();
-          if (value === 'N/D') value = '';
-          return value.replace(/[\t\r\n]+/g, ' ');
-        }).join('\t')
-      ).join('\n');
-    }
-
-    function fallbackCopy(value) {
-      const textarea = document.createElement('textarea');
-      textarea.value = value;
-      textarea.setAttribute('readonly', '');
-      textarea.style.cssText = 'position:fixed;left:-9999px;top:0';
-      document.body.appendChild(textarea);
-      textarea.select();
-      const copied = document.execCommand('copy');
-      textarea.remove();
-      if (!copied) throw new Error('Copy failed');
-    }
-
-    async function copyText(value) {
-      if (navigator.clipboard?.writeText) {
-        try { await navigator.clipboard.writeText(value); return; } catch (_) { /* HTTP fallback */ }
-      }
-      fallbackCopy(value);
-    }
-
-    function fileName(table) {
-      const name = table.dataset.exportName || document.querySelector('h1')?.textContent || 'table';
-      const slug = name.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-      return `${slug || 'table'}.csv`;
-    }
-
-    function initExportableTables(root = document) {
-      root.querySelectorAll('table.exportable').forEach(table => {
-        if (table.dataset.exportReady === 'true') return;
-        table.dataset.exportReady = 'true';
-        const toolbar = document.createElement('div');
-        toolbar.className = 'table-export';
-        toolbar.setAttribute('role', 'group');
-        toolbar.setAttribute('aria-label', 'Table export options');
-        toolbar.innerHTML = '<button class="table-export-button" type="button" aria-label="Copy table">Copy</button><button class="table-export-button" type="button" aria-label="Download CSV">CSV</button>';
-        const [copyButton, csvButton] = toolbar.querySelectorAll('button');
-        copyButton.addEventListener('click', async () => {
-          const label = copyButton.textContent;
-          try { await copyText(tableTsv(table)); copyButton.textContent = 'Copied'; }
-          catch (_) { copyButton.textContent = 'Copy failed'; }
-          window.setTimeout(() => { copyButton.textContent = label; }, 1500);
-        });
-        csvButton.addEventListener('click', () => {
-          const url = URL.createObjectURL(new Blob([tableCsv(table)], {type:'text/csv;charset=utf-8'}));
-          const link = document.createElement('a');
-          link.href = url; link.download = fileName(table); document.body.appendChild(link); link.click(); link.remove();
-          URL.revokeObjectURL(url);
-        });
-        (table.closest('.table-wrap') || table).before(toolbar);
-      });
-    }
-
-    window.initExportableTables = initExportableTables;
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => initExportableTables());
-    else initExportableTables();
-  })();
-  </script>
+  <div class="palette-overlay" id="command-palette" aria-hidden="true">
+    <section class="palette-panel" role="dialog" aria-modal="true" aria-label="Find a tool">
+      <input class="palette-search" id="palette-search" type="search" placeholder="Find a tool…" autocomplete="off" aria-label="Find a tool">
+      <div class="palette-results" id="palette-results" role="listbox"></div>
+    </section>
+  </div>
+  <script src="/static/catalog.js"></script>
+  <script src="/static/app.js"></script>
+  {% block scripts %}{% endblock %}
 </body>
 </html>

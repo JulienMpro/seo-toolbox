@@ -63,6 +63,9 @@ def _serialize_tool(tool: ToolSpec) -> dict[str, Any]:
         ],
         "ui": ui,
         "archetype": ui["archetype"],
+        "display_name": ui["display_name"],
+        "cta": ui["cta"],
+        "no_api": ui["no_api"],
         "labels": ui["labels"],
         "widgets": ui["widgets"],
     }
@@ -178,9 +181,15 @@ async def dashboard(request: Request, domain: str = "") -> HTMLResponse:
         report, audit_error = _run(lambda: audit.analyze(audit.crawl_site(start_url, max_pages=10)))
         errors = [message for message in (backlink_error, audit_error) if message]
         error = " | ".join(errors) or None
-    return templates.TemplateResponse(
-        request, "index.html", _context(request, domain=domain, summary=backlink_summary, report=report, error=error)
-    )
+    tools, categories = _tool_catalog()
+    popular_names = ["serp_compare", "link_gap", "cannibalization", "roi_seo", "keyword_expansion",
+                     "redirect_generator", "http_status_bulk", "jsonld_faq", "keyword_density",
+                     "sitemap_generator", "brand_visibility_ia", "eeat_score"]
+    by_name = {tool["name"]: tool for tool in tools}
+    popular = [by_name[name] for name in popular_names if name in by_name]
+    return templates.TemplateResponse(request, "index.html", _context(
+        request, domain=domain, summary=backlink_summary, report=report, error=error,
+        popular=popular, categories=categories))
 
 
 @app.get("/keywords", response_class=HTMLResponse)

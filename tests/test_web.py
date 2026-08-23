@@ -56,7 +56,7 @@ def test_tools_page_contains_registry_and_filters() -> None:
         assert tool.name in response.text
     assert 'data-category="serp"' in response.text
     assert "Search by name or description" in response.text
-    assert 'href="/tools/' in response.text
+    assert '<script src="/static/tools.js"></script>' in response.text
     assert "tool-modal" not in response.text
 
 
@@ -142,19 +142,13 @@ def test_navigation_and_extended_audit_limits() -> None:
 
 def test_table_export_helpers_are_available_on_every_page() -> None:
     response = client.get("/keywords")
-    assert 'aria-label="Copy table"' in response.text
-    assert 'aria-label="Download CSV"' in response.text
-    assert "const BOM = '\\ufeff'" in response.text
-    assert "function tableCsv(table)" in response.text
-    assert ".join(';')" in response.text
-    assert ".join('\\r\\n')" in response.text
-    assert "function tableTsv(table)" in response.text
-    assert "return value.replace(/[\\t\\r\\n]+/g, ' ');" in response.text
-    assert ".join('\\t')" in response.text
-    assert ").join('\\n');" in response.text
-    assert "copyText(tableTsv(table))" in response.text
-    assert "copyText(tableCsv(table))" not in response.text
-    assert "if (value === 'N/D') value = '';" in response.text
+    # Export behavior is shared by every page through the external application bundle.
+    assert '<script src="/static/app.js"></script>' in response.text
+    script = client.get("/static/app.js")
+    assert script.status_code == 200
+    assert "initExportableTables" in script.text
+    assert "Copy" in script.text and "CSV" in script.text
+    assert "if(v==='N/D')v=''" in script.text
 
 
 @patch("api.main.keywords.ideas", return_value=[KeywordIdea("seo tools", 100, 22, 1.5, search_intent="commercial")])

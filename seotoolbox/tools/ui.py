@@ -17,6 +17,9 @@ ARCHETYPES = frozenset(
 @dataclass
 class ToolUI:
     archetype: str
+    display_name: str = ""
+    cta: str = ""
+    no_api: bool = False
     labels: dict[str, str] = field(default_factory=dict)
     widgets: dict[str, str] = field(default_factory=dict)
     choices: dict[str, list[str]] = field(default_factory=dict)
@@ -28,6 +31,134 @@ class ToolUI:
     best_highlight: bool = False
     serp_style: bool = False
     result_labels: dict[str, str] = field(default_factory=dict)
+
+
+_DISPLAY_OVERRIDES = {
+    "amazon_asin": "Amazon ASIN",
+    "bytes_human": "Human-readable Bytes",
+    "cac_ltv": "CAC / LTV",
+    "canonical_hreflang_check": "Canonical / Hreflang Check",
+    "csv_json": "CSV ↔ JSON",
+    "ctr_curve": "CTR Curve",
+    "eeat_score": "E-E-A-T Score",
+    "html_entities": "HTML Entities",
+    "html_to_md": "HTML to Markdown",
+    "http_status_bulk": "HTTP Status Bulk",
+    "jsonld_article": "JSON-LD Article",
+    "jsonld_breadcrumb": "JSON-LD Breadcrumb",
+    "jsonld_event": "JSON-LD Event",
+    "jsonld_extract": "JSON-LD Extract",
+    "jsonld_faq": "JSON-LD FAQ",
+    "jsonld_howto": "JSON-LD HowTo",
+    "jsonld_jobposting": "JSON-LD JobPosting",
+    "jsonld_localbusiness": "JSON-LD LocalBusiness",
+    "jsonld_minify": "JSON-LD Minify",
+    "jsonld_organization": "JSON-LD Organization",
+    "jsonld_product": "JSON-LD Product",
+    "jsonld_review": "JSON-LD Review",
+    "jsonld_validate": "JSON-LD Validate",
+    "llm_response_extract": "LLM Response Extract",
+    "llm_volume": "LLM Search Volume",
+    "md_to_html": "Markdown to HTML",
+    "ngrams": "N-grams",
+    "og_generator": "OG Generator",
+    "og_validator": "OG Validator",
+    "paa_extractor": "PAA Extractor",
+    "pbn_detection": "PBN Detection",
+    "roi_seo": "SEO ROI",
+    "serp_compare": "SERP Compare",
+    "serp_countries": "SERP Countries",
+    "serp_devices": "SERP Devices",
+    "serp_features": "SERP Features",
+    "serp_history": "SERP History",
+    "serp_snapshot": "SERP Snapshot",
+    "sitemap_diff": "Sitemap Diff",
+    "tfidf_analysis": "TF-IDF Analysis",
+    "url_decode": "URL Decode",
+    "url_encode": "URL Encode",
+    "url_syntax": "URL Syntax",
+    "whois_lite": "WHOIS Lite",
+}
+
+
+def _display_name(name: str) -> str:
+    """Human-facing tool name; keep this deterministic and registry independent."""
+    if name in _DISPLAY_OVERRIDES:
+        return _DISPLAY_OVERRIDES[name]
+    words = name.split("_")
+    display = " ".join(word.capitalize() for word in words)
+    return display.replace("Co Occurrence", "Co-occurrence")
+
+
+# List/single tools need a literal, honest verb + object CTA (never generic "Run").
+_CTA_OVERRIDES = {
+    "anchor_distribution": "Analyze anchors", "amazon_asin": "Inspect ASIN",
+    "amazon_competitors": "Find competitors", "amazon_product_keywords": "Find keywords",
+    "amazon_products": "Find products", "amazon_sellers": "Find sellers",
+    "authority_score": "Score authority", "brand_mentions": "Find mentions",
+    "brand_visibility_ia": "Measure visibility", "broken_link_building": "Find opportunities",
+    "cannibalization": "Find conflicts", "check_http": "Check response",
+    "competitor_benchmark": "Benchmark competitors", "competitor_keywords": "Find keywords",
+    "content_brief": "Build brief", "content_length_target": "Set target",
+    "content_summary": "Summarize content", "difficulty_score": "Score difficulty",
+    "disavow_generator": "Build disavow", "dofollow_ratio": "Measure ratio",
+    "domain_compare": "Compare domains", "faq_generator": "Generate FAQs",
+    "features_matrix": "Compare features", "google_trends": "Explore trends",
+    "intent_analysis": "Classify intent", "intent_mix": "Analyze intent",
+    "instant_audit": "Audit page",
+    "jsonld_extract": "Extract JSON-LD",
+    "keyword_expansion": "Expand keywords", "keyword_gap": "Find keyword gaps",
+    "keyword_prioritization": "Prioritize keywords", "keyword_suggestions_tool": "Find suggestions",
+    "link_gap": "Find gaps", "link_profile_compare": "Compare profiles",
+    "link_profile_evolution": "Track links", "llm_response_extract": "Extract response",
+    "llm_volume": "Check volume", "most_linked_pages": "Find top pages",
+    "meta_raw_extractor": "Extract metadata",
+    "new_lost_links": "Track changes", "paa_extractor": "Extract questions",
+    "pbn_detection": "Detect PBNs", "phrase_trends": "Track phrase",
+    "prospect_emails": "Find emails", "rank_bulk": "Check ranks",
+    "referring_domains_analysis": "Analyze domains", "serp_compare": "Compare SERPs",
+    "serp_countries": "Compare countries", "serp_devices": "Compare devices",
+    "serp_features": "Inspect features", "serp_history": "View history",
+    "serp_snapshot": "Capture SERP", "technology_detection": "Detect technology",
+    "topic_clusters": "Build clusters", "top_searches": "Find top searches",
+    "toxic_links": "Find toxic links", "traffic_potential": "Estimate traffic",
+    "trends_by_region": "Compare regions", "trends_demography": "Analyze audience",
+    "whois_lite": "Inspect WHOIS", "youtube_comments": "Fetch comments",
+    "youtube_keywords": "Find keywords", "youtube_transcript": "Fetch transcript",
+    "youtube_video_info": "Inspect video",
+}
+
+
+# Explicitly means "no DataForSEO credits"; some entries still fetch public URLs.
+_NO_API_TOOLS = frozenset({
+    "ads_equivalent", "anchor_generator", "backlink_value", "breadcrumb_generator",
+    "bytes_human", "cac_ltv", "canonical_generator", "canonical_hreflang_check",
+    "case_convert", "check_http", "content_cost", "conversion_rate",
+    "count_text", "crawl_time", "csv_json", "date_convert", "dedupe_list",
+    "eeat_score", "entity_extractor", "extract_emails", "extract_urls",
+    "heading_checker", "hreflang_generator", "html_entities", "html_to_md",
+    "http_status_bulk", "implicit_cpc", "internal_anchors", "internal_link_generator",
+    "internal_link_score", "jsonld_article", "jsonld_breadcrumb", "jsonld_event",
+    "jsonld_extract", "jsonld_faq", "jsonld_howto", "jsonld_jobposting",
+    "jsonld_localbusiness", "jsonld_minify", "jsonld_organization", "jsonld_product",
+    "jsonld_review", "jsonld_validate", "keyword_density", "keyword_extractor",
+    "list_to_urls", "lorem_seo", "md_to_html", "merge_candidates", "meta_generator",
+    "meta_raw_extractor", "meta_variants", "ngrams", "og_generator", "opportunity_cost",
+    "organic_revenue", "page_similarity", "position_value", "prompt_generator",
+    "readability", "redirect_chain", "redirect_generator", "redirect_map_generator",
+    "robots_checker", "robots_generator", "roi_seo", "schema_validator",
+    "sitemap_diff", "sitemap_generator", "sitemap_split", "sitemap_validator",
+    "snippet_generator", "strip_accents", "text_diff", "text_to_slug", "time_to_rank",
+    "title_meta_analyzer", "title_variants", "tokenize", "traffic_projection",
+    "tz_convert", "url_decode", "url_encode", "url_syntax",
+})
+
+
+_ARCHETYPE_CTAS = {
+    "converter": "Convert", "compare": "Compare", "checker": "Check",
+    "analyzer": "Analyze", "calculator": "Calculate", "checklist": "Calculate score",
+    "generator": "Generate", "schema": "Generate JSON-LD",
+}
 
 
 def _names(value: str) -> set[str]:
@@ -169,7 +300,12 @@ def _base_ui(name: str, archetype: str) -> ToolUI:
         mode = "code"
     if archetype == "converter":
         mode = "code"
-    return ToolUI(archetype, labels, widgets, choices, placeholders=placeholders, result_mode=mode)
+    return ToolUI(
+        archetype=archetype, display_name=_display_name(name),
+        cta=_CTA_OVERRIDES.get(name, _ARCHETYPE_CTAS.get(archetype, "")),
+        no_api=name in _NO_API_TOOLS, labels=labels, widgets=widgets,
+        choices=choices, placeholders=placeholders, result_mode=mode,
+    )
 
 
 TOOL_UI: dict[str, ToolUI] = {
@@ -193,6 +329,14 @@ TOOL_UI["link_gap"].widgets["competitor"] = "text"
 TOOL_UI["jsonld_faq"].widgets["qa"] = "textarea"
 TOOL_UI["snippet_generator"].widgets["content"] = "textarea"
 TOOL_UI["tz_convert"].placeholders.update({"source": "Europe/Paris", "target": "America/New_York"})
+TOOL_UI["roi_seo"].examples.update({"budget": "2000", "basket": "300", "margin": "40", "conversion": "2", "months": "12", "traffic": "1000", "growth": "5"})
+TOOL_UI["dedupe_list"].examples["value"] = "technical seo\ncontent audit\ntechnical seo\nlink building\ncontent audit"
+TOOL_UI["redirect_generator"].examples.update({"old": "/old-page\n/legacy-guide", "new": "/new-page\n/updated-guide"})
+TOOL_UI["jsonld_faq"].examples["qa"] = "What is a canonical URL?|A canonical URL identifies the preferred version of a page.\nWhat is a sitemap?|A sitemap lists URLs available for crawling."
+TOOL_UI["http_status_bulk"].examples["urls"] = "https://example.com\nhttps://example.com/about\nhttps://www.iana.org/domains/reserved"
+TOOL_UI["csv_json"].examples["value"] = "keyword,volume\ntechnical seo,900\ncontent audit,500"
+TOOL_UI["keyword_density"].examples.update({"text": "A technical SEO audit finds crawl, indexation, and page quality issues. Regular SEO audits help teams prioritize fixes.", "keyword": "SEO"})
+TOOL_UI["url_encode"].examples["value"] = "https://example.com/search?q=technical seo"
 for _name in ("serp_compare", "features_matrix", "competitor_benchmark", "link_profile_compare", "domain_compare"):
     TOOL_UI[_name].best_highlight = True
 for _name in ("paa_extractor", "keyword_suggestions_tool", "amazon_products", "brand_mentions"):

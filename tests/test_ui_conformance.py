@@ -70,7 +70,8 @@ def test_tool_page_conformance(name: str) -> None:
     assert spec.description in text
     assert soup.select_one("#tool-form") is not None
     submit = soup.select_one("#tool-form button[type=submit]")
-    assert submit is not None and submit.get_text(strip=True) == CTAS[ui_for(name).archetype]
+    # CTA copy is now tool-specific and comes from the serialized ToolUI metadata.
+    assert submit is not None and submit.get_text(strip=True) == ui_for(name).cta
     assert soup.select_one('nav[aria-label="Breadcrumb"]') is not None
     assert "Example command" in text
     assert data["archetype"] == ui_for(name).archetype
